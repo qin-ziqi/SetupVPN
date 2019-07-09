@@ -1,0 +1,41 @@
+<div class="activation">
+  <i class="material-icons activation__close" id="activation-close">close</i>
+  <div class="activation__container">
+    <div id="activation-info">
+      <i class="material-icons activation__container__icon">email</i>
+      <p class="activation__container__title">{ActivationVerifyEmail}</p>
+      <p class="activation__container__subtitle">{ActivationTitle2}</p>
+      <p class="activation__container__subtitle">{ActivationText}</p>
+
+      <p class="activation__container__warning">
+        {ActivationWarning}
+      </p>
+
+      <div class="activation__container__back-button-container">
+        <div class="activation__container__back-button-container__loading" id="resend-loading"></div>
+        <a style="margin-bottom: 10px;" id="resend-activation-button" href="#" class="btn btn--orange">{resendVerificationButton}</a>
+        <a id="back-to-login-button" href="#" class="btn">{RegisterBackTo}</a>
+      </div>
+    </div>
+    <div id="resend-activation-timeout" class="activation__container__timeout-error">
+      <p class="activation__container__timeout-error__text">{ActivationResendError}</p>
+      <p class="activation__container__warning">
+        {ActivationWarning}
+      </p>
+    </div>
+    <div id="resend-activation-success" class="activation__container__resend-success">
+      <p class="activation__container__resend-success__title">{ActivationResendSuccess}</p>
+      <p class="activation__container__resend-success__subtitle">{ActivationText}</p>
+      <p class="activation__container__warning">
+        {ActivationWarning}
+      </p>
+    </div>
+    <div id="resend-activation-error" class="activation__container__resend-error">
+    </div>
+
+    <div class="activation__container__back-button-container2" id="back-to-login-button-2-container">
+      <a id="back-to-login-button-2" href="#" class="btn">{RegisterBackTo}</a>
+    </div>
+
+  </div>
+</div>

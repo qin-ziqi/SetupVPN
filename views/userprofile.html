@@ -1,0 +1,84 @@
+<div id="user-profile-success" class="user-profile-view user-profile-view--success">
+	<div class="wrapper">
+		<div id="change-success-message" class="headline"></div>
+		<a id="user-profile-back-button" href="#" class="btn btn--large btn--flex">{ContactSupportBackTo}</a>
+	</div>
+</div>
+
+<div id="user-profile-form" class="user-profile-view">
+	<div class="wrapper">
+		
+		<div class="headline">
+				{EditProfile}
+		</div>
+
+		<div class="user-profile-view__input-container">
+				<div class="textinput">
+					<input id="user-profile-firstname" type="text" placeholder="">
+					<div class="textinput__placeholder"></div>
+				</div>
+
+				<div class="textinput">
+					<input id="user-profile-lastname" type="text" placeholder="">
+					<div class="textinput__placeholder"></div>
+				</div>
+
+				<div class="textinput">
+					<input id="user-profile-password" type="password" placeholder="{EditProfileNewPass}">
+					<div class="textinput__placeholder"></div>
+				</div>						
+
+				<div class="textinput">
+					<input id="user-profile-password-confirm" type="password" placeholder="{EditProfileNewPassCofirm}">
+					<div class="textinput__placeholder"></div>
+				</div>	
+				
+		</div>
+
+		<div class="user-profile-view__notification-container">
+			<div id="notification-normal-state" class="user-profile-view__notification-container__normal-state">
+				<span class="user-profile-view__notification-container__label">Messaging</span>
+			
+				<label class="switch" for="notification" id="notification-label">
+				  <input id="notification" type="checkbox">
+				  <span class="switch__slider switch--round"></span>
+				</label>
+			</div>
+
+			<div id="notification-loading-state" class="user-profile-view__notification-container__loading-state">
+				Updating...
+			</div>
+
+			<div id="notification-verify-step" class="user-profile-view__notification-container__verify-step">
+				<div style="text-align: center">You will receive no emails and no notifications from us anymore. Are you sure you want to proceed?</div>
+				<div style="display: flex;">
+				    <div style="width: 150px"><a id="notification-disable-yes-button" href="#" class="btn btn--blue">Yes</a></div>
+				    <div style="width: 150px; padding: 0px 5px;"><a id="notification-disable-no-button" href="#" class="btn btn--blue">No</a></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="notification-inapp-container" class="user-profile-view__notification-container">
+			<div class="user-profile-view__notification-container__normal-state">
+				<span class="user-profile-view__notification-container__label">Notification</span>
+			
+				<label class="switch" for="notification-inapp-checkbox" id="notification-inapp-label">
+				  <input id="notification-inapp-checkbox" type="checkbox">
+				  <span class="switch__slider switch--round"></span>
+				</label>
+			</div>
+		</div>	
+	
+
+		<div id="error_message" class="textinput__errormessage"></div>
+
+		<div class="user-profile-view__change-profile-button-container">
+			<a id="change-profile-button" href="#" class="btn btn--flex btn--large">{EditProfileChange}</a>
+		</div>
+		<div class="user-profile-view__change-language-button-container">
+			<a id="change-language-button" href="#" class="btn btn--blue">{ChangeLanguageTitle}</a>
+		</div>
+
+	
+	</div>
+</div>

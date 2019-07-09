@@ -1,0 +1,140 @@
+	<div class="dashboard-view">
+			<div class="dashboard-view__user-profile">
+				<div class="wrapper">
+					<div id="user-profile-username" class="dashboard-view__user-profile__username"></div>
+					<div id="user-profile-email" class="dashboard-view__user-profile__email"></div>
+					<div id="user-profile-status" class="dashboard-view__user-profile__status">
+						Free user
+					</div>
+
+					<div class="dashboard-view__user-profile__extend-button-container">
+						<a id="user-profile-upgrade-button" href="#" class="btn">{MemberStatusFreeExtend}</a>
+					</div>
+				</div>
+
+				<div class="dashboard-view__download-container">
+					<div class="platforms-download">
+							<div class="dashboard-view__download-container__dashboard">
+								<div class="platforms-download__platforms__container">
+
+									<div class="platforms-download__platforms__container__item1">
+									<i class="material-icons" style="color: #A4C639" id="dw-android" alt="Download Android Client" title="Download Android Client">android</i>
+									</div>
+									<div class="platforms-download__platforms__container__item2" id="dw-windows">
+										<img src="images/pl_windows.png" alt="Download Windows Client" title="Download Windows Client">
+									</div>
+									<div class="platforms-download__platforms__container__item3" id="dw-macosx">
+										<img src="images/pl_macosx.png" alt="Download Mac OSX Client" title="Download Mac OSX Client">
+									</div>
+
+									<div class="platforms-download__platforms__container__item4" id="dw-othertools">
+										<img id="othertools-gif" class="othertools__gif" src="images/other-tools.gif">
+									</div>
+
+								</div>
+							</div>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="dashboard-view__server-selection-container">
+
+				 <!-- isBlocked -->
+				<div id="limit-info" class="limit-info">
+					<div class="limit-info__container">
+						<div class="wrapper">
+							<div class="limit-info__header-txt">{tempBlockTitle}</div>
+
+							<div class="limit-info__description-txt">
+								<span id="limit-info-remaining-time"></span> <br>
+								{tempBlockTextDontWait}
+							</div>
+
+							<a id="limit-info-upgrade-button" class="btn btn--blue" href="#">{MemberStatusFreeExtend}</a>
+						</div>
+					</div>
+
+				</div>
+				 <!-- isBlocked -->
+
+				 <!-- Rate us -->
+				 <div id="rate-us-box" class="rate-us-box">
+
+				 	<div class="rate-us-box__container">
+				 		<div class="wrapper">
+				 			<div class="rate-us-box__title">{RateNotTitle}</div>
+				 			<div class="rate-us-box__description">{RateNotText}</div>
+
+				 			<div class="rate-us-box__options">
+				 				<a id="rate-us-now-button" href="#" class="btn btn--blue rate-us-box__options__preferred">{RateNotRateHoxx}</a>
+				 				<a id="rate-us-later-button" href="#" class="btn btn--blue rate-us-box__options__normal">{RateNotAskLater}</a>
+				 				<a id="rate-us-dont-ask-button" href="#" class="btn btn--blue rate-us-box__options__normal">{RateNotDontAsk}</a>
+				 			</div>
+
+				 		</div>
+				 	</div>
+
+				 </div>
+				 <!-- Rate us -->
+
+
+				<div class="dashboard-view__headline-container">
+					<div class="wrapper">
+						<div class="dashboard-view__sort-function-container">
+							<div id="select-location-headline" class="headline headline--small dashboard-view__sort-function-container__headline">{DashboardSelectLocation}</div>
+
+							<div id="sort-function-error" class="dashboard-view__sort-function-container__error">
+
+							</div>
+
+							<div id="bypass-function-container" class="dashboard-view__bypass-function-container">
+								<i class="material-icons">call_split</i>
+							</div>
+
+							<div class="sort-function">
+								<div id="sort-function-container" class="sort-function__dropdown-menu">
+									<div class="sort-function__dropdown-menu__dropdown">
+										<i class="material-icons">sort</i>
+										<div class="sort-function__dropdown-menu__dropdown__content" id="sort-function-dropdown-content">
+											<a id="sort-list-by-name" href="#" class="sort-function__byname">
+											<label>Sort by country name</label>
+											<i id="is-sorted-icon" class="material-icons">done</i>
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+
+				<section>
+					<div class="tabs tabs--linemove">
+						<nav>
+							<ul>
+								<li><a id="tab-free" href="#free-server-list"><span>{TabFreeServer}</span></a></li>
+								<li><a id="tab-premium" href="#premium-server-list"><span>{TabPremiumServer} </span></a></li>
+								<li><a id="tab-public" href="#public-server-list"><span>{tabPublicServer}</span></a></li>
+							</ul>
+						</nav>
+						<div class="tabs__content-wrap dashboard-view__server-list">
+							<section id="free-server-list"></section>
+							<section id="premium-server-list"></section>
+							<section id="public-server-list"></section>
+						</div><!-- /content -->
+					</div><!-- /tabs -->
+				</section>
+
+			</div>
+
+
+			<div class="quick-menu">
+				<div id="logout-button" class="quick-menu__item quick-menu__item__1"><img src="images/signout.png"></div>
+				<div id="iplookup-button" class="quick-menu__item quick-menu__item__2"><img src="images/iplookup.png"></div>
+				<div id="contact-button" class="quick-menu__item quick-menu__item__3"><img src="images/onlinesupport.png"></div>
+				<div id="user-profile-button" class="quick-menu__item quick-menu__item__4"><img src="images/profile.png"></div>
+			</div>
+	</div>
