@@ -1,0 +1,86 @@
+<div class="trial-view">
+  <i class="material-icons trial-view__close" id="gettrial-close">close</i>
+
+  <div class="trial-view__container trial-view__container__loading" id="loading-div">
+    <div id="gettrial-loading-img"></div>
+  </div>
+
+  <div id="trial-content">
+
+    <p class="trial-view__main-title">Enjoy <span id="t-d1"></span> days the benefits of premium for free!</p>
+    <p class="trial-view__sub-title">No subscription! FREE!</p>
+
+    <div class="get-premium__feature-list">
+
+      <div class="get-premium__feature-list__row">
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">storage</i>
+          <p class="get-premium__feature-list__row__item__text">2,000+ servers</p>
+        </div>
+        <div class="get-premium__feature-list__row__item">
+          <img src="images/speed.svg" width="32px" height="32px">
+          <p class="get-premium__feature-list__row__item__text">4x faster</p>
+        </div>
+
+      </div>
+
+      <div class="get-premium__feature-list__row">
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">phonelink</i>
+          <p class="get-premium__feature-list__row__item__text">Multiple devices</p>
+        </div>
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">language</i>
+          <p class="get-premium__feature-list__row__item__text">40+ different countries</p>
+        </div>
+      </div>
+
+      <div class="get-premium__feature-list__row">
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">network_check</i>
+          <p class="get-premium__feature-list__row__item__text">No bandwidth or quota limitation</p>
+        </div>
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">live_help</i>
+          <p class="get-premium__feature-list__row__item__text">Priority support</p>
+        </div>
+      </div>
+      <div class="get-premium__feature-list__row">
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">call_split</i>
+          <p class="get-premium__feature-list__row__item__text">Bypass list</p>
+        </div>
+
+        <div class="get-premium__feature-list__row__item">
+          <i class="material-icons">sort</i>
+          <p class="get-premium__feature-list__row__item__text">Sort server list</p>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <p class="trial-view__sub-title">After <span id="t-d2"></span> days upgrade expires automatically</p>
+
+    <div class="trial-view__upgrade">
+      <a id="gettrial-upgrade-btn" href="#" class="btn btn--yellow">Get Trial</a>
+    </div>
+
+  </div>
+
+  <div class="trial-view__container" id="fail-con">
+    <div class="trial-view__container__error" id="error-div"></div>
+  </div>
+
+  <div class="trial-view__container" id="success-con">
+    <div class="trial-view__container__success" id="success-div">
+      <p class="trial-view__container__success__title" id="success-title">Success</p>
+      <p class="trial-view__container__success__title">Your account has been upgraded.</p>
+      <p class="trial-view__container__success__title">It may take up to 5 minutes until you can start using your premium account!</p>
+      <p class="trial-view__container__success__expiration-date">Your premium upgrade will automatically expire on <span id="expiration-date"></span></p>
+      <p class="trial-view__container__success__info">You can extend your expiration date anytime by upgrading your account</p>
+    </div>
+  </div>
+
+</div>

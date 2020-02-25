@@ -1,0 +1,137 @@
+<div class="login-authcode-view">
+
+  <div class="login-authcode-view__container">
+    <img height="30px" id="login-service-logo" src="">
+    
+
+    <!-- AUTHCODE LOGIN BEGIN -->
+    <div id="authcode-login-view">
+
+      <div class="login-authcode-view__authcode-container">
+        <div class="login-authcode-view__authcode-container__error" id="authcode-error">
+        </div>
+        <div class="login-authcode-view__desc">
+          {AuthLoginAuthcodeDesc}
+        </div>
+        <form>
+            <input id="codeBox1" class="login-authcode-view__authcode-container__input" data="1" type="text" maxlength="12"/>
+            <input id="codeBox2" class="login-authcode-view__authcode-container__input" data="2" type="text" maxlength="1" />
+            <input id="codeBox3" class="login-authcode-view__authcode-container__input" data="3" type="text" maxlength="1" /> -
+            <input id="codeBox4" class="login-authcode-view__authcode-container__input" data="4" type="text" maxlength="1" />
+            <input id="codeBox5" class="login-authcode-view__authcode-container__input" data="5" type="text" maxlength="1" />
+            <input id="codeBox6" class="login-authcode-view__authcode-container__input" data="6" type="text" maxlength="1" />
+            <input id="codeBox7" class="login-authcode-view__authcode-container__input" data="7" type="text" maxlength="1" />
+            <input id="codeBox8" class="login-authcode-view__authcode-container__input" data="8" type="text" maxlength="1" /> -
+            <input id="codeBox9" class="login-authcode-view__authcode-container__input" data="9" type="text" maxlength="1" />
+            <input id="codeBox10" class="login-authcode-view__authcode-container__input" data="10" type="text" maxlength="1" />
+        </form>
+        <div class="login-authcode-view__authcode-container__loading" id="authcode-loading">
+        </div>
+
+
+      </div>
+
+      <div id="emailsignin-option">
+
+        <div class="login-authcode-view__desc" style="padding: 10px 0px;">
+          or
+        </div>
+
+        <div class="login-authcode-view__emailsignin" id="emailsignin-button">
+
+          <div class="login-authcode-view__emailsignin__container">
+            <div class="login-authcode-view__emailsignin__container__left">
+              <i class="material-icons">email</i>
+            </div>
+            <div class="login-authcode-view__emailsignin__container__left login-authcode-view__emailsignin__container__text">
+                <div class="pleasewait">{AuthLoginSignEmailPassword}</div>
+
+            </div>
+            <div class="login-authcode-view__emailsignin__container__clr"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+    <!-- AUTHCODE LOGIN END -->
+
+    <!-- EMAIL LOGIN BEGIN -->
+    <div id="email-login-view">
+      <div class="login-view__input-container">
+        <div class="wrapper">
+          <div class="textinput-icon">
+            <i class="material-icons textinput-icon__icon">person</i>
+            <input id="login-email" type="email" placeholder="{LoginEmailLabel}">
+
+          </div>
+
+          <div class="textinput-icon">
+            <i class="material-icons textinput-icon__icon">lock</i>
+            <input id="login-password" type="password" placeholder="{LoginPasswordLabel}">
+          </div>
+          <div style="text-align:right">
+            <a href="#" id="forgotpass-button" class="login-authcode-view__bottom-link" style="padding: 0px 7px; 0px 0px">{IForgotPassword}</a>
+          </div>
+        </div>
+      </div>
+      <div class="wrapper">
+        <div id="error_message" class="textinput__errormessage">
+
+        </div>
+      </div>
+
+      <div class="login-view__btn-container">
+        <a id="login-button" href="#" class="btn btn--large btn--flex">{SignIn}</a>
+      </div>
+
+
+      <div class="login-authcode-view__emailsignin" id="authcodesignin-button">
+
+        <div class="login-authcode-view__emailsignin__container">
+          <div class="login-authcode-view__emailsignin__container__left">
+            <i class="material-icons">
+            vpn_key
+            </i>
+          </div>
+          <div style="margin: 7px 0px 0px 16px;" class="login-authcode-view__emailsignin__container__left login-authcode-view__emailsignin__container__text">
+              <div class="pleasewait">{AuthLoginSignAuthcode}</div>
+
+          </div>
+          <div class="login-authcode-view__emailsignin__container__clr"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EMAIL LOGIN END -->
+
+    <div class="login-authcode-view__desc" style="padding: 10px 0px;">
+      or
+    </div>
+
+    <div class="login-authcode-view__createacc-container">
+      <div>
+        <a class="btn btn--new-blue" href="#" id="register-button">{CreateAnAccount}</a>
+      </div>
+    </div>
+  </div>
+
+
+  <div style="position: absolute; width: 100%; bottom: 0px; text-align: center; padding-bottom: 20px;">
+
+    <div style="color: #888; padding: 10px 3px; ">
+      <a class="login-authcode-view__bottom-link" href="#" id="contact-button">{DasboardContactSupport}</a>
+      <span>·</span>
+      <a class="login-authcode-view__bottom-link" href="#" id="change-lanuage-button">{AuthLoginChangeLanguage}</a>
+
+    </div>
+
+    <div style="color: #888;font-size: 10px;font-weight: 100;">
+      v. <span id="version-bottom"></span>
+    </div>
+
+  </div>
+
+</div>

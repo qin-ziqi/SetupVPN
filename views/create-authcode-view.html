@@ -1,0 +1,90 @@
+<div class="create-authcode-view">
+
+  <!-- Create Form BEGIN -->
+  <div class="create-authcode-view__create" id="create-authcode-container">
+    <div class="wrapper">
+      <div class="create-authcode-view__title">
+        {RegisterCreateAcccount}
+      </div>
+
+      <div class="create-authcode-view__desc">
+        {AuthCreateAuthcodeDesc}
+      </div>
+
+      <div class="create-authcode-view__mandatory">
+        <div class="create-authcode-view__mandatory__checkbox">
+          <label class="pure-material-checkbox">
+            <input type="checkbox" id="pp-checkbox">
+            <span id="pp-label"></span>
+          </label>
+        <i class="material-icons create-authcode-view__launch" data="/html/pp.php">launch</i>
+        </div>
+        <div class="create-authcode-view__mandatory__checkbox">
+        <label class="pure-material-checkbox">
+          <input type="checkbox" id="terms-checkbox">
+          <span id="terms-label"></span>
+
+        </label>
+        <i class="material-icons create-authcode-view__launch" data="/html/tos.php">launch</i>
+        </div>
+        <div class="create-authcode-view__mandatory__checkbox">
+        <label class="pure-material-checkbox">
+          <input type="checkbox" id="eula-checkbox">
+          <span id="eula-label"></span>
+
+        </label>
+        <i class="material-icons create-authcode-view__launch" data="/html/eula.php">launch</i>
+        </div>
+      </div>
+      <div class="create-authcode-view__error" id="inline-error">
+
+      </div>
+      <div class="create-authcode-view__loading-container" id="loading-container">
+
+      </div>
+      <div class="create-authcode-view__btn-container">
+        <a class="btn btn--new-blue" id="create-authcode">{RegisterButton}</a>
+      </div>
+    </div>
+  </div>
+  <!-- Create Form END -->
+
+  <!-- SUCCESS BEGIN -->
+  <div class="create-authcode-view__success" id="success-authcode-container">
+    <div class="wrapper">
+
+      <div class="create-authcode-view__success__title">{AuthCreateSuccessTitle}</div>
+
+
+
+      <div style="padding: 20px;">
+        <div style="text-align:center; padding-bottom: 10px;"><i class="material-icons" style="font-size:50px;">vpn_key</i></div>
+        <div style="text-align: center;font-weight: 100; padding-bottom: 5px;">{AuthcodeConTitle}</div>
+        <div id="authcode-copied-clipboard" class="create-authcode-view__success__clipboard">{AuthcodeConClipboardCopied}</div>
+        <div class="create-authcode-view__success__authcode" id="authcode"></div>
+        <div style="padding-top: 5px; text-align: center; margin-bottom: 5px; font-weight: 100; font-size: 10px; ">{AuthcodeConClipboardClickCopy}</div>
+      </div>
+
+      <div class="create-authcode-view__success__desc">
+        <p>{AuthCreateSuccessDesc1}</p>
+        <p>{AuthCreateSuccessDesc2}</p>
+      </div>
+      <div class="create-authcode-view__success__letsgo">
+        <a class="btn btn--new-blue" id="login-with-authcode">{AuthCreateLetsStart}</a>
+      </div>
+    </div>
+  </div>
+  <!-- SUCCESS END -->
+
+  <!-- ERROR BEGIN -->
+  <div class="create-authcode-view__error" id="error-authcode-container">
+    <div class="create-authcode-view__error__msg">
+      <i class="material-icons" style="font-size: 50px;color: rgba(231,55,39,1);">error</i>
+      <div id="autcode-errormsg">
+
+      </div>
+    </div>
+
+  </div>
+  <!-- ERROR END -->
+</div>

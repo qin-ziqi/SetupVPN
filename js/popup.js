@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 26);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,15 +74,15 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _errorcodes = __webpack_require__(28);
+var _errorcodes = __webpack_require__(31);
 
 var _errorcodes2 = _interopRequireDefault(_errorcodes);
 
-var _platform = __webpack_require__(29);
+var _platform = __webpack_require__(32);
 
 var _platform2 = _interopRequireDefault(_platform);
 
@@ -94,10 +94,12 @@ exports.default = {
 	BROWSERLANG: chrome.i18n.getUILanguage(),
 	FALLBACKLINK: "https://base0-sv.diltwo.com/client/",
 	SERVERSJSONFILE: _folders2.default.ASSETS + "/servers.json",
-	UNINSTALLPATH: "html/uninstalled.php",
+	TIERUPDATETTL: 86400,
+	VERSIONSTATUSTTL: 86400,
+	UNINSTALLPATH: "/html/uninstalled.php",
 	BASEDOMAIN: "diltwo.com",
 	BACKUPBASEDOMAIN: "mainbackupdomain.com",
-	TESTREQUESTREGEX: "proxytest[0-9]+.com",
+	TESTREQUESTREGEX: /http:\/\/test[0-9]{6,12}\.io/,
 	SERVICE: "SetupVPN",
 	SERVICESHORT: "setupvpn",
 	SHORTNAME: "sv",
@@ -111,7 +113,8 @@ exports.default = {
 	RATEUS: {
 		LINKS: {
 			FIREFOX: "https://addons.mozilla.org/en-US/firefox/addon/setupvpn/reviews/",
-			CHROME: "https://chrome.google.com/webstore/detail/setupvpn-lifetime-free-vp/oofgbpoabipfcfjapgnbbjjaenockbdp/reviews"
+			CHROME: "https://chrome.google.com/webstore/detail/setupvpn-lifetime-free-vp/oofgbpoabipfcfjapgnbbjjaenockbdp/reviews",
+			EDGE: false
 		},
 		INTERVAL: 1000 * 60 * 60 * 24 * 3, // 3 days
 		DONTASKINTERVAL: 1000 * 60 * 60 * 24 * 3 * 30 // 3 months
@@ -147,7 +150,20 @@ exports.default = {
 		ISINAPPNOTIFICATIONOFF: "isInAppNotificationOff",
 		LASTLOGINRESULT: "lastLoginResult",
 		INSTALLID: "installId",
-		LASTRESENDACTIVATION: "lastResendActivation"
+		LASTRESENDACTIVATION: "lastResendActivation",
+		SERVERSJSON: 'serversJson',
+		TIERNEXTUPDATE: 'tierNextUpdate',
+		ERRCACHE: 'errCache',
+		ECACHE: 'eCache',
+		RCACHE: 'rCache',
+		HASHCACHE: 'hashCache',
+		BASELINKTYPE: 'baselinkType',
+		DEBUGVAL: "debugVal",
+		TIMEOUTSETTINGS: "timeoutSettings",
+		TEASERNEXT: 'teaserNext',
+		VERSIONSTATUSNEXTUPDATE: 'versionStatusNextTime',
+		VERSIONSTATUS: 'versionStatus',
+		LOGINTYPE: 'logintype'
 	},
 	STATUS: {
 		BLOCKED: "BLOCKED",
@@ -158,11 +174,11 @@ exports.default = {
 		OFFICON: _folders2.default.IMAGES + "/setupvpn-48-grey.png",
 		HEADERLOGO: _folders2.default.IMAGES + "/setupvpn-150.png",
 		LOGOLARGE: _folders2.default.IMAGES + "/setupvpn-250.png",
-		FEATUREPINGIF: "img/feature_pin.gif",
-		FEATURESORTGIF: "img/feature_sorting.gif",
+		FEATUREPINGIF: "/cdn/feature_pin.gif",
+		FEATURESORTGIF: "/cdn/feature_sorting.gif",
 		PERMERRORICON: _folders2.default.IMAGES + "/symbol48-permission-error.png",
-		PERMFIXGIF: "img/perm-fix-sv.gif",
-		OTHERTOOLSGIF: "img/other-tools.gif"
+		PERMFIXGIF: "/cdn/permission-fix.gif",
+		OTHERTOOLSGIF: "/cdn/other-tools.gif"
 	},
 	ERRORCODES: _errorcodes2.default,
 	LOADINGIMG: '<img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/' + 'C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyk' + 'lrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG' + '4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8p' + 'ByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIu' + 'mIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzI' + 'IunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAAD' + 'Mwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQ' + 'AAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAA' + 'QABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==">'
@@ -170,6 +186,23 @@ exports.default = {
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = {
+	VIEWS: './views',
+	ASSETS: './assets',
+	FLAGS: './images/flags',
+	IMAGES: './images'
+};
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10429,7 +10462,7 @@ return jQuery;
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10438,31 +10471,18 @@ return jQuery;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.default = {
-	VIEWS: './views',
-	ASSETS: './assets',
-	FLAGS: './images/flags',
-	IMAGES: './images'
-};
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _constants = __webpack_require__(34);
+
+var _constants2 = _interopRequireDefault(_constants);
 
 var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -10473,322 +10493,424 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Utils = function () {
-    function Utils() {
-        _classCallCheck(this, Utils);
-    }
+	function Utils() {
+		_classCallCheck(this, Utils);
+	}
 
-    _createClass(Utils, [{
-        key: 'isEmpty',
-        value: function isEmpty(obj) {
+	_createClass(Utils, [{
+		key: 'isEmpty',
+		value: function isEmpty(obj) {
 
-            for (var prop in obj) {
-                if (obj.hasOwnProperty(prop)) return false;
-            }
+			for (var prop in obj) {
+				if (obj.hasOwnProperty(prop)) return false;
+			}
 
-            return true;
-        }
-    }, {
-        key: 'shuffleArray',
-        value: function shuffleArray(o) {
-            for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x) {}
-            return o;
-        }
-    }, {
-        key: 'loadTemplate',
-        value: function loadTemplate(html, locale) {
-            var template = html;
-            var htmlKeys = html.match(/(?:\{)[^\{\}]*?(?:\})/g);
+			return true;
+		}
+	}, {
+		key: 'shuffleArray',
+		value: function shuffleArray(o) {
+			for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x) {}
+			return o;
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(html, locale) {
+			var template = html;
+			var htmlKeys = html.match(/(?:\{)[^\{\}]*?(?:\})/g);
 
-            if (!htmlKeys) return template;
+			if (!htmlKeys) return template;
 
-            htmlKeys.forEach(function (htmlKey) {
-                var localeKey = htmlKey.replace("{", "").replace("}", "");
+			htmlKeys.forEach(function (htmlKey) {
+				var localeKey = htmlKey.replace("{", "").replace("}", "");
 
-                if (locale[localeKey]) template = template.replace(htmlKey, locale[localeKey]);
-            });
+				if (locale[localeKey]) template = template.replace(htmlKey, locale[localeKey]);
+			});
 
-            return template;
-        }
-    }, {
-        key: 'loadTemplateWithFallback',
-        value: function loadTemplateWithFallback(html, locale, fallbacks) {
-            var template = html;
-            template = this.loadTemplate(html, locale);
-            template = this.loadTemplate(template, fallbacks);
-            return template;
-        }
-    }, {
-        key: 'getConfigTTL',
-        value: function getConfigTTL() {
-            return Math.floor(Date.now() / 1000) + 5 * 60;
-        }
-    }, {
-        key: 'getLocaleInStorage',
-        value: function getLocaleInStorage() {
-            return new Promise(function (resolve, reject) {
-                chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.LOCALE, function (storage) {
-                    if (storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]) return resolve(storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]);
+			return template;
+		}
+	}, {
+		key: 'loadTemplateWithFallback',
+		value: function loadTemplateWithFallback(html, locale, fallbacks) {
+			var template = html;
+			template = this.loadTemplate(html, locale);
+			template = this.loadTemplate(template, fallbacks);
+			return template;
+		}
+	}, {
+		key: 'getConfigTTL',
+		value: function getConfigTTL() {
+			return Math.floor(Date.now() / 1000) + 5 * 60;
+		}
+	}, {
+		key: 'getLocaleInStorage',
+		value: function getLocaleInStorage() {
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.LOCALE, function (storage) {
+					if (storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]) return resolve(storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]);
 
-                    reject();
-                });
-            });
-        }
-    }, {
-        key: 'isUserPremium',
-        value: function isUserPremium(serverData) {
-            if (serverData.premium == 0) {
-                return false;
-            } else {
-                if (!Date.now) {
-                    Date.now = function () {
-                        return new Date().getTime();
-                    };
-                }
+					reject();
+				});
+			});
+		}
+	}, {
+		key: 'isUserPremium',
+		value: function isUserPremium(serverData) {
+			if (serverData.premium == 0) {
+				return false;
+			} else {
+				if (!Date.now) {
+					Date.now = function () {
+						return new Date().getTime();
+					};
+				}
 
-                var datenow = Math.floor(Date.now() / 1000);
-                //console.log("UTC TIME" + datenow);
-                var expiredate = serverData.premium;
+				var datenow = Math.floor(Date.now() / 1000);
+				//console.log("UTC TIME" + datenow);
+				var expiredate = serverData.premium;
 
-                if (expiredate > datenow) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-    }, {
-        key: 'getUserExpirationData',
-        value: function getUserExpirationData(timestamp) {
-            var a = new Date(timestamp * 1000);
-            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            var year = a.getFullYear();
-            var month = months[a.getMonth()];
-            var date = a.getDate();
+				if (expiredate > datenow) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}, {
+		key: 'getUserExpirationData',
+		value: function getUserExpirationData(timestamp) {
+			var a = new Date(timestamp * 1000);
+			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			var year = a.getFullYear();
+			var month = months[a.getMonth()];
+			var date = a.getDate();
 
-            return date + ". " + month + " " + year;
-        }
-    }, {
-        key: 'generateIdentifierDomain',
-        value: function generateIdentifierDomain() {
-            var it = Math.floor(Math.random() * 100000 + 1);
-            return _ServiceMeta2.default.SERVICESHORT + "proxytest" + it + ".com";
-        }
-    }, {
-        key: 'getDateNow',
-        value: function getDateNow() {
-            return Math.floor(Date.now() / 1000);
-        }
-    }, {
-        key: 'openNewTab',
-        value: function openNewTab(url) {
-            chrome.tabs.create({ "url": url });
-        }
-    }, {
-        key: 'setProxyStatusIcon',
-        value: function setProxyStatusIcon(isProxyOn) {
-            var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
-            chrome.browserAction.setIcon({ path: { 38: icon } });
-        }
-    }, {
-        key: 'setPermissionIcon',
-        value: function setPermissionIcon(isValid) {
-            var icon = isValid ? _ServiceMeta2.default.IMAGES.OFFICON : _ServiceMeta2.default.IMAGES.PERMERRORICON;
-            chrome.browserAction.setIcon({ path: { 38: icon } });
-        }
-    }, {
-        key: 'showConnectionNotification',
-        value: function showConnectionNotification(title, message, isProxyOn) {
-            var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
-            var options = {
-                type: "basic",
-                title: title,
-                message: message,
-                iconUrl: icon
-            };
+			return date + ". " + month + " " + year;
+		}
+	}, {
+		key: 'getRandomInt',
+		value: function getRandomInt(min, max) {
+			min = Math.ceil(min);
+			max = Math.floor(max);
+			return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+		}
+	}, {
+		key: 'getRandomRange',
+		value: function getRandomRange() {
+			var randomRange = {
+				s: 100000,
+				e: 100000000000
+			};
 
-            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+			try {
+				var length = this.getRandomInt(6, 12);
+				var start = parseInt("1".padEnd(length, "0"));
+				var end = parseInt("9".padEnd(length, "9"));
 
-                var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
-                var uid = configData && configData.uid ? configData.uid : "";
-                var inAppNoti = storage[_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF];
+				randomRange.s = start;
+				randomRange.e = end;
+				return randomRange;
+			} catch (e) {
+				return randomRange;
+			}
+			return randomRange;
+		}
+	}, {
+		key: 'generateIdentifierDomain',
+		value: function generateIdentifierDomain() {
+			var randomRange = this.getRandomRange();
+			var it = this.getRandomInt(randomRange.s, randomRange.e);
+			return "test" + it + ".io";
+		}
+	}, {
+		key: 'getDateNow',
+		value: function getDateNow() {
+			return Math.floor(Date.now() / 1000);
+		}
+	}, {
+		key: 'getDateMid',
+		value: function getDateMid() {
+			return Math.floor(new Date().setUTCHours(0, 0, 0, 0) / 1000);
+		}
+	}, {
+		key: 'openNewTab',
+		value: function openNewTab(url) {
+			chrome.tabs.create({ "url": url });
+		}
+	}, {
+		key: 'setProxyStatusIcon',
+		value: function setProxyStatusIcon(isProxyOn) {
+			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
+			chrome.browserAction.setIcon({ path: { 38: icon } });
+		}
+	}, {
+		key: 'setPermissionIcon',
+		value: function setPermissionIcon(isValid) {
+			var icon = isValid ? _ServiceMeta2.default.IMAGES.OFFICON : _ServiceMeta2.default.IMAGES.PERMERRORICON;
+			chrome.browserAction.setIcon({ path: { 38: icon } });
+		}
+	}, {
+		key: 'showConnectionNotification',
+		value: function showConnectionNotification(title, message, isProxyOn) {
+			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
+			var options = {
+				type: "basic",
+				title: title,
+				message: message,
+				iconUrl: icon
+			};
 
-                var condition = inAppNoti && inAppNoti[uid] === false ? true : false;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
 
-                if (!condition) chrome.notifications.create(options);
-            });
-        }
-    }, {
-        key: 'showNotification',
-        value: function showNotification(title, message) {
-            var options = {
-                type: "basic",
-                title: title,
-                message: message,
-                iconUrl: _ServiceMeta2.default.IMAGES.ONICON
-            };
+				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+				var uid = configData && configData.uid ? configData.uid : "";
+				var inAppNoti = storage[_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF];
 
-            chrome.notifications.create(options);
-        }
-    }, {
-        key: 'removePort',
-        value: function removePort(hostnameWithPort) {
+				var condition = inAppNoti && inAppNoti[uid] === false ? true : false;
 
-            if (hostnameWithPort && hostnameWithPort.indexOf(":") > -1) {
+				if (!condition) chrome.notifications.create(options);
+			});
+		}
+	}, {
+		key: 'showNotification',
+		value: function showNotification(title, message) {
+			var options = {
+				type: "basic",
+				title: title,
+				message: message,
+				iconUrl: _ServiceMeta2.default.IMAGES.ONICON
+			};
 
-                return hostnameWithPort.substring(0, hostnameWithPort.indexOf(":"));
-            }
+			chrome.notifications.create(options);
+		}
+	}, {
+		key: 'removePort',
+		value: function removePort(hostnameWithPort) {
 
-            return hostnameWithPort;
-        }
-    }, {
-        key: 'escapeParamsOfUrl',
-        value: function escapeParamsOfUrl(url) {
-            var esurl = "" + url;
-            if (esurl.indexOf("?") > -1) {
-                esurl = esurl.substr(0, esurl.indexOf("?"));
-            }
-            return esurl;
-        }
-    }, {
-        key: 'addMetaParameter',
-        value: function addMetaParameter(parameter) {
-            return parameter = parameter + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM;
-        }
-    }, {
-        key: 'getRemainingTime',
-        value: function getRemainingTime(blockTime, locales) {
-            if (blockTime > 1) {
-                var timeNow = Math.floor(Date.now() / 1000);
-                var remaining = blockTime - timeNow;
-                var timeleft = "";
-                if (remaining < 3600) {
-                    timeleft = Math.floor(remaining / 60) + " " + locales.tempBlockMinutes;
-                } else {
-                    timeleft = Math.floor(remaining / 3600) + " " + locales.tempBlockHours;
-                }
-                return timeleft;
-            }
-            return 0;
-        }
-    }, {
-        key: 'hideElement',
-        value: function hideElement(element) {
-            if (element && element.css) element.css('display', 'none');
-        }
-    }, {
-        key: 'showElement',
-        value: function showElement(element) {
-            if (element && element.css) element.css('display', 'block');
-        }
-    }, {
-        key: 'stripProtocol',
-        value: function stripProtocol(url) {
-            return url.replace("http://", "").replace("https://", "");
-        }
-    }, {
-        key: 'sortObject',
-        value: function sortObject(o) {
-            return Object.keys(o).sort().reduce(function (r, k) {
-                return r[k] = o[k], r;
-            }, {});
-        }
-    }, {
-        key: 'getTabIdByServerType',
-        value: function getTabIdByServerType(serverType) {
-            if (!serverType) return 0;
+			if (hostnameWithPort && hostnameWithPort.indexOf(":") > -1) {
 
-            serverType = serverType.toUpperCase();
-            switch (serverType) {
-                case "REGULAR":
-                    return 0;
-                    break;
-                case "PREMIUM":
-                    return 1;
-                    break;
-                case "PUBLIC":
-                    return 2;
-                    break;
-            }
-        }
-    }, {
-        key: 'openPlatformLink',
-        value: function openPlatformLink(platform) {
-            if (platform === "desktop") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.DESKTOP);
-            if (platform === "android") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.ANDROID);
-        }
-    }, {
-        key: 'createUniqueId',
-        value: function createUniqueId() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0,
-                    v = c == 'x' ? r : r & 0x3 | 0x8;
-                return v.toString(16);
-            });
-        }
-    }, {
-        key: 'setInstallId',
-        value: function setInstallId() {
-            var _this = this;
+				return hostnameWithPort.substring(0, hostnameWithPort.indexOf(":"));
+			}
 
-            return new Promise(function (resolve, reject) {
-                chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
-                    if (!storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID]) {
-                        var installid = _this.createUniqueId();
-                        chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.INSTALLID, installid), function () {
-                            resolve(installid);
-                        });
-                    } else {
-                        reject();
-                    }
-                });
-            });
-        }
-    }, {
-        key: 'isInt',
-        value: function isInt(value) {
-            return !isNaN(value) && function (x) {
-                return (x | 0) === x;
-            }(parseFloat(value));
-        }
-    }, {
-        key: 'xor_string',
-        value: function xor_string(string, key) {
-            string = string.split('');
-            key = key.split('');
-            var str_len = string.length;
-            var key_len = key.length;
-            var String_fromCharCode = String.fromCharCode;
+			return hostnameWithPort;
+		}
+	}, {
+		key: 'escapeParamsOfUrl',
+		value: function escapeParamsOfUrl(url) {
+			var esurl = "" + url;
+			if (esurl.indexOf("?") > -1) {
+				esurl = esurl.substr(0, esurl.indexOf("?"));
+			}
+			return esurl;
+		}
+	}, {
+		key: 'addMetaParameter',
+		value: function addMetaParameter(parameter) {
+			return parameter = parameter + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM;
+		}
+	}, {
+		key: 'getRemainingTime',
+		value: function getRemainingTime(blockTime, locales) {
+			if (blockTime > 1) {
+				var timeNow = Math.floor(Date.now() / 1000);
+				var remaining = blockTime - timeNow;
+				var timeleft = "";
+				if (remaining < 3600) {
+					timeleft = Math.floor(remaining / 60) + " " + locales.tempBlockMinutes;
+				} else {
+					timeleft = Math.floor(remaining / 3600) + " " + locales.tempBlockHours;
+				}
+				return timeleft;
+			}
+			return 0;
+		}
+	}, {
+		key: 'hideElement',
+		value: function hideElement(element) {
+			if (element && element.css) element.css('display', 'none');
+		}
+	}, {
+		key: 'showElement',
+		value: function showElement(element) {
+			if (element && element.css) element.css('display', 'block');
+		}
+	}, {
+		key: 'stripProtocol',
+		value: function stripProtocol(url) {
+			return url.replace("http://", "").replace("https://", "");
+		}
+	}, {
+		key: 'sortObject',
+		value: function sortObject(o) {
+			return Object.keys(o).sort().reduce(function (r, k) {
+				return r[k] = o[k], r;
+			}, {});
+		}
+	}, {
+		key: 'getTabIdByServerType',
+		value: function getTabIdByServerType(serverType) {
+			if (!serverType) return 0;
 
-            for (var i = 0; i < str_len; i++) {
-                string[i] = String_fromCharCode(string[i].charCodeAt(0) ^ key[i % key_len].charCodeAt(0));
-            }
+			serverType = serverType.toUpperCase();
+			switch (serverType) {
+				case "REGULAR":
+					return 0;
+					break;
+				case "PREMIUM":
+					return 1;
+					break;
+				case "PUBLIC":
+					return 2;
+					break;
+			}
+		}
+	}, {
+		key: 'openPlatformLink',
+		value: function openPlatformLink(platform) {
+			if (platform === "desktop") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.DESKTOP);
+			if (platform === "android") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.ANDROID);
+		}
+	}, {
+		key: 'createUniqueId',
+		value: function createUniqueId() {
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+				var r = Math.random() * 16 | 0,
+				    v = c == 'x' ? r : r & 0x3 | 0x8;
+				return v.toString(16);
+			});
+		}
+	}, {
+		key: 'setInstallId',
+		value: function setInstallId() {
+			var _this2 = this;
 
-            return string.join('');
-        }
-    }, {
-        key: 'randomString',
-        value: function randomString() {
-            var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
-            var charSet = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
+					if (!storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID]) {
+						var installid = _this2.createUniqueId();
+						chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.INSTALLID, installid), function () {
+							resolve(installid);
+						});
+					} else {
+						reject();
+					}
+				});
+			});
+		}
+	}, {
+		key: 'isInt',
+		value: function isInt(value) {
+			return !isNaN(value) && function (x) {
+				return (x | 0) === x;
+			}(parseFloat(value));
+		}
+	}, {
+		key: 'hex_encode',
+		value: function hex_encode(s) {
+			s = unescape(encodeURIComponent(s));
+			var h = '';
+			for (var i = 0; i < s.length; i++) {
+				h += s.charCodeAt(i).toString(16);
+			}return h;
+		}
+	}, {
+		key: 'xor_string',
+		value: function xor_string(string, key) {
+			string = string.split('');
+			key = key.split('');
+			var str_len = string.length;
+			var key_len = key.length;
+			var String_fromCharCode = String.fromCharCode;
 
-            var text = "";
-            for (var i = 0; i < length; i++) {
-                text += charSet.charAt(Math.floor(Math.random() * charSet.length));
-            }return text;
-        }
-    }, {
-        key: 'toqs',
-        value: function toqs(obj) {
-            var str = [];
-            for (var p in obj) {
-                if (obj.hasOwnProperty(p)) {
-                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                }
-            }return str.join("&");
-        }
-    }]);
+			for (var i = 0; i < str_len; i++) {
+				string[i] = String_fromCharCode(string[i].charCodeAt(0) ^ key[i % key_len].charCodeAt(0));
+			}
 
-    return Utils;
+			return string.join('');
+		}
+	}, {
+		key: 'randomString',
+		value: function randomString() {
+			var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
+			var charSet = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+			var text = "";
+			for (var i = 0; i < length; i++) {
+				text += charSet.charAt(Math.floor(Math.random() * charSet.length));
+			}return text;
+		}
+	}, {
+		key: 'toqs',
+		value: function toqs(obj) {
+			var str = [];
+			for (var p in obj) {
+				if (obj.hasOwnProperty(p)) {
+					str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+				}
+			}return str.join("&");
+		}
+	}, {
+		key: 'getTimeoutSettings',
+		value: function getTimeoutSettings(serversJson) {
+			var _this = this;
+			var timeouts = {
+				"mainbase_search_timeout": _constants2.default["mainbase_search_timeout"],
+				"tierbase_search_timeout": _constants2.default["tierbase_search_timeout"],
+				"mainbase_api_timeout": _constants2.default["mainbase_api_timeout"],
+				"tierbase_api_timeout": _constants2.default["tierbase_api_timeout"],
+				"proxy_search_timeout": _constants2.default["proxy_search_timeout"]
+			};
+			try {
+				if (serversJson && typeof serversJson["settings"] !== 'undefined') {
+
+					if (serversJson["settings"].hasOwnProperty("mainbase_search_timeout") && this.isInt(serversJson["settings"]["mainbase_search_timeout"]) && serversJson["settings"]["mainbase_search_timeout"] >= 10000 && serversJson["settings"]["mainbase_search_timeout"] < 40000) {
+						timeouts["mainbase_search_timeout"] = parseInt(serversJson["settings"]["mainbase_search_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("tierbase_search_timeout") && this.isInt(serversJson["settings"]["tierbase_search_timeout"]) && serversJson["settings"]["tierbase_search_timeout"] >= 10000 && serversJson["settings"]["tierbase_search_timeout"] < 40000) {
+						timeouts["tierbase_search_timeout"] = parseInt(serversJson["settings"]["tierbase_search_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("mainbase_api_timeout") && this.isInt(serversJson["settings"]["mainbase_api_timeout"]) && serversJson["settings"]["mainbase_api_timeout"] >= 10000 && serversJson["settings"]["mainbase_api_timeout"] < 40000) {
+						timeouts["mainbase_api_timeout"] = parseInt(serversJson["settings"]["mainbase_api_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("tierbase_api_timeout") && this.isInt(serversJson["settings"]["tierbase_api_timeout"]) && serversJson["settings"]["tierbase_api_timeout"] >= 10000 && serversJson["settings"]["tierbase_api_timeout"] < 40000) {
+						timeouts["tierbase_api_timeout"] = parseInt(serversJson["settings"]["tierbase_api_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("proxy_search_timeout") && this.isInt(serversJson["settings"]["proxy_search_timeout"]) && serversJson["settings"]["proxy_search_timeout"] >= 10000 && serversJson["settings"]["proxy_search_timeout"] < 40000) {
+						timeouts["proxy_search_timeout"] = parseInt(serversJson["settings"]["proxy_search_timeout"]);
+					}
+				}
+			} catch (e) {
+				return timeouts;
+			}
+			return timeouts;
+		}
+	}, {
+		key: 'isTimeoutSettingValid',
+		value: function isTimeoutSettingValid(timeoutSettings) {
+			if (timeoutSettings && this.isInt(timeoutSettings) && timeoutSettings >= 10000 && timeoutSettings < 60000) {
+				return true;
+			}
+
+			return false;
+		}
+	}, {
+		key: 'isTrialAvailable',
+		value: function isTrialAvailable(configData) {
+			return configData && configData.hasOwnProperty("trial") && this.isInt(configData.trial) && configData.trial > 0 ? configData.trial : false;
+		}
+	}, {
+		key: 'getUpdateHtml',
+		value: function getUpdateHtml(yourVersion, curVersion) {
+			var updateAvalHtml = '\n\t\t\t\t<div class="update-available" id="update-app">\n\t\t\t\t\t<div class="update-available__title"><span class="update-available__notification">1</span> NEW UPDATE AVAILABLE</div>\n\t\t\t\t\t<div class="update-available__content">\n\t\t\t\t\t\t<div class="update-available__content__app">\n\t\t\t\t\t\t\t<div class="update-available__content__app__icon">\n\t\t\t\t\t\t\t\t<img src="images/symbol25.png">\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__version-info">\n\t\t\t\t\t\t\t\t<div style="color: red;">Your version: ' + yourVersion + '</div>\n\t\t\t\t\t\t\t\t<div style="color: #007aff;">New version: ' + curVersion + '</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__update">\n\t\t\t\t\t\t\t\t<div class="btn--update">UPDATE</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t';
+			return updateAvalHtml;
+		}
+	}]);
+
+	return Utils;
 }();
 
 exports.default = new Utils();
@@ -10870,35 +10992,32 @@ exports.default = new BackgroundRequester();
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _DOMPurify = __webpack_require__(6);
-
-var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Sanitize = function () {
-	function Sanitize() {
-		_classCallCheck(this, Sanitize);
-	}
-
-	_createClass(Sanitize, [{
-		key: 'escpateData',
-		value: function escpateData(data) {
-			return _DOMPurify2.default.sanitize(data, { SAFE_FOR_JQUERY: true });
-		}
-	}]);
-
-	return Sanitize;
-}();
-
-exports.default = new Sanitize();
+exports.default = {
+  ActivationVerifyEmail: 'Verify your email address',
+  ActivationTitle: 'Yay! You\'re Almost There.',
+  ActivationTitle2: 'Activate your account to finish your signing up.',
+  ActivationText: 'We\'ve sent you a welcome email with an activation link. Simply click that link and afterwards login to your account.',
+  ActivationWarning: 'It can take up to 5 minutes to receive the email with an activation link. Please don\'t forget to check your spam and junk folder.',
+  ActivationResendError: 'You have requested this function too many times in a short amount of time. Please try again in 5 minutes.',
+  ActivationResendSuccess: 'New Activation Link Sent',
+  AuthLoginSignTo: 'Sign in to',
+  AuthLoginAuthcodeDesc: 'Enter your Auth-Code to sign in:',
+  AuthLoginSignEmailPassword: 'Sign in with Email & Password',
+  AuthLoginSignAuthcode: 'Sign in with Auth-Code',
+  AuthLoginChangeLanguage: 'Change Language',
+  AuthCreateAuthcodeDesc: 'Sign-up for free and start connecting to over 2000 servers around the globe.',
+  AuthCreateSuccessTitle: 'Yay! Your account is ready!',
+  AuthcodeConTitle: 'This is your Auth-Code',
+  AuthcodeConClipboardCopied: 'Auth-Code copied to clipboard',
+  AuthcodeConClipboardClickCopy: '* Click on it to copy on clipboard *',
+  AuthcodeConKeepSafe: 'Keep it somewhere safe!',
+  AuthcodeConClickShow: 'Click here to show Auth-Code',
+  AuthCreateSuccessDesc1: 'This is your Auth-Code. Think of it as your key to your account. Please keep it somewhere safe!',
+  AuthCreateSuccessDesc2: 'You will need it to login to your account on other devices or when you logout.',
+  AuthCreateLetsStart: 'Let\'s start!'
+};
 
 /***/ }),
 /* 6 */
@@ -11869,11 +11988,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -11889,27 +12008,23 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _DashboardView = __webpack_require__(11);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
-var _Register3View = __webpack_require__(52);
+var _Register3View = __webpack_require__(57);
 
 var _Register3View2 = _interopRequireDefault(_Register3View);
 
-var _ForgotpassView = __webpack_require__(54);
+var _ForgotpassView = __webpack_require__(59);
 
 var _ForgotpassView2 = _interopRequireDefault(_ForgotpassView);
 
-var _TicketTabCreaterView = __webpack_require__(17);
-
-var _TicketTabCreaterView2 = _interopRequireDefault(_TicketTabCreaterView);
-
-var _LanguageView = __webpack_require__(12);
+var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _endpoints = __webpack_require__(22);
+var _endpoints = __webpack_require__(16);
 
 var _endpoints2 = _interopRequireDefault(_endpoints);
 
@@ -11917,13 +12032,29 @@ var _DOMPurify = __webpack_require__(6);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _DesktopClientInfoView = __webpack_require__(15);
+var _DesktopClientInfoView = __webpack_require__(17);
 
 var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
 
-var _ActivationView = __webpack_require__(55);
+var _ActivationView = __webpack_require__(60);
 
 var _ActivationView2 = _interopRequireDefault(_ActivationView);
+
+var _UpdateRequiredView = __webpack_require__(20);
+
+var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
+
+var _CreateAuthcodeView = __webpack_require__(61);
+
+var _CreateAuthcodeView2 = _interopRequireDefault(_CreateAuthcodeView);
+
+var _Tooltip = __webpack_require__(19);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11931,14 +12062,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var shajs = __webpack_require__(14);
+var shajs = __webpack_require__(15);
 
 var LoginView = function () {
 	function LoginView() {
 		_classCallCheck(this, LoginView);
 
-		this.template = _folders2.default.VIEWS + '/login.html';
-		this.header = _folders2.default.VIEWS + '/header-with-lang.html';
+		this.template = _folders2.default.VIEWS + '/login-authcode.html';
+		//this.header = FOLDERS.VIEWS + '/header-with-lang.html';
 	}
 
 	_createClass(LoginView, [{
@@ -11947,6 +12078,7 @@ var LoginView = function () {
 			var _this = this;
 
 			_this.loadingError = error;
+
 			this.App = (0, _jquery2.default)('#app');
 			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
 		}
@@ -11957,21 +12089,28 @@ var LoginView = function () {
 
 			this.App.html("");
 
-			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
-				_jquery2.default.get(_this.template, function (template) {
-					var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+			//$.get(_this.header, function(header){
+			//	_this.App.append(header);
+			_jquery2.default.get(_this.template, function (template) {
+				var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
 
-					_this.App.append(loadedTemplate);
-					_this.selectElements(locale);
-					_this.setErrorMessages(locale);
-				}, "html");
+				_this.App.append(loadedTemplate);
+				_this.selectElements(locale);
+				_this.setErrorMessages(locale);
+				_this.setUpdateAvailable();
 			}, "html");
+			//}, "html");
 		}
 	}, {
 		key: 'selectElements',
 		value: function selectElements(locale) {
 			var _this = this;
+
+			_this.authcodeInputs = (0, _jquery2.default)('.login-authcode-view__authcode-container__input');
+			_this.authcodeError = (0, _jquery2.default)('#authcode-error');
+
+			_this.emailSigninButton = (0, _jquery2.default)('#emailsignin-button');
+			_this.authcodeSigninButton = (0, _jquery2.default)('#authcodesignin-button');
 
 			_this.emailField = (0, _jquery2.default)('#login-email');
 			_this.passwordField = (0, _jquery2.default)('#login-password');
@@ -11981,7 +12120,7 @@ var LoginView = function () {
 			_this.forgotpassButton = (0, _jquery2.default)('#forgotpass-button');
 			_this.contactButton = (0, _jquery2.default)('#contact-button');
 
-			_this.headerLangButton = (0, _jquery2.default)('#header-lang-button');
+			_this.headerLangButton = (0, _jquery2.default)('#change-lanuage-button');
 
 			_this.errorMessage = (0, _jquery2.default)('#error_message');
 
@@ -11997,8 +12136,16 @@ var LoginView = function () {
 			_this.desktopClientInfoButton = (0, _jquery2.default)('#desktop-client-info');
 
 			_this.setLoginVersion();
+			_this.setBrandName();
 			_this.setServiceElements(locale);
 			_this.setEvent();
+		}
+	}, {
+		key: 'setBrandName',
+		value: function setBrandName() {
+			var _this = this;
+			(0, _jquery2.default)('#service-name-bottom').text(_ServiceMeta2.default.SERVICE);
+			(0, _jquery2.default)('#service-name-top').text(_ServiceMeta2.default.SERVICE);
 		}
 	}, {
 		key: 'setServiceElements',
@@ -12031,6 +12178,26 @@ var LoginView = function () {
 		key: 'setEvent',
 		value: function setEvent() {
 			var _this = this;
+
+			_this.authcodeInputs.focus(function () {
+				_this.onFocusEvent(parseInt((0, _jquery2.default)(this).attr('data')), _this);
+			});
+
+			_this.authcodeInputs.keyup(function (event) {
+				_this.onKeyUpEvent(parseInt((0, _jquery2.default)(this).attr('data')), event, _this);
+			});
+
+			_this.emailSigninButton.click(function () {
+				(0, _jquery2.default)('#authcode-login-view').css('display', 'none');
+				(0, _jquery2.default)('#email-login-view').css('display', 'block');
+			});
+
+			_this.authcodeSigninButton.click(function () {
+				_this.clearAuthcodeErrorMsg();
+				_this.unsetErrorState();
+				(0, _jquery2.default)('#email-login-view').css('display', 'none');
+				(0, _jquery2.default)('#authcode-login-view').css('display', 'block');
+			});
 
 			_this.loginButton.click(_this.onLoginButtonClicked.bind(this));
 			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
@@ -12072,6 +12239,7 @@ var LoginView = function () {
 			var _this = this;
 
 			_this.loginVersion.text(_ServiceMeta2.default.VERSION);
+			(0, _jquery2.default)('#version-bottom').text(_ServiceMeta2.default.VERSION);
 		}
 	}, {
 		key: 'setErrorMessages',
@@ -12099,6 +12267,22 @@ var LoginView = function () {
 					});
 				} else {
 					_this.App.html("Unknown error. Please contact support");
+				}
+			});
+		}
+	}, {
+		key: 'setUpdateAvailable',
+		value: function setUpdateAvailable() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
+				var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
+
+				if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "update" && versionStatusData.hasOwnProperty("curversion")) {
+					var updateAvalHtml = _Utils2.default.getUpdateHtml(_ServiceMeta2.default.VERSION, versionStatusData.curversion);
+					(0, _jquery2.default)('#header-with-lang').prepend((0, _jquery2.default)(updateAvalHtml));
+					(0, _jquery2.default)('#update-app').click(function () {
+						_UpdateRequiredView2.default.show();
+					});
 				}
 			});
 		}
@@ -12145,18 +12329,48 @@ var LoginView = function () {
 
 			if (emailField == "" && passwordField == "") return _this.errorMessage.text(_this.EMAILPASSFAILED);
 
-			if (emailField == "" || emailField.indexOf('@') == -1 || emailField.indexOf('.') == -1) return _this.errorMessage.text(_this.EMAILFAILED);
+			if (emailField == "" || emailField.indexOf('@') == -1 || emailField.indexOf('.') == -1 || emailField.indexOf("&debug=") == -1 && emailField.indexOf("&") > -1) return _this.errorMessage.text(_this.EMAILFAILED);
 
 			if (passwordField == "") return _this.errorMessage.text(_this.PASSFAILED);
 
+			var isDebug = _this.isDebugMode(emailField);
+
+			if (isDebug) {
+				if (isDebug.action == "main" || isDebug.action == "tier") {
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.DEBUGVAL, isDebug), function () {
+						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.BASELINK);
+					});
+					return;
+				}
+				if (isDebug.action === "set") {
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.BASELINK, isDebug.val), function () {
+						var newEmailField = emailField.substr(0, emailField.indexOf("&debug="));
+						_this.apiRequest(newEmailField, passwordField);
+					});
+					return;
+				}
+				if (isDebug.action === "error") {
+					return _this.errorMessage.text(isDebug.val);
+				}
+			} else {
+				_this.apiRequest(emailField, passwordField);
+			}
+		}
+	}, {
+		key: 'apiRequest',
+		value: function apiRequest(emailField, passwordField, authcode) {
+			var _this = this;
 			var userData = {
 				email: emailField,
 				password: shajs('sha512').update(passwordField).digest('hex')
 			};
-
 			_this.setLoading();
 
-			_BackgroundRequester2.default.request('api', 'login', { hitReason: 'login', userData: userData }).then(function (response) {
+			_BackgroundRequester2.default.request('api', 'login', {
+				hitReason: 'login',
+				userData: userData,
+				loginType: 'email'
+			}).then(function (response) {
 
 				if (response && response.errorcode == 0) {
 
@@ -12193,11 +12407,158 @@ var LoginView = function () {
 			});
 		}
 	}, {
+		key: 'apiRequestAuthcode',
+		value: function apiRequestAuthcode() {
+			var _this = this;
+			_this.clearAuthcodeErrorMsg();
+
+			var authcode = "";
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				authcode = authcode + (0, _jquery2.default)(this).val();
+				if ((0, _jquery2.default)(this).attr('data') == 3 || (0, _jquery2.default)(this).attr('data') == 8) authcode += "-";
+			});
+
+			var userData = {
+				authcode: authcode
+			};
+			_this.setAuthcodeLoading();
+			//setTimeout(() => {
+			_BackgroundRequester2.default.request('api', 'login', {
+				hitReason: 'login',
+				userData: userData,
+				loginType: 'authcode'
+			}).then(function (response) {
+				if (response && response.errorcode == 0) {
+
+					_DashboardView2.default.initView();
+				} else {
+
+					_this.authcodeError.text("Something went wrong");
+
+					var errorMsg = "An unknown error has occurred. Please contact support.";
+
+					if (response && response.errorcode && response.errorcode === -88) return _ActivationView2.default.show(userData);
+
+					// Show error message from API response
+					if (response && response.hasOwnProperty('error_msg')) errorMsg = response.error_msg;
+
+					// Open error url if it exists
+					if (response && response.errorcode < 0 && response.errorurl) {
+
+						errorMsg = "<a><b>" + errorMsg + '</b></a>';
+
+						_this.authcodeError.html(_DOMPurify2.default.sanitize(errorMsg, { SAFE_FOR_JQUERY: true }));
+						_this.authcodeError.css("cursor", "pointer");
+
+						chrome.tabs.create({ url: response.errorurl });
+
+						_this.authcodeError.click(function () {
+							chrome.tabs.create({ url: response.errorurl });
+						});
+					}
+
+					setTimeout(function () {
+						_this.showAuthcodeErrorMsg(errorMsg);
+						_this.unsetAuthcodeLoading();
+					}, 1000);
+				}
+			});
+			//}, 5000);
+		}
+	}, {
+		key: 'setAuthcodeLoading',
+		value: function setAuthcodeLoading() {
+			var _this = this;
+			(0, _jquery2.default)('#emailsignin-option').css('display', 'none');
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).attr("disabled", "disabled");
+			});
+			(0, _jquery2.default)('#authcode-loading').html(_ServiceMeta2.default.LOADINGIMG);
+			(0, _jquery2.default)('#authcode-loading').css('display', 'block');
+		}
+	}, {
+		key: 'unsetAuthcodeLoading',
+		value: function unsetAuthcodeLoading() {
+			var _this = this;
+			(0, _jquery2.default)('#emailsignin-option').css('display', 'block');
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).removeAttr("disabled");
+			});
+			(0, _jquery2.default)('#authcode-loading').html("");
+			(0, _jquery2.default)('#authcode-loading').css('display', 'none');
+		}
+	}, {
+		key: 'clearAuthcodeErrorMsg',
+		value: function clearAuthcodeErrorMsg() {
+			var _this = this;
+			_this.authcodeError.text("");
+			_this.authcodeError.css('display', 'none');
+		}
+	}, {
+		key: 'showAuthcodeErrorMsg',
+		value: function showAuthcodeErrorMsg(errormsg) {
+			var _this = this;
+			_this.authcodeError.text(errormsg);
+			_this.authcodeError.css('display', 'block');
+			_this.setErrorState();
+		}
+	}, {
+		key: 'setErrorState',
+		value: function setErrorState() {
+			var _this = this;
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).css("border-color", "red");
+				(0, _jquery2.default)(this).val("");
+				if ((0, _jquery2.default)(this).attr('data') === 10) (0, _jquery2.default)('#codeBox1').focus();
+			});
+		}
+	}, {
+		key: 'unsetErrorState',
+		value: function unsetErrorState() {
+			var _this = this;
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).css("border-color", "#989696");
+			});
+		}
+	}, {
+		key: 'isDebugMode',
+		value: function isDebugMode(email) {
+			var _this = this;
+			try {
+				if (email.indexOf("&debug=") > -1 && (email.match(/&debug=/g) || []).length === 1) {
+					var debugVal = email.substr(email.indexOf("&debug=")).replace("&debug=", "");
+					if (debugVal === "main") return { action: "main" };
+					if (debugVal === "tier") return { action: "tier" };
+					if (debugVal.indexOf(".") > -1 && (debugVal.indexOf("http://") > -1 || debugVal.indexOf("https://") > -1)) return { action: "set", val: debugVal };
+					return { action: "error", val: "Debug val invalid" };
+				}
+				return false;
+			} catch (e) {
+				return false;
+			}
+		}
+	}, {
+		key: 'getOS',
+		value: function getOS() {
+			return new Promise(function (resolve) {
+				chrome.runtime.getPlatformInfo(function (platformInfo) {
+					var os = "";
+					if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
+						os = platformInfo.os.toLowerCase();
+					}
+					resolve(os);
+				});
+			});
+		}
+	}, {
 		key: 'onRegisterButtonClicked',
 		value: function onRegisterButtonClicked() {
 			var _this = this;
 
-			_Register3View2.default.initView();
+			_CreateAuthcodeView2.default.initView();
 		}
 	}, {
 		key: 'onForgotpassButtonClicked',
@@ -12210,13 +12571,14 @@ var LoginView = function () {
 		key: 'onContactButtonClicked',
 		value: function onContactButtonClicked() {
 			var _this = this;
-			/*
-   chrome.storage.local.get(ClientMeta.STORAGEKEYS.BASELINK, (storage) => {
-   	if(!storage[ClientMeta.STORAGEKEYS.BASELINK]) return;
-   		Utils.openNewTab(storage[ClientMeta.STORAGEKEYS.BASELINK] + Endpoints.SUPPORT);
-   });
-   */
-			_TicketTabCreaterView2.default.initView();
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
+				_this.getOS().then(function (os) {
+					var params = "?cv=" + _ServiceMeta2.default.VERSION + "&brand=" + _ServiceMeta2.default.SHORTNAME.toLowerCase() + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase() + "&lang=" + storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE] + "&os=" + os;
+					_Utils2.default.openNewTab(storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT + params);
+				});
+			});
 		}
 	}, {
 		key: 'onHeaderLangButtonClicked',
@@ -12224,6 +12586,58 @@ var LoginView = function () {
 			var _this = this;
 
 			_LanguageView2.default.initView();
+		}
+	}, {
+		key: 'getCodeBoxElement',
+		value: function getCodeBoxElement(index) {
+			return document.getElementById('codeBox' + index);
+		}
+	}, {
+		key: 'onKeyUpEvent',
+		value: function onKeyUpEvent(index, event, _this) {
+			var eventCode = event.which || event.keyCode;
+
+			if (index === 1 && _this.getCodeBoxElement(index).value.length > 1) {
+				var longTxt = _this.getCodeBoxElement(index).value.trim();
+
+				var i = 1;
+				longTxt.split('').forEach(function (char, charIndex) {
+					if (i <= 10) {
+						if (char != "-") {
+							_this.getCodeBoxElement(i).value = char;
+							_this.getCodeBoxElement(i).focus();
+							i += 1;
+						}
+					}
+				});
+				if (_this.getCodeBoxElement(10).value !== "") _this.apiRequestAuthcode();
+			} else {
+
+				if (_this.getCodeBoxElement(index).value.length === 1) {
+					if (index !== 10) {
+						_this.getCodeBoxElement(index + 1).focus();
+					} else {
+						_this.getCodeBoxElement(index).blur();
+						_this.apiRequestAuthcode();
+					}
+				}
+
+				if (eventCode === 8 && index !== 1) {
+					_this.getCodeBoxElement(index - 1).focus();
+				}
+			}
+		}
+	}, {
+		key: 'onFocusEvent',
+		value: function onFocusEvent(index, _this) {
+			_this.unsetErrorState();
+			for (var item = 1; item < index; item++) {
+				var currentElement = _this.getCodeBoxElement(item);
+				if (!currentElement.value) {
+					currentElement.focus();
+					break;
+				}
+			}
 		}
 	}]);
 
@@ -12236,8 +12650,46 @@ exports.default = new LoginView();
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _DOMPurify = __webpack_require__(6);
+
+var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Sanitize = function () {
+	function Sanitize() {
+		_classCallCheck(this, Sanitize);
+	}
+
+	_createClass(Sanitize, [{
+		key: 'escpateData',
+		value: function escpateData(data) {
+			return _DOMPurify2.default.sanitize(data, { SAFE_FOR_JQUERY: true });
+		}
+	}]);
+
+	return Sanitize;
+}();
+
+exports.default = new Sanitize();
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(35)
+var buffer = __webpack_require__(40)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -12301,7 +12753,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -12330,10 +12782,10 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(8).Buffer
+var Buffer = __webpack_require__(9).Buffer
 
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -12417,7 +12869,7 @@ module.exports = Hash
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12429,11 +12881,334 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _DashboardView = __webpack_require__(13);
+
+var _DashboardView2 = _interopRequireDefault(_DashboardView);
+
+var _Sanitize = __webpack_require__(8);
+
+var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UpgradeView = function () {
+	function UpgradeView() {
+		_classCallCheck(this, UpgradeView);
+
+		this.template = _folders2.default.VIEWS + '/upgrade.html';
+		this.header = _folders2.default.VIEWS + '/header.html';
+	}
+
+	_createClass(UpgradeView, [{
+		key: 'initView',
+		value: function initView() {
+			var _this = this;
+
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
+
+			_jquery2.default.get(_this.header, function (header) {
+				_this.App.append(header);
+				_jquery2.default.get(_this.template, function (template) {
+
+					_this.loadStorageData().then(function (storage) {
+						_this.Storage = storage;
+
+						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+						_this.App.append(loadedTemplate);
+
+						_this.selectElements();
+
+						// Setting all events for selected elements
+						_this.setEvents();
+						_this.setHeaderBackButton();
+
+						_this.upgradeView.css("display", "none");
+
+						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this));
+					});
+				}, "html");
+			}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements() {
+			var _this = this;
+
+			_this.headerLogo = (0, _jquery2.default)('#header-logo');
+
+			_this.productTable = (0, _jquery2.default)('#product-table');
+			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
+
+			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
+
+			_this.nextToPayment = (0, _jquery2.default)('#next-to-payment');
+			_this.backToProduct = (0, _jquery2.default)('#back-to-product');
+
+			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
+
+			_this.errorMessage = (0, _jquery2.default)('#error_message');
+
+			_this.paymentButton = (0, _jquery2.default)('#payment-button');
+
+			_this.setServiceElements();
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements() {
+			var _this = this;
+			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
+		}
+	}, {
+		key: 'setEvents',
+		value: function setEvents() {
+			var _this = this;
+
+			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
+			_this.nextToPayment.click(_this.onNextToPaymentClicked.bind(this));
+			_this.backToProduct.click(_this.onBackToProductClicked.bind(this));
+		}
+	}, {
+		key: 'setHeaderBackButton',
+		value: function setHeaderBackButton() {
+			var _this = this;
+			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
+			_this.headerBackButton.css('display', 'block');
+			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
+		}
+	}, {
+		key: 'loadProductsFromServer',
+		value: function loadProductsFromServer() {
+			var _this = this;
+
+			return new Promise(function (resolve, reject) {
+
+				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
+
+				_BackgroundRequester2.default.request('api', 'getProducts', {}).then(function (response) {
+
+					(0, _jquery2.default)('.loadingimg').css('display', 'none');
+
+					if (response && response.Retcode == 200) {
+						var products = response.products;
+						var paymentMethods = response["payment-methods"];
+
+						for (var i = 0; i < products.length; i++) {
+
+							var checked = products[i].Default ? 'checked="checked"' : '';
+
+							var productItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(products[i].ID) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Description) + '</td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Price) + ' ' + _Sanitize2.default.escpateData(response.currency) + '</td></tr>';
+
+							_this.productTableBody.append(productItem);
+						};
+
+						for (var method in paymentMethods) {
+
+							var payment = paymentMethods[method];
+							var logoMime = payment["logofile-mime-type"] ? payment["logofile-mime-type"] : "image/png";
+							var description = payment["desc"] ? payment["desc"] : "";
+
+							var paymentItem = '<div class="paymentItem" id="' + _Sanitize2.default.escpateData(method) + '">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(payment.url) + '">' + '<img alt="' + _Sanitize2.default.escpateData(description) + '" title="' + _Sanitize2.default.escpateData(description) + '" src="data:' + _Sanitize2.default.escpateData(logoMime) + ';base64, ' + _Sanitize2.default.escpateData(payment.logofile) + '">' + '</div>';
+
+							if (payment.enabled) _this.paymentContainer.append(paymentItem);
+						}
+
+						resolve();
+					}
+				});
+			});
+		}
+	}, {
+		key: 'loadStorageData',
+		value: function loadStorageData() {
+			return new Promise(function (resolve, reject) {
+
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+
+					resolve(storage);
+				});
+			});
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+
+			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
+				if (resp != undefined && resp != "" && resp.Retcode === 200) {
+
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
+
+						window.location.reload(true);
+					});
+				} else {
+					//todo can't get locale
+				}
+			});
+		}
+
+		/* Modifier */
+
+	}, {
+		key: 'makeButtonInactive',
+		value: function makeButtonInactive(button) {
+			button.unbind('click');
+			button.addClass('btn--inactive');
+		}
+	}, {
+		key: 'makeButtonActive',
+		value: function makeButtonActive(button) {
+			button.click(this.onPaymentButtonClicked.bind(this));
+			button.removeClass('btn--inactive');
+		}
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
+			_this.makeButtonInactive(_this.paymentButton);
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			_this.makeButtonActive(_this.paymentButton);
+		}
+	}, {
+		key: 'displayErrors',
+		value: function displayErrors(errors) {
+			var _this = this;
+			_this.errorMessage.html("");
+
+			for (var i = 0; i < errors.length; i++) {
+				if (i <= 2) {
+					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
+					_this.errorMessage.append(errorElm);
+				}
+			}
+		}
+
+		/* Events */
+
+	}, {
+		key: 'onProductsLoaded',
+		value: function onProductsLoaded() {
+			var _this = this;
+
+			_this.upgradeView.css("display", "block");
+		}
+	}, {
+		key: 'onPaymentButtonClicked',
+		value: function onPaymentButtonClicked() {
+			var _this = this;
+
+			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
+			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
+
+			var productId = selectedPackage.val();
+			var paymentPath = selectedPayment.val();
+
+			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
+
+			_this.setLoading();
+
+			var paymentData = {
+				productId: productId,
+				paymentPath: paymentPath
+			};
+
+			_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
+
+				_this.unsetLoading();
+
+				if (response && response.Retcode == 200) {
+					_Utils2.default.openNewTab(response.PayAt);
+					chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
+					window.close();
+				} else {
+
+					if (response && response.Message) return _this.displayErrors(response.Message);
+				}
+			});
+		}
+	}, {
+		key: 'onHeaderBackButtonClicked',
+		value: function onHeaderBackButtonClicked() {
+			var _this = this;
+
+			_DashboardView2.default.initView();
+		}
+	}, {
+		key: 'onNextToPaymentClicked',
+		value: function onNextToPaymentClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'none');
+			(0, _jquery2.default)('#payment-step').css('display', 'block');
+		}
+	}, {
+		key: 'onBackToProductClicked',
+		value: function onBackToProductClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'block');
+			(0, _jquery2.default)('#payment-step').css('display', 'none');
+		}
+	}]);
+
+	return UpgradeView;
+}();
+
+exports.default = new UpgradeView();
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -12453,73 +13228,89 @@ var _LoginView = __webpack_require__(7);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _Tabs = __webpack_require__(31);
+var _Tabs = __webpack_require__(35);
 
 var _Tabs2 = _interopRequireDefault(_Tabs);
 
-var _ServerList = __webpack_require__(32);
+var _ServerList = __webpack_require__(36);
 
 var _ServerList2 = _interopRequireDefault(_ServerList);
 
-var _ProxySearchView = __webpack_require__(18);
+var _ProxySearchView = __webpack_require__(21);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
-var _UserProfile3View = __webpack_require__(33);
+var _UserProfile3View = __webpack_require__(37);
 
 var _UserProfile3View2 = _interopRequireDefault(_UserProfile3View);
 
-var _OpenTip = __webpack_require__(21);
-
-var _OpenTip2 = _interopRequireDefault(_OpenTip);
-
-var _BypassConfigView = __webpack_require__(44);
+var _BypassConfigView = __webpack_require__(47);
 
 var _BypassConfigView2 = _interopRequireDefault(_BypassConfigView);
 
-var _endpoints = __webpack_require__(22);
+var _endpoints = __webpack_require__(16);
 
 var _endpoints2 = _interopRequireDefault(_endpoints);
 
-var _ConnectedView = __webpack_require__(46);
+var _ConnectedView = __webpack_require__(49);
 
 var _ConnectedView2 = _interopRequireDefault(_ConnectedView);
 
-var _GifView = __webpack_require__(51);
+var _GifView = __webpack_require__(55);
 
 var _GifView2 = _interopRequireDefault(_GifView);
 
-var _Sticked = __webpack_require__(23);
+var _Sticked = __webpack_require__(25);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
-
-var _TicketTabCreaterView = __webpack_require__(17);
-
-var _TicketTabCreaterView2 = _interopRequireDefault(_TicketTabCreaterView);
 
 var _DOMPurify = __webpack_require__(6);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _DesktopClientInfoView = __webpack_require__(15);
+var _DesktopClientInfoView = __webpack_require__(17);
 
 var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
-var _PermissionView = __webpack_require__(16);
+var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
 
-var _OtherToolsView = __webpack_require__(24);
+var _OtherToolsView = __webpack_require__(26);
 
 var _OtherToolsView2 = _interopRequireDefault(_OtherToolsView);
+
+var _Tooltip = __webpack_require__(19);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
+var _GetPremiumView = __webpack_require__(27);
+
+var _GetPremiumView2 = _interopRequireDefault(_GetPremiumView);
+
+var _TrialView = __webpack_require__(28);
+
+var _TrialView2 = _interopRequireDefault(_TrialView);
+
+var _TeaserView = __webpack_require__(56);
+
+var _TeaserView2 = _interopRequireDefault(_TeaserView);
+
+var _UpdateRequiredView = __webpack_require__(20);
+
+var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -12533,6 +13324,10 @@ var DashboardView = function () {
 
 		this.template = _folders2.default.VIEWS + '/dashboard.html';
 		this.header = _folders2.default.VIEWS + '/header.html';
+
+		this.fallbackCopyTextToClipboard = this.fallbackCopyTextToClipboard.bind(this);
+		this.copyTextToClipboard = this.copyTextToClipboard.bind(this);
+		this.setUserProfile = this.setUserProfile.bind(this);
 	}
 
 	_createClass(DashboardView, [{
@@ -12543,6 +13338,39 @@ var DashboardView = function () {
 			this.App = (0, _jquery2.default)('#app');
 
 			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'fallbackCopyTextToClipboard',
+		value: function fallbackCopyTextToClipboard(text) {
+			var _this = this;
+			var textArea = document.createElement("textarea");
+			textArea.value = text;
+			textArea.style.position = "fixed"; //avoid scrolling to bottom
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'successful' : 'unsuccessful';
+			} catch (err) {
+				console.error('Fallback: Oops, unable to copy', err);
+			}
+
+			document.body.removeChild(textArea);
+		}
+	}, {
+		key: 'copyTextToClipboard',
+		value: function copyTextToClipboard(text) {
+			var _this = this;
+
+			if (!navigator.clipboard) {
+				_this.fallbackCopyTextToClipboard(text);
+				return;
+			}
+			navigator.clipboard.writeText(text).then(function () {}, function (err) {
+				console.error('Async: Could not copy text: ', err);
+			});
 		}
 	}, {
 		key: 'loadTemplate',
@@ -12573,7 +13401,7 @@ var DashboardView = function () {
 				_this.App.append(header);
 				_jquery2.default.get(_this.template, function (template) {
 
-					var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+					var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
 					_this.App.append(loadedTemplate);
 
 					_this.setTabs();
@@ -12586,12 +13414,18 @@ var DashboardView = function () {
 					_this.setToolTip(locale);
 
 					_this.checkBlockedStatus(storage, locale);
-					_this.checkRateUsTime(storage, locale);
+					_this.checkRateUsTime(storage, locale, _this);
 
 					_this.loadServerList();
 
+					_this.setTrial(storage);
+					_this.setTeaser(storage);
+					_this.setUpdateAvailable();
+
 					// Setting all events for selected elements
 					_this.setEvents();
+
+					_this.setAuthcodeContainer(storage);
 				}, "html");
 			}, "html");
 		}
@@ -12610,6 +13444,29 @@ var DashboardView = function () {
 			var isSorted = sorted || _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED][uid] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED][uid][tabId] ? true : false;
 
 			if (currentTabSection.html() == "") return _this.buildServerList(currentTabSection, _this.serverList[tabId], tabId, isSorted);
+		}
+	}, {
+		key: 'setAuthcodeContainer',
+		value: function setAuthcodeContainer(storage) {
+			var _this = this;
+
+			var loginType = storage[_ServiceMeta2.default.STORAGEKEYS.LOGINTYPE];
+			var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+			if (loginType == "authcode" || userdata && !userdata.authcode) {
+				_this.authcodeContainer.css('display', 'none');
+				_this.downloadContainer.css('display', 'block');
+				_this.userProfileStatus.css('margin-top', '30px');
+				(0, _jquery2.default)('.dashboard-view__user-profile').css('height', '115px');
+				(0, _jquery2.default)('.dashboard-view__user-profile').css('max-height', '115px');
+				(0, _jquery2.default)('.dashboard-view__server-list').css('min-height', '273px');
+				(0, _jquery2.default)('.dashboard-view__server-list').css('max-height', '273px');
+
+				(0, _jquery2.default)('#rate-us-box').css('height', '360px');
+				(0, _jquery2.default)('#rate-us-box').css('max-height', '360px');
+
+				(0, _jquery2.default)('#limit-info').css('height', '360px');
+				(0, _jquery2.default)('#limit-info').css('max-height', '360px');
+			}
 		}
 	}, {
 		key: 'setTabs',
@@ -12640,14 +13497,22 @@ var DashboardView = function () {
 			_this.headerLogo = (0, _jquery2.default)('#header-logo');
 			_this.headerVersion = (0, _jquery2.default)('#header-version');
 
+			_this.userProfileAuthcode = (0, _jquery2.default)('#user-profile-authcode');
+			_this.userProfileAuthcodeCopied = (0, _jquery2.default)('#authcode-copied-clipboard');
+			_this.userProfileShowAuthcode = (0, _jquery2.default)('#show-authcode');
+
+			_this.downloadContainer = (0, _jquery2.default)('#download-container');
+			_this.authcodeContainer = (0, _jquery2.default)('#authcode-container');
+
 			_this.userProfileUsername = (0, _jquery2.default)('#user-profile-username');
-			_this.userProfileEmail = (0, _jquery2.default)('#user-profile-email');
 			_this.userProfileStatus = (0, _jquery2.default)('#user-profile-status');
 			_this.userProfileUpgradeButton = (0, _jquery2.default)('#user-profile-upgrade-button');
 
 			_this.freeServerListSection = (0, _jquery2.default)('#free-server-list');
 			_this.premiumServerListSection = (0, _jquery2.default)('#premium-server-list');
 			_this.publicServerListSection = (0, _jquery2.default)('#public-server-list');
+
+			_this.serverListContainer = (0, _jquery2.default)('#server-list-container');
 
 			_this.logoutButton = (0, _jquery2.default)('#logout-button');
 			_this.userProfileButton = (0, _jquery2.default)('#user-profile-button');
@@ -12662,6 +13527,7 @@ var DashboardView = function () {
 			_this.downloadMacButton = (0, _jquery2.default)('#dw-macosx');
 
 			_this.otherToolsButton = (0, _jquery2.default)('#dw-othertools');
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() === 'edge') _this.otherToolsButton.css('display', 'none');
 
 			_this.otherToolsGif = (0, _jquery2.default)('#othertools-gif');
 
@@ -12677,6 +13543,9 @@ var DashboardView = function () {
 
 			_this.bypasslistFunctionButton = (0, _jquery2.default)('#bypass-function-container');
 
+			_this.getTrial = (0, _jquery2.default)('#get-trial');
+			_this.getTrialContainer = (0, _jquery2.default)('#get-trial-container');
+
 			_this.setServiceElements();
 		}
 	}, {
@@ -12684,7 +13553,7 @@ var DashboardView = function () {
 		value: function setServiceElements() {
 			var _this = this;
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-				var logosource = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] ? storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + "rest/img/logo/dashboard/150.png" : _ServiceMeta2.default.IMAGES.HEADERLOGO;
+				var logosource = _ServiceMeta2.default.IMAGES.HEADERLOGO;
 				var uid = "";
 				var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
 
@@ -12704,15 +13573,89 @@ var DashboardView = function () {
 			var _this = this;
 
 			var options = {
-				tipJoint: "bottom",
-				background: "#fff",
-				borderColor: '#fff'
+				placement: 'top', // or bottom, left, right, and variations
+				title: "Top"
 			};
 
-			new _OpenTip2.default(_this.logoutButton, locales.Logout, options);
-			new _OpenTip2.default(_this.userProfileButton, locales.EditProfile, options);
-			new _OpenTip2.default(_this.ipLookupButton, locales.DasboardIPLookup, options);
-			new _OpenTip2.default(_this.contactButton, locales.DasboardContactSupport, options);
+			new _Tooltip2.default(_this.logoutButton, {
+				placement: 'top', // or bottom, left, right, and variations
+				title: locales.Logout
+			});
+			new _Tooltip2.default(_this.userProfileButton, {
+				placement: 'top', // or bottom, left, right, and variations
+				title: locales.EditProfile
+			});
+			new _Tooltip2.default(_this.ipLookupButton, {
+				placement: 'top', // or bottom, left, right, and variations
+				title: locales.DasboardIPLookup
+			});
+			new _Tooltip2.default(_this.contactButton, {
+				placement: 'top', // or bottom, left, right, and variations
+				title: locales.DasboardContactSupport
+			});
+		}
+	}, {
+		key: 'setTrial',
+		value: function setTrial(storage) {
+			if (!storage) return;
+			var _this = this;
+
+			var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+			var userData = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+
+			if (!config || !userData) return;
+
+			var trial = _Utils2.default.isTrialAvailable(config);
+
+			if (trial > 0) {
+				_this.getTrial.click(function () {
+					_this.onGetTrialClicked(trial, userData);
+				});
+				(0, _jquery2.default)('#get-trial-days').text(trial);
+				_this.getTrialContainer.css("display", "block");
+			}
+		}
+	}, {
+		key: 'setTeaser',
+		value: function setTeaser(storage) {
+			var _this = this;
+			if (!storage) return;
+
+			var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+			var userData = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+			if (!config || !userData) return;
+
+			if (_Utils2.default.isUserPremium(config)) return;
+
+			var teaserTime = storage[_ServiceMeta2.default.STORAGEKEYS.TEASERNEXT];
+
+			var trial = _Utils2.default.isTrialAvailable(config);
+
+			if (teaserTime !== undefined && _Utils2.default.isInt(teaserTime)) {
+				if (teaserTime < _Utils2.default.getDateNow()) {
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.TEASERNEXT, _Utils2.default.getDateNow() + 259200), function () {
+						_TeaserView2.default.show(trial, userData);
+					});
+				}
+			} else {
+				chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.TEASERNEXT, _Utils2.default.getDateNow() + 259200));
+			}
+		}
+	}, {
+		key: 'setUpdateAvailable',
+		value: function setUpdateAvailable() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
+				var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
+
+				if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "update" && versionStatusData.hasOwnProperty("curversion")) {
+					var updateAvalHtml = _Utils2.default.getUpdateHtml(_ServiceMeta2.default.VERSION, versionStatusData.curversion);
+					(0, _jquery2.default)('#header-container').prepend((0, _jquery2.default)(updateAvalHtml));
+					(0, _jquery2.default)('#update-app').click(function () {
+						_UpdateRequiredView2.default.show();
+					});
+				}
+			});
 		}
 	}, {
 		key: 'checkBlockedStatus',
@@ -12736,7 +13679,7 @@ var DashboardView = function () {
 		}
 	}, {
 		key: 'checkRateUsTime',
-		value: function checkRateUsTime(storage, locale) {
+		value: function checkRateUsTime(storage, locale, _this) {
 			var isProxyOn = storage[_ServiceMeta2.default.STORAGEKEYS.ISPROXYON];
 			var nextRateTime = storage[_ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME];
 			var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
@@ -12747,7 +13690,12 @@ var DashboardView = function () {
 				chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, nextTime));
 			}
 
-			if (nextRateTime !== undefined && nextRateTime < Date.now() && !isProxyOn && config.status == _ServiceMeta2.default.STATUS.OK) {
+			var rateUsLink = false;
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "firefox") rateUsLink = _ServiceMeta2.default.RATEUS.LINKS.FIREFOX;
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "chrome") rateUsLink = _ServiceMeta2.default.RATEUS.LINKS.CHROME;
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "edge") rateUsLink = _ServiceMeta2.default.RATEUS.LINKS.EDGE;
+
+			if (nextRateTime !== undefined && rateUsLink && nextRateTime < Date.now() && !isProxyOn && config.status == _ServiceMeta2.default.STATUS.OK) {
 				var rateUsBox = (0, _jquery2.default)('#rate-us-box');
 
 				rateUsBox.css('display', 'block');
@@ -12760,7 +13708,6 @@ var DashboardView = function () {
 				rateUsNowButton.click(function () {
 
 					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, nextTime), function () {
-						var rateUsLink = _ServiceMeta2.default.PLATFORM.toLowerCase() == "firefox" ? _ServiceMeta2.default.RATEUS.LINKS.FIREFOX : _ServiceMeta2.default.RATEUS.LINKS.CHROME;
 
 						rateUsBox.css('display', 'none');
 						_Utils2.default.openNewTab(rateUsLink);
@@ -12787,6 +13734,9 @@ var DashboardView = function () {
 		value: function setEvents() {
 			var _this = this;
 
+			_this.userProfileAuthcode.click(_this.onUserProfileAuthcodeClicked.bind(this));
+			_this.userProfileShowAuthcode.click(_this.onUserProfileShowAuthcodeClicked.bind(this));
+
 			_this.userProfileUpgradeButton.click(_this.onUpgradeButtonClicked.bind(this));
 			_this.logoutButton.click(_this.onLogoutButtonClicked.bind(this));
 			_this.userProfileButton.click(_this.onUserProfileButtonClicked.bind(this));
@@ -12805,6 +13755,11 @@ var DashboardView = function () {
 			_this.downloadMacButton.click(_this.onDesktopInfoButtonClicked.bind(this));
 			_this.downloadWindowsButton.click(_this.onDesktopInfoButtonClicked.bind(this));
 			_this.otherToolsButton.click(_this.onOtherToolsButtonClicked.bind(this));
+		}
+	}, {
+		key: 'onGetTrialClicked',
+		value: function onGetTrialClicked(trial, userData) {
+			_TrialView2.default.show(trial, userData);
 		}
 	}, {
 		key: 'onOtherToolsButtonClicked',
@@ -12835,7 +13790,10 @@ var DashboardView = function () {
 			var _this = this;
 
 			//_this.userProfileUsername.text(_this.Storage.configData.name);
-			_this.userProfileEmail.text(_this.Storage.userData.email);
+			if (_this.Storage.userData.authcode) {
+				_this.userProfileAuthcode.text(_this.Storage.userData.authcode);
+				(0, _jquery2.default)('#authcode-container').css('display', 'block');
+			}
 
 			if (_Utils2.default.isUserPremium(_this.Storage.configData)) {
 
@@ -12864,7 +13822,7 @@ var DashboardView = function () {
 		value: function loadStorageData() {
 			return new Promise(function (resolve, reject) {
 
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.ISPROXYON, _ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, _ServiceMeta2.default.STORAGEKEYS.LOCALE, _ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED, _ServiceMeta2.default.STORAGEKEYS.LASTSELECTEDTAB], function (storage) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.ISPROXYON, _ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, _ServiceMeta2.default.STORAGEKEYS.LOCALE, _ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED, _ServiceMeta2.default.STORAGEKEYS.LASTSELECTEDTAB, _ServiceMeta2.default.STORAGEKEYS.TEASERNEXT, _ServiceMeta2.default.STORAGEKEYS.LOGINTYPE], function (storage) {
 
 					resolve(storage);
 				});
@@ -13118,7 +14076,8 @@ var DashboardView = function () {
 		key: 'onUpgradeButtonClicked',
 		value: function onUpgradeButtonClicked() {
 
-			_UpgradeView2.default.initView();
+			_GetPremiumView2.default.show();
+			//UpgradeView.initView();
 		}
 	}, {
 		key: 'onLogoutButtonClicked',
@@ -13130,7 +14089,7 @@ var DashboardView = function () {
 				_LoginView2.default.initView();
 			});
 
-			chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.USERDATA);
+			chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL]);
 
 			/*
    todo:
@@ -13163,14 +14122,13 @@ var DashboardView = function () {
 		value: function onContactButtonClicked() {
 			var _this = this;
 
-			/*
-   chrome.storage.local.get(ClientMeta.STORAGEKEYS.BASELINK, (storage) => {
-   	if(!storage[ClientMeta.STORAGEKEYS.BASELINK]) return;
-   		Utils.openNewTab(storage[ClientMeta.STORAGEKEYS.BASELINK] + Endpoints.SUPPORT);
-   });
-   */
-
-			_TicketTabCreaterView2.default.initView();
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
+				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+				var supportLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT;
+				if (configData && configData.hasOwnProperty("support_parameter")) supportLink = supportLink + "?" + configData["support_parameter"];
+				_Utils2.default.openNewTab(supportLink);
+			});
 		}
 	}, {
 		key: 'showSortFunctionError',
@@ -13351,6 +14309,33 @@ var DashboardView = function () {
 
 			if (isValid === false) _PermissionView2.default.show();
 		}
+	}, {
+		key: 'onUserProfileAuthcodeClicked',
+		value: function onUserProfileAuthcodeClicked() {
+			var _this = this;
+			var authcode = (0, _jquery2.default)('#user-profile-authcode').text().toUpperCase();
+
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
+				_this.fallbackCopyTextToClipboard(authcode);
+			} else {
+				_this.copyTextToClipboard(authcode);
+			}
+
+			_this.userProfileAuthcode.css('display', 'none');
+			_this.userProfileAuthcodeCopied.css('display', 'block');
+
+			setTimeout(function () {
+				_this.userProfileAuthcodeCopied.css('display', 'none');
+				_this.userProfileAuthcode.css('display', 'block');
+			}, 5000);
+		}
+	}, {
+		key: 'onUserProfileShowAuthcodeClicked',
+		value: function onUserProfileShowAuthcodeClicked() {
+			var _this = this;
+			_this.userProfileShowAuthcode.css('display', 'none');
+			_this.userProfileAuthcode.css('display', 'block');
+		}
 	}]);
 
 	return DashboardView;
@@ -13359,7 +14344,7 @@ var DashboardView = function () {
 exports.default = new DashboardView();
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13371,11 +14356,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -13387,7 +14372,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -13479,313 +14464,7 @@ var LanguageView = function () {
 exports.default = new LanguageView();
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(1);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(2);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _Utils = __webpack_require__(3);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _DashboardView = __webpack_require__(11);
-
-var _DashboardView2 = _interopRequireDefault(_DashboardView);
-
-var _Sanitize = __webpack_require__(5);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var UpgradeView = function () {
-	function UpgradeView() {
-		_classCallCheck(this, UpgradeView);
-
-		this.template = _folders2.default.VIEWS + '/upgrade.html';
-		this.header = _folders2.default.VIEWS + '/header.html';
-	}
-
-	_createClass(UpgradeView, [{
-		key: 'initView',
-		value: function initView() {
-			var _this = this;
-
-			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(locale) {
-			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
-
-			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
-				_jquery2.default.get(_this.template, function (template) {
-
-					_this.loadStorageData().then(function (storage) {
-						_this.Storage = storage;
-
-						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
-						_this.App.append(loadedTemplate);
-
-						_this.selectElements();
-
-						// Setting all events for selected elements
-						_this.setEvents();
-						_this.setHeaderBackButton();
-
-						_this.upgradeView.css("display", "none");
-
-						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this));
-					});
-				}, "html");
-			}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements() {
-			var _this = this;
-
-			_this.headerLogo = (0, _jquery2.default)('#header-logo');
-
-			_this.productTable = (0, _jquery2.default)('#product-table');
-			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
-
-			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
-
-			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			_this.paymentButton = (0, _jquery2.default)('#payment-button');
-
-			_this.setServiceElements();
-		}
-	}, {
-		key: 'setServiceElements',
-		value: function setServiceElements() {
-			var _this = this;
-			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
-		}
-	}, {
-		key: 'setEvents',
-		value: function setEvents() {
-			var _this = this;
-
-			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
-		}
-	}, {
-		key: 'setHeaderBackButton',
-		value: function setHeaderBackButton() {
-			var _this = this;
-			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
-			_this.headerBackButton.css('display', 'block');
-			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
-		}
-	}, {
-		key: 'loadProductsFromServer',
-		value: function loadProductsFromServer() {
-			var _this = this;
-
-			return new Promise(function (resolve, reject) {
-
-				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-				_BackgroundRequester2.default.request('api', 'getProducts', {}).then(function (response) {
-
-					(0, _jquery2.default)('.loadingimg').css('display', 'none');
-
-					if (response && response.Retcode == 200) {
-						var products = response.products;
-						var paymentMethods = response["payment-methods"];
-
-						for (var i = 0; i < products.length; i++) {
-
-							var checked = products[i].Default ? 'checked="checked"' : '';
-
-							var productItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(products[i].ID) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Description) + '</td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Price) + ' ' + _Sanitize2.default.escpateData(response.currency) + '</td></tr>';
-
-							_this.productTableBody.append(productItem);
-						};
-
-						for (var method in paymentMethods) {
-
-							var payment = paymentMethods[method];
-							var logoMime = payment["logofile-mime-type"] ? payment["logofile-mime-type"] : "image/png";
-							var description = payment["desc"] ? payment["desc"] : "";
-
-							var paymentItem = '<div class="paymentItem" id="' + _Sanitize2.default.escpateData(method) + '">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(payment.url) + '">' + '<img alt="' + _Sanitize2.default.escpateData(description) + '" title="' + _Sanitize2.default.escpateData(description) + '" src="data:' + _Sanitize2.default.escpateData(logoMime) + ';base64, ' + _Sanitize2.default.escpateData(payment.logofile) + '">' + '</div>';
-
-							if (payment.enabled) _this.paymentContainer.append(paymentItem);
-						}
-
-						resolve();
-					}
-				});
-			});
-		}
-	}, {
-		key: 'loadStorageData',
-		value: function loadStorageData() {
-			return new Promise(function (resolve, reject) {
-
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-
-					resolve(storage);
-				});
-			});
-		}
-	}, {
-		key: 'loadLocaleFromServer',
-		value: function loadLocaleFromServer() {
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					//todo can't get locale
-				}
-			});
-		}
-
-		/* Modifier */
-
-	}, {
-		key: 'makeButtonInactive',
-		value: function makeButtonInactive(button) {
-			button.unbind('click');
-			button.addClass('btn--inactive');
-		}
-	}, {
-		key: 'makeButtonActive',
-		value: function makeButtonActive(button) {
-			button.click(this.onPaymentButtonClicked.bind(this));
-			button.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
-			var _this = this;
-
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.makeButtonInactive(_this.paymentButton);
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.makeButtonActive(_this.paymentButton);
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(errors) {
-			var _this = this;
-			_this.errorMessage.html("");
-
-			for (var i = 0; i < errors.length; i++) {
-				if (i <= 2) {
-					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
-					_this.errorMessage.append(errorElm);
-				}
-			}
-		}
-
-		/* Events */
-
-	}, {
-		key: 'onProductsLoaded',
-		value: function onProductsLoaded() {
-			var _this = this;
-
-			_this.upgradeView.css("display", "block");
-		}
-	}, {
-		key: 'onPaymentButtonClicked',
-		value: function onPaymentButtonClicked() {
-			var _this = this;
-
-			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
-			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
-
-			var productId = selectedPackage.val();
-			var paymentPath = selectedPayment.val();
-
-			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
-
-			_this.setLoading();
-
-			var paymentData = {
-				productId: productId,
-				paymentPath: paymentPath,
-				email: _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].email ? _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].email : "",
-				password: _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].password ? _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].password : ""
-			};
-
-			_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
-
-				_this.unsetLoading();
-
-				if (response && response.Retcode == 200) {
-					_Utils2.default.openNewTab(response.PayAt);
-					chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
-					window.close();
-				} else {
-
-					if (response && response.Message) return _this.displayErrors(response.Message);
-				}
-			});
-		}
-	}, {
-		key: 'onHeaderBackButtonClicked',
-		value: function onHeaderBackButtonClicked() {
-			var _this = this;
-
-			_DashboardView2.default.initView();
-		}
-	}]);
-
-	return UpgradeView;
-}();
-
-exports.default = new UpgradeView();
-
-/***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var exports = module.exports = function SHA (algorithm) {
@@ -13797,16 +14476,50 @@ var exports = module.exports = function SHA (algorithm) {
   return new Algorithm()
 }
 
-exports.sha = __webpack_require__(34)
-exports.sha1 = __webpack_require__(40)
-exports.sha224 = __webpack_require__(41)
-exports.sha256 = __webpack_require__(19)
-exports.sha384 = __webpack_require__(42)
-exports.sha512 = __webpack_require__(20)
+exports.sha = __webpack_require__(39)
+exports.sha1 = __webpack_require__(44)
+exports.sha224 = __webpack_require__(45)
+exports.sha256 = __webpack_require__(23)
+exports.sha384 = __webpack_require__(46)
+exports.sha512 = __webpack_require__(24)
 
 
 /***/ }),
-/* 15 */
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = {
+	PING: '/api/p',
+	TIER: '/api2/t/u',
+	LANGUAGELIST: '/api/l/l',
+	GETLOCALE: '/api/l/get',
+	CONFIG: '/api/c/e',
+	TICKETTOKEN: '/api/misc/persist',
+	REST: '/api',
+	REGISTER: '/api/u/r4',
+	FORGOTPASS: '/api/user/forgotpassword',
+	PRODUCTS: '/api/i/p',
+	PROFILE: '/api/user/profile',
+	AUTOPROXY: '/debug',
+	FEEDBACK: '/api/misc/feedback',
+	NOTIFICATION: '/api/user/profile/notification',
+	SUPPORT: '/support',
+	DISCONNECTS: '/api/misc/disconnects',
+	RESENDACTIVATION: '/api/user/activation/resend',
+	CLOSEACCOUNT: '/api/user/closeaccount',
+	TRIAL: '/api/user/trial',
+	CLIENTUPDATES: '/api2/cu',
+	CREATEAUTHCODE: '/api/u/r5'
+};
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13818,11 +14531,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -13899,7 +14612,7 @@ var DesktopClientInfoView = function () {
 exports.default = new DesktopClientInfoView();
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13911,11 +14624,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -13923,13 +14636,17 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _TicketTabCreaterView = __webpack_require__(17);
-
-var _TicketTabCreaterView2 = _interopRequireDefault(_TicketTabCreaterView);
-
 var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _endpoints = __webpack_require__(16);
+
+var _endpoints2 = _interopRequireDefault(_endpoints);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13988,7 +14705,11 @@ var PermissionView = function () {
   }, {
     key: 'onContactButtonClicked',
     value: function onContactButtonClicked() {
-      _TicketTabCreaterView2.default.initView();
+      chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
+        if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
+
+        _Utils2.default.openNewTab(storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT);
+      });
     }
   }, {
     key: 'onPermissionChanged',
@@ -14004,117 +14725,743 @@ var PermissionView = function () {
 exports.default = new PermissionView();
 
 /***/ }),
-/* 17 */
+/* 19 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_popper_js__ = __webpack_require__(54);
+/**!
+ * @fileOverview Kickass library to create and place poppers near their reference elements.
+ * @version 1.3.2
+ * @license
+ * Copyright (c) 2016 Federico Zivolo and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+/**
+ * Check if the given variable is a function
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Any} functionToCheck - variable to check
+ * @returns {Boolean} answer to: is a function?
+ */
+function isFunction(functionToCheck) {
+  var getType = {};
+  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+var DEFAULT_OPTIONS = {
+  container: false,
+  delay: 0,
+  html: false,
+  placement: 'top',
+  title: '',
+  template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+  trigger: 'hover focus',
+  offset: 0,
+  arrowSelector: '.tooltip-arrow, .tooltip__arrow',
+  innerSelector: '.tooltip-inner, .tooltip__inner'
+};
+
+var Tooltip = function () {
+  /**
+   * Create a new Tooltip.js instance
+   * @class Tooltip
+   * @param {HTMLElement} reference - The DOM node used as reference of the tooltip (it can be a jQuery element).
+   * @param {Object} options
+   * @param {String} options.placement='top'
+   *      Placement of the popper accepted values: `top(-start, -end), right(-start, -end), bottom(-start, -end),
+   *      left(-start, -end)`
+   * @param {String} options.arrowSelector='.tooltip-arrow, .tooltip__arrow' - className used to locate the DOM arrow element in the tooltip.
+   * @param {String} options.innerSelector='.tooltip-inner, .tooltip__inner' - className used to locate the DOM inner element in the tooltip.
+   * @param {HTMLElement|String|false} options.container=false - Append the tooltip to a specific element.
+   * @param {Number|Object} options.delay=0
+   *      Delay showing and hiding the tooltip (ms) - does not apply to manual trigger type.
+   *      If a number is supplied, delay is applied to both hide/show.
+   *      Object structure is: `{ show: 500, hide: 100 }`
+   * @param {Boolean} options.html=false - Insert HTML into the tooltip. If false, the content will inserted with `textContent`.
+   * @param {String} [options.template='<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>']
+   *      Base HTML to used when creating the tooltip.
+   *      The tooltip's `title` will be injected into the `.tooltip-inner` or `.tooltip__inner`.
+   *      `.tooltip-arrow` or `.tooltip__arrow` will become the tooltip's arrow.
+   *      The outermost wrapper element should have the `.tooltip` class.
+   * @param {String|HTMLElement|TitleFunction} options.title='' - Default title value if `title` attribute isn't present.
+   * @param {String} [options.trigger='hover focus']
+   *      How tooltip is triggered - click, hover, focus, manual.
+   *      You may pass multiple triggers; separate them with a space. `manual` cannot be combined with any other trigger.
+   * @param {Boolean} options.closeOnClickOutside=false - Close a popper on click outside of the popper and reference element. This has effect only when options.trigger is 'click'.
+   * @param {String|HTMLElement} options.boundariesElement
+   *      The element used as boundaries for the tooltip. For more information refer to Popper.js'
+   *      [boundariesElement docs](https://popper.js.org/popper-documentation.html)
+   * @param {Number|String} options.offset=0 - Offset of the tooltip relative to its reference. For more information refer to Popper.js'
+   *      [offset docs](https://popper.js.org/popper-documentation.html)
+   * @param {Object} options.popperOptions={} - Popper options, will be passed directly to popper instance. For more information refer to Popper.js'
+   *      [options docs](https://popper.js.org/popper-documentation.html)
+   * @return {Object} instance - The generated tooltip instance
+   */
+  function Tooltip(reference, options) {
+    classCallCheck(this, Tooltip);
+
+    _initialiseProps.call(this);
+
+    // apply user options over default ones
+    options = _extends({}, DEFAULT_OPTIONS, options);
+
+    reference.jquery && (reference = reference[0]);
+
+    // cache reference and options
+    this.reference = reference;
+    this.options = options;
+
+    // get events list
+    var events = typeof options.trigger === 'string' ? options.trigger.split(' ').filter(function (trigger) {
+      return ['click', 'hover', 'focus'].indexOf(trigger) !== -1;
+    }) : [];
+
+    // set initial state
+    this._isOpen = false;
+    this._popperOptions = {};
+
+    // set event listeners
+    this._setEventListeners(reference, events, options);
+  }
+
+  //
+  // Public methods
+  //
+
+  /**
+   * Reveals an element's tooltip. This is considered a "manual" triggering of the tooltip.
+   * Tooltips with zero-length titles are never displayed.
+   * @method Tooltip#show
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Hides an element’s tooltip. This is considered a “manual” triggering of the tooltip.
+   * @method Tooltip#hide
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Hides and destroys an element’s tooltip.
+   * @method Tooltip#dispose
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Toggles an element’s tooltip. This is considered a “manual” triggering of the tooltip.
+   * @method Tooltip#toggle
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Updates the tooltip's title content
+   * @method Tooltip#updateTitleContent
+   * @memberof Tooltip
+   * @param {String|HTMLElement} title - The new content to use for the title
+   */
+
+
+  //
+  // Private methods
+  //
+
+  createClass(Tooltip, [{
+    key: '_create',
+
+
+    /**
+     * Creates a new tooltip node
+     * @memberof Tooltip
+     * @private
+     * @param {HTMLElement} reference
+     * @param {String} template
+     * @param {String|HTMLElement|TitleFunction} title
+     * @param {Boolean} allowHtml
+     * @return {HTMLElement} tooltipNode
+     */
+    value: function _create(reference, template, title, allowHtml) {
+      // create tooltip element
+      var tooltipGenerator = window.document.createElement('div');
+      tooltipGenerator.innerHTML = template.trim();
+      var tooltipNode = tooltipGenerator.childNodes[0];
+
+      // add unique ID to our tooltip (needed for accessibility reasons)
+      tooltipNode.id = 'tooltip_' + Math.random().toString(36).substr(2, 10);
+
+      // set initial `aria-hidden` state to `false` (it's visible!)
+      tooltipNode.setAttribute('aria-hidden', 'false');
+
+      // add title to tooltip
+      var titleNode = tooltipGenerator.querySelector(this.options.innerSelector);
+      this._addTitleContent(reference, title, allowHtml, titleNode);
+
+      // return the generated tooltip node
+      return tooltipNode;
+    }
+  }, {
+    key: '_addTitleContent',
+    value: function _addTitleContent(reference, title, allowHtml, titleNode) {
+      if (title.nodeType === 1 || title.nodeType === 11) {
+        // if title is a element node or document fragment, append it only if allowHtml is true
+        allowHtml && titleNode.appendChild(title);
+      } else if (isFunction(title)) {
+        // if title is a function, call it and set textContent or innerHtml depending by `allowHtml` value
+        var titleText = title.call(reference);
+        allowHtml ? titleNode.innerHTML = titleText : titleNode.textContent = titleText;
+      } else {
+        // if it's just a simple text, set textContent or innerHtml depending by `allowHtml` value
+        allowHtml ? titleNode.innerHTML = title : titleNode.textContent = title;
+      }
+    }
+  }, {
+    key: '_show',
+    value: function _show(reference, options) {
+      // don't show if it's already visible
+      // or if it's not being showed
+      if (this._isOpen && !this._isOpening) {
+        return this;
+      }
+      this._isOpen = true;
+
+      // if the tooltipNode already exists, just show it
+      if (this._tooltipNode) {
+        this._tooltipNode.style.visibility = 'visible';
+        this._tooltipNode.setAttribute('aria-hidden', 'false');
+        this.popperInstance.update();
+        return this;
+      }
+
+      // get title
+      var title = reference.getAttribute('title') || options.title;
+
+      // don't show tooltip if no title is defined
+      if (!title) {
+        return this;
+      }
+
+      // create tooltip node
+      var tooltipNode = this._create(reference, options.template, title, options.html);
+
+      // Add `aria-describedby` to our reference element for accessibility reasons
+      reference.setAttribute('aria-describedby', tooltipNode.id);
+
+      // append tooltip to container
+      var container = this._findContainer(options.container, reference);
+
+      this._append(tooltipNode, container);
+
+      this._popperOptions = _extends({}, options.popperOptions, {
+        placement: options.placement
+      });
+
+      this._popperOptions.modifiers = _extends({}, this._popperOptions.modifiers, {
+        arrow: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.arrow, {
+          element: options.arrowSelector
+        }),
+        offset: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.offset, {
+          offset: options.offset
+        })
+      });
+
+      if (options.boundariesElement) {
+        this._popperOptions.modifiers.preventOverflow = {
+          boundariesElement: options.boundariesElement
+        };
+      }
+
+      this.popperInstance = new __WEBPACK_IMPORTED_MODULE_0_popper_js__["a" /* default */](reference, tooltipNode, this._popperOptions);
+
+      this._tooltipNode = tooltipNode;
+
+      return this;
+    }
+  }, {
+    key: '_hide',
+    value: function _hide() /*reference, options*/{
+      // don't hide if it's already hidden
+      if (!this._isOpen) {
+        return this;
+      }
+
+      this._isOpen = false;
+
+      // hide tooltipNode
+      this._tooltipNode.style.visibility = 'hidden';
+      this._tooltipNode.setAttribute('aria-hidden', 'true');
+
+      return this;
+    }
+  }, {
+    key: '_dispose',
+    value: function _dispose() {
+      var _this = this;
+
+      // remove event listeners first to prevent any unexpected behaviour
+      this._events.forEach(function (_ref) {
+        var func = _ref.func,
+            event = _ref.event;
+
+        _this.reference.removeEventListener(event, func);
+      });
+      this._events = [];
+
+      if (this._tooltipNode) {
+        this._hide();
+
+        // destroy instance
+        this.popperInstance.destroy();
+
+        // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
+        if (!this.popperInstance.options.removeOnDestroy) {
+          this._tooltipNode.parentNode.removeChild(this._tooltipNode);
+          this._tooltipNode = null;
+        }
+      }
+      return this;
+    }
+  }, {
+    key: '_findContainer',
+    value: function _findContainer(container, reference) {
+      // if container is a query, get the relative element
+      if (typeof container === 'string') {
+        container = window.document.querySelector(container);
+      } else if (container === false) {
+        // if container is `false`, set it to reference parent
+        container = reference.parentNode;
+      }
+      return container;
+    }
+
+    /**
+     * Append tooltip to container
+     * @memberof Tooltip
+     * @private
+     * @param {HTMLElement} tooltipNode
+     * @param {HTMLElement|String|false} container
+     */
+
+  }, {
+    key: '_append',
+    value: function _append(tooltipNode, container) {
+      container.appendChild(tooltipNode);
+    }
+  }, {
+    key: '_setEventListeners',
+    value: function _setEventListeners(reference, events, options) {
+      var _this2 = this;
+
+      var directEvents = [];
+      var oppositeEvents = [];
+
+      events.forEach(function (event) {
+        switch (event) {
+          case 'hover':
+            directEvents.push('mouseenter');
+            oppositeEvents.push('mouseleave');
+            break;
+          case 'focus':
+            directEvents.push('focus');
+            oppositeEvents.push('blur');
+            break;
+          case 'click':
+            directEvents.push('click');
+            oppositeEvents.push('click');
+            break;
+        }
+      });
+
+      // schedule show tooltip
+      directEvents.forEach(function (event) {
+        var func = function func(evt) {
+          if (_this2._isOpening === true) {
+            return;
+          }
+          evt.usedByTooltip = true;
+          _this2._scheduleShow(reference, options.delay, options, evt);
+        };
+        _this2._events.push({ event: event, func: func });
+        reference.addEventListener(event, func);
+      });
+
+      // schedule hide tooltip
+      oppositeEvents.forEach(function (event) {
+        var func = function func(evt) {
+          if (evt.usedByTooltip === true) {
+            return;
+          }
+          _this2._scheduleHide(reference, options.delay, options, evt);
+        };
+        _this2._events.push({ event: event, func: func });
+        reference.addEventListener(event, func);
+        if (event === 'click' && options.closeOnClickOutside) {
+          document.addEventListener('mousedown', function (e) {
+            if (!_this2._isOpening) {
+              return;
+            }
+            var popper = _this2.popperInstance.popper;
+            if (reference.contains(e.target) || popper.contains(e.target)) {
+              return;
+            }
+            func(e);
+          }, true);
+        }
+      });
+    }
+  }, {
+    key: '_scheduleShow',
+    value: function _scheduleShow(reference, delay, options /*, evt */) {
+      var _this3 = this;
+
+      this._isOpening = true;
+      // defaults to 0
+      var computedDelay = delay && delay.show || delay || 0;
+      this._showTimeout = window.setTimeout(function () {
+        return _this3._show(reference, options);
+      }, computedDelay);
+    }
+  }, {
+    key: '_scheduleHide',
+    value: function _scheduleHide(reference, delay, options, evt) {
+      var _this4 = this;
+
+      this._isOpening = false;
+      // defaults to 0
+      var computedDelay = delay && delay.hide || delay || 0;
+      window.clearTimeout(this._showTimeout);
+      window.setTimeout(function () {
+        if (_this4._isOpen === false) {
+          return;
+        }
+        if (!document.body.contains(_this4._tooltipNode)) {
+          return;
+        }
+
+        // if we are hiding because of a mouseleave, we must check that the new
+        // reference isn't the tooltip, because in this case we don't want to hide it
+        if (evt.type === 'mouseleave') {
+          var isSet = _this4._setTooltipNodeEvent(evt, reference, delay, options);
+
+          // if we set the new event, don't hide the tooltip yet
+          // the new event will take care to hide it if necessary
+          if (isSet) {
+            return;
+          }
+        }
+
+        _this4._hide(reference, options);
+      }, computedDelay);
+    }
+  }, {
+    key: '_updateTitleContent',
+    value: function _updateTitleContent(title) {
+      if (typeof this._tooltipNode === 'undefined') {
+        if (typeof this.options.title !== 'undefined') {
+          this.options.title = title;
+        }
+        return;
+      }
+      var titleNode = this._tooltipNode.querySelector(this.options.innerSelector);
+      this._clearTitleContent(titleNode, this.options.html, this.reference.getAttribute('title') || this.options.title);
+      this._addTitleContent(this.reference, title, this.options.html, titleNode);
+      this.options.title = title;
+      this.popperInstance.update();
+    }
+  }, {
+    key: '_clearTitleContent',
+    value: function _clearTitleContent(titleNode, allowHtml, lastTitle) {
+      if (lastTitle.nodeType === 1 || lastTitle.nodeType === 11) {
+        allowHtml && titleNode.removeChild(lastTitle);
+      } else {
+        allowHtml ? titleNode.innerHTML = '' : titleNode.textContent = '';
+      }
+    }
+  }]);
+  return Tooltip;
+}();
+
+/**
+ * Title function, its context is the Tooltip instance.
+ * @memberof Tooltip
+ * @callback TitleFunction
+ * @return {String} placement - The desired title.
+ */
+
+
+var _initialiseProps = function _initialiseProps() {
+  var _this5 = this;
+
+  this.show = function () {
+    return _this5._show(_this5.reference, _this5.options);
+  };
+
+  this.hide = function () {
+    return _this5._hide();
+  };
+
+  this.dispose = function () {
+    return _this5._dispose();
+  };
+
+  this.toggle = function () {
+    if (_this5._isOpen) {
+      return _this5.hide();
+    } else {
+      return _this5.show();
+    }
+  };
+
+  this.updateTitleContent = function (title) {
+    return _this5._updateTitleContent(title);
+  };
+
+  this._events = [];
+
+  this._setTooltipNodeEvent = function (evt, reference, delay, options) {
+    var relatedreference = evt.relatedreference || evt.toElement || evt.relatedTarget;
+
+    var callback = function callback(evt2) {
+      var relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget;
+
+      // Remove event listener after call
+      _this5._tooltipNode.removeEventListener(evt.type, callback);
+
+      // If the new reference is not the reference element
+      if (!reference.contains(relatedreference2)) {
+        // Schedule to hide tooltip
+        _this5._scheduleHide(reference, options.delay, options, evt2);
+      }
+    };
+
+    if (_this5._tooltipNode.contains(relatedreference)) {
+      // listen to mouseleave on the tooltip element to be able to hide the tooltip
+      _this5._tooltipNode.addEventListener(evt.type, callback);
+      return true;
+    }
+
+    return false;
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Tooltip);
+//# sourceMappingURL=tooltip.js.map
+
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _Sanitize = __webpack_require__(5);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var TicketTabCreaterView = function () {
-	function TicketTabCreaterView() {
-		_classCallCheck(this, TicketTabCreaterView);
+var UpdateRequiredView = function () {
+  function UpdateRequiredView() {
+    _classCallCheck(this, UpdateRequiredView);
 
-		this.template = _folders2.default.VIEWS + '/tickettabcreater.html';
-	}
+    this.template = _folders2.default.VIEWS + '/update-required.html';
+  }
 
-	_createClass(TicketTabCreaterView, [{
-		key: 'initView',
-		value: function initView() {
+  _createClass(UpdateRequiredView, [{
+    key: 'show',
+    value: function show(isStop) {
+      var _this = this;
+      _this.isStop = isStop;
 
-			var _this = this;
+      this.App = (0, _jquery2.default)('#app');
+      this.App.html("");
 
-			_this.App = (0, _jquery2.default)('#app');
-			_this.App.html("");
+      _jquery2.default.get(_this.template, function (template) {
 
-			_jquery2.default.get(_this.template, function (template) {
+        _this.App.append(template);
+        _this.selectElements();
+        _this.setContent();
+      }, "html");
+    }
+  }, {
+    key: 'setContent',
+    value: function setContent() {
+      var _this = this;
 
-				_this.App.append(template);
-				_this.selectElements();
-				_this.openTicketTab();
-			}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements() {
-			var _this = this;
+      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
+        var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
 
-			_this.resultTxt = (0, _jquery2.default)('#result-txt');
-			_this.cancelButton = (0, _jquery2.default)('#cancel-support');
-		}
-	}, {
-		key: 'setEvents',
-		value: function setEvents() {
-			var _this = this;
+        if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "update") {
+          var desc = '\n            <p>\n            You are running version ' + _ServiceMeta2.default.VERSION + ' but there is an update\n            to version ' + versionStatusData.curversion + '. We highly recommend you to update in order to be bugfree\n            and have latest features.\n            </p>\n            ';
+          (0, _jquery2.default)('#up-desc').prepend((0, _jquery2.default)(desc));
+          var update = '\n          <div class="update-available__title"><span class="update-available__notification">1</span> NEW UPDATE AVAILABLE</div>\n          <div class="update-available__content">\n            <div class="update-available__content__app">\n              <div class="update-available__content__app__icon">\n                <img src="images/symbol25.png">\n              </div>\n              <div class="update-available__content__app__version-info">\n                <div style="color: red;">Your version: ' + _ServiceMeta2.default.VERSION + '</div>\n                <div style="color: #007aff;">New version: ' + versionStatusData.curversion + '</div>\n              </div>\n\n            </div>\n          </div>';
+          (0, _jquery2.default)('#up-update').prepend((0, _jquery2.default)(update));
 
-			_this.cancelButton.click(_this.onCancelButtonClicked.bind(_this));
-		}
-	}, {
-		key: 'openTicketTab',
-		value: function openTicketTab() {
-			var _this = this;
+          if (versionStatusData.hasOwnProperty("sources") && versionStatusData.sources.length > 0) {
+            versionStatusData.sources.forEach(function (source) {
+              var sourceButtonHtml = '\n                <div class="btn--update btn--update--large">' + source.label + '</div>\n              ';
+              var sourceButton = (0, _jquery2.default)(sourceButtonHtml);
+              sourceButton.click(function () {
+                _Utils2.default.openNewTab(source.url);
+              });
+              (0, _jquery2.default)('#update-links').append(sourceButton);
+            });
+          }
+          (0, _jquery2.default)('#up-content').css('display', 'block');
+        }
 
-			_BackgroundRequester2.default.request('TicketTab', 'openNewTicketTab', {}).then(function (response) {
+        if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "stop") {
+          (0, _jquery2.default)('#up-loading-img').append((0, _jquery2.default)(_ServiceMeta2.default.LOADINGIMG));
+          (0, _jquery2.default)('#up-loading').css("display", "block");
 
-				_this.resultTxt.html("");
+          _BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {}).then(function () {
+            _BackgroundRequester2.default.request('api', 'getClientVersionStatus', { ignoreTTL: true }).then(function (versionResponse) {
 
-				if (response && response.Retcode == 200) return window.close();
+              (0, _jquery2.default)('#up-loading').css("display", "none");
+              if (versionResponse && versionResponse != "" && versionResponse.retcode === 200 && versionResponse.data && versionResponse.data.hasOwnProperty("action") && versionResponse.data.action === "stop") {
+                if (_this.isStop) {
+                  (0, _jquery2.default)('#up-container').addClass("update-required--stop");
+                  (0, _jquery2.default)('#up-title').text("Outdated Version");
+                  (0, _jquery2.default)('#up-title').css("color", "white");
+                }
+                var _desc = '\n                <p>\n                You are running an outdated version ' + _ServiceMeta2.default.VERSION + '. In order to use\n                this software you need to update to most current version ' + versionStatusData.curversion + '\n                </p>\n                ';
+                (0, _jquery2.default)('#up-desc').prepend((0, _jquery2.default)(_desc));
+                if (versionStatusData.hasOwnProperty("sources") && versionStatusData.sources.length > 0) {
+                  versionStatusData.sources.forEach(function (source) {
+                    var sourceButtonHtml = '\n                    <div class="btn--update btn--update--large">' + source.label + '</div>\n                  ';
+                    var sourceButton = (0, _jquery2.default)(sourceButtonHtml);
+                    sourceButton.click(function () {
+                      _Utils2.default.openNewTab(source.url);
+                    });
+                    (0, _jquery2.default)('#update-links').append(sourceButton);
+                  });
+                }
+                (0, _jquery2.default)('#up-content').css('display', 'block');
+              } else {
+                chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE], function () {
+                  var nextUpdate = _Utils2.default.getDateNow() + _ServiceMeta2.default.VERSIONSTATUSTTL;
+                  chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE, nextUpdate));
+                  location.reload();
+                });
+              }
+            });
+          });
+        }
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {}
+  }, {
+    key: 'setEvents',
+    value: function setEvents() {}
+  }]);
 
-				if (response && response.Message) {
-					for (var i = 0; i < response.Message.length; i++) {
-						var error = (0, _jquery2.default)('<p>' + _Sanitize2.default.escpateData(response.Message[i]) + '</p>');
-						_this.resultTxt.append(error);
-					};
-					return;
-				}
-
-				_this.resultTxt.html("Unknown error happened. Please try later again.");
-			});
-		}
-	}, {
-		key: 'onCancelButtonClicked',
-		value: function onCancelButtonClicked() {
-			var _this = this;
-
-			_BackgroundRequester2.default.request('TicketTab', 'cancelSupportRequest', {}).then(function (response) {
-
-				location.reload();
-			});
-		}
-	}]);
-
-	return TicketTabCreaterView;
+  return UpdateRequiredView;
 }();
 
-exports.default = new TicketTabCreaterView();
+exports.default = new UpdateRequiredView();
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14126,11 +15473,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -14212,7 +15559,7 @@ var ProxySearchView = function () {
    
    				});
    			}, "html");
-   		}, "html");	
+   		}, "html");
    */
 		}
 	}, {
@@ -14389,6 +15736,8 @@ var ProxySearchView = function () {
 			}
 
 			var _this = this;
+			var clienversion = (0, _jquery2.default)("#client-version");
+			clienversion.text(_ServiceMeta2.default.VERSION);
 			_this.proxySearchActiveView.css("display", "none");
 			_this.proxySearchFailedView.css("display", "block");
 		}
@@ -14400,7 +15749,34 @@ var ProxySearchView = function () {
 exports.default = new ProxySearchView();
 
 /***/ }),
-/* 19 */
+/* 22 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -14411,9 +15787,9 @@ exports.default = new ProxySearchView();
  *
  */
 
-var inherits = __webpack_require__(9)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var K = [
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
@@ -14541,12 +15917,12 @@ module.exports = Sha256
 
 
 /***/ }),
-/* 20 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var inherits = __webpack_require__(9)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var K = [
   0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
@@ -14807,1880 +16183,7 @@ module.exports = Sha512
 
 
 /***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(module) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _jquery = __webpack_require__(1);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Opentip,
-    firstAdapter,
-    i,
-    mouseMoved,
-    mousePosition,
-    mousePositionObservers,
-    position,
-    vendors,
-    _i,
-    _len,
-    _ref,
-    __slice = [].slice,
-    __indexOf = [].indexOf || function (item) {
-  for (var i = 0, l = this.length; i < l; i++) {
-    if (i in this && this[i] === item) return i;
-  }return -1;
-},
-    __hasProp = {}.hasOwnProperty;
-
-Opentip = function () {
-
-  Opentip.prototype.STICKS_OUT_TOP = 1;
-
-  Opentip.prototype.STICKS_OUT_BOTTOM = 2;
-
-  Opentip.prototype.STICKS_OUT_LEFT = 1;
-
-  Opentip.prototype.STICKS_OUT_RIGHT = 2;
-
-  Opentip.prototype["class"] = {
-    container: "opentip-container",
-    opentip: "opentip",
-    header: "ot-header",
-    content: "ot-content",
-    loadingIndicator: "ot-loading-indicator",
-    close: "ot-close",
-    goingToHide: "ot-going-to-hide",
-    hidden: "ot-hidden",
-    hiding: "ot-hiding",
-    goingToShow: "ot-going-to-show",
-    showing: "ot-showing",
-    visible: "ot-visible",
-    loading: "ot-loading",
-    ajaxError: "ot-ajax-error",
-    fixed: "ot-fixed",
-    showEffectPrefix: "ot-show-effect-",
-    hideEffectPrefix: "ot-hide-effect-",
-    stylePrefix: "style-"
-  };
-
-  function Opentip(element, content, title, options) {
-    var elementsOpentips,
-        hideTrigger,
-        methodToBind,
-        optionSources,
-        prop,
-        styleName,
-        _i,
-        _j,
-        _len,
-        _len1,
-        _ref,
-        _ref1,
-        _ref2,
-        _tmpStyle,
-        _this = this;
-    this.id = ++Opentip.lastId;
-    this.debug("Creating Opentip.");
-    Opentip.tips.push(this);
-    this.adapter = Opentip.adapter;
-    elementsOpentips = this.adapter.data(element, "opentips") || [];
-    elementsOpentips.push(this);
-    this.adapter.data(element, "opentips", elementsOpentips);
-    this.triggerElement = this.adapter.wrap(element);
-    if (this.triggerElement.length > 1) {
-      throw new Error("You can't call Opentip on multiple elements.");
-    }
-    if (this.triggerElement.length < 1) {
-      throw new Error("Invalid element.");
-    }
-    this.loaded = false;
-    this.loading = false;
-    this.visible = false;
-    this.waitingToShow = false;
-    this.waitingToHide = false;
-    this.currentPosition = {
-      left: 0,
-      top: 0
-    };
-    this.dimensions = {
-      width: 100,
-      height: 50
-    };
-    this.content = "";
-    this.redraw = true;
-    this.currentObservers = {
-      showing: false,
-      visible: false,
-      hiding: false,
-      hidden: false
-    };
-    options = this.adapter.clone(options);
-    if ((typeof content === 'undefined' ? 'undefined' : _typeof(content)) === "object") {
-      options = content;
-      content = title = void 0;
-    } else if ((typeof title === 'undefined' ? 'undefined' : _typeof(title)) === "object") {
-      options = title;
-      title = void 0;
-    }
-    if (title != null) {
-      options.title = title;
-    }
-    if (content != null) {
-      this.setContent(content);
-    }
-    if (options["extends"] == null) {
-      if (options.style != null) {
-        options["extends"] = options.style;
-      } else {
-        options["extends"] = Opentip.defaultStyle;
-      }
-    }
-    optionSources = [options];
-    _tmpStyle = options;
-    while (_tmpStyle["extends"]) {
-      styleName = _tmpStyle["extends"];
-      _tmpStyle = Opentip.styles[styleName];
-      if (_tmpStyle == null) {
-        throw new Error("Invalid style: " + styleName);
-      }
-      optionSources.unshift(_tmpStyle);
-      if (!(_tmpStyle["extends"] != null || styleName === "standard")) {
-        _tmpStyle["extends"] = "standard";
-      }
-    }
-    options = (_ref = this.adapter).extend.apply(_ref, [{}].concat(__slice.call(optionSources)));
-    options.hideTriggers = function () {
-      var _i, _len, _ref1, _results;
-      _ref1 = options.hideTriggers;
-      _results = [];
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        hideTrigger = _ref1[_i];
-        _results.push(hideTrigger);
-      }
-      return _results;
-    }();
-    if (options.hideTrigger && options.hideTriggers.length === 0) {
-      options.hideTriggers.push(options.hideTrigger);
-    }
-    _ref1 = ["tipJoint", "targetJoint", "stem"];
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      prop = _ref1[_i];
-      if (options[prop] && typeof options[prop] === "string") {
-        options[prop] = new Opentip.Joint(options[prop]);
-      }
-    }
-    if (options.ajax && (options.ajax === true || !options.ajax)) {
-      if (this.adapter.tagName(this.triggerElement) === "A") {
-        options.ajax = this.adapter.attr(this.triggerElement, "href");
-      } else {
-        options.ajax = false;
-      }
-    }
-    if (options.showOn === "click" && this.adapter.tagName(this.triggerElement) === "A") {
-      this.adapter.observe(this.triggerElement, "click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return e.stopped = true;
-      });
-    }
-    if (options.target) {
-      options.fixed = true;
-    }
-    if (options.stem === true) {
-      options.stem = new Opentip.Joint(options.tipJoint);
-    }
-    if (options.target === true) {
-      options.target = this.triggerElement;
-    } else if (options.target) {
-      options.target = this.adapter.wrap(options.target);
-    }
-    this.currentStem = options.stem;
-    if (options.delay == null) {
-      options.delay = options.showOn === "mouseover" ? 0.2 : 0;
-    }
-    if (options.targetJoint == null) {
-      options.targetJoint = new Opentip.Joint(options.tipJoint).flip();
-    }
-    this.showTriggers = [];
-    this.showTriggersWhenVisible = [];
-    this.hideTriggers = [];
-    if (options.showOn && options.showOn !== "creation") {
-      this.showTriggers.push({
-        element: this.triggerElement,
-        event: options.showOn
-      });
-    }
-    if (options.ajaxCache != null) {
-      options.cache = options.ajaxCache;
-      delete options.ajaxCache;
-    }
-    this.options = options;
-    this.bound = {};
-    _ref2 = ["prepareToShow", "prepareToHide", "show", "hide", "reposition"];
-    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-      methodToBind = _ref2[_j];
-      this.bound[methodToBind] = function (methodToBind) {
-        return function () {
-          return _this[methodToBind].apply(_this, arguments);
-        };
-      }(methodToBind);
-    }
-    this.adapter.domReady(function () {
-      _this.activate();
-      if (_this.options.showOn === "creation") {
-        return _this.prepareToShow();
-      }
-    });
-  }
-
-  Opentip.prototype._setup = function () {
-    var hideOn, hideTrigger, hideTriggerElement, i, _i, _j, _len, _len1, _ref, _ref1, _results;
-    this.debug("Setting up the tooltip.");
-    this._buildContainer();
-    this.hideTriggers = [];
-    _ref = this.options.hideTriggers;
-    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-      hideTrigger = _ref[i];
-      hideTriggerElement = null;
-      hideOn = this.options.hideOn instanceof Array ? this.options.hideOn[i] : this.options.hideOn;
-      if (typeof hideTrigger === "string") {
-        switch (hideTrigger) {
-          case "trigger":
-            hideOn = hideOn || "mouseout";
-            hideTriggerElement = this.triggerElement;
-            break;
-          case "tip":
-            hideOn = hideOn || "mouseover";
-            hideTriggerElement = this.container;
-            break;
-          case "target":
-            hideOn = hideOn || "mouseover";
-            hideTriggerElement = this.options.target;
-            break;
-          case "closeButton":
-            break;
-          default:
-            throw new Error("Unknown hide trigger: " + hideTrigger + ".");
-        }
-      } else {
-        hideOn = hideOn || "mouseover";
-        hideTriggerElement = this.adapter.wrap(hideTrigger);
-      }
-      if (hideTriggerElement) {
-        this.hideTriggers.push({
-          element: hideTriggerElement,
-          event: hideOn,
-          original: hideTrigger
-        });
-      }
-    }
-    _ref1 = this.hideTriggers;
-    _results = [];
-    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-      hideTrigger = _ref1[_j];
-      _results.push(this.showTriggersWhenVisible.push({
-        element: hideTrigger.element,
-        event: "mouseover"
-      }));
-    }
-    return _results;
-  };
-
-  Opentip.prototype._buildContainer = function () {
-    this.container = this.adapter.create("<div id=\"opentip-" + this.id + "\" class=\"" + this["class"].container + " " + this["class"].hidden + " " + this["class"].stylePrefix + this.options.className + "\"></div>");
-    this.adapter.css(this.container, {
-      position: "absolute"
-    });
-    if (this.options.ajax) {
-      this.adapter.addClass(this.container, this["class"].loading);
-    }
-    if (this.options.fixed) {
-      this.adapter.addClass(this.container, this["class"].fixed);
-    }
-    if (this.options.showEffect) {
-      this.adapter.addClass(this.container, "" + this["class"].showEffectPrefix + this.options.showEffect);
-    }
-    if (this.options.hideEffect) {
-      return this.adapter.addClass(this.container, "" + this["class"].hideEffectPrefix + this.options.hideEffect);
-    }
-  };
-
-  Opentip.prototype._buildElements = function () {
-    var headerElement, titleElement;
-    this.tooltipElement = this.adapter.create("<div class=\"" + this["class"].opentip + "\"><div class=\"" + this["class"].header + "\"></div><div class=\"" + this["class"].content + "\"></div></div>");
-    this.backgroundCanvas = this.adapter.wrap(document.createElement("canvas"));
-    this.adapter.css(this.backgroundCanvas, {
-      position: "absolute"
-    });
-    if (typeof G_vmlCanvasManager !== "undefined" && G_vmlCanvasManager !== null) {
-      G_vmlCanvasManager.initElement(this.adapter.unwrap(this.backgroundCanvas));
-    }
-    headerElement = this.adapter.find(this.tooltipElement, "." + this["class"].header);
-    if (this.options.title) {
-      titleElement = this.adapter.create("<h1></h1>");
-      this.adapter.update(titleElement, this.options.title, this.options.escapeTitle);
-      this.adapter.append(headerElement, titleElement);
-    }
-    if (this.options.ajax && !this.loaded) {
-      this.adapter.append(this.tooltipElement, this.adapter.create("<div class=\"" + this["class"].loadingIndicator + "\"><span>↻</span></div>"));
-    }
-    if (__indexOf.call(this.options.hideTriggers, "closeButton") >= 0) {
-      this.closeButtonElement = this.adapter.create("<a href=\"javascript:undefined;\" class=\"" + this["class"].close + "\"><span>Close</span></a>");
-      this.adapter.append(headerElement, this.closeButtonElement);
-    }
-    this.adapter.append(this.container, this.backgroundCanvas);
-    this.adapter.append(this.container, this.tooltipElement);
-    this.adapter.append(document.body, this.container);
-    this._newContent = true;
-    return this.redraw = true;
-  };
-
-  Opentip.prototype.setContent = function (content) {
-    this.content = content;
-    this._newContent = true;
-    if (typeof this.content === "function") {
-      this._contentFunction = this.content;
-      this.content = "";
-    } else {
-      this._contentFunction = null;
-    }
-    if (this.visible) {
-      return this._updateElementContent();
-    }
-  };
-
-  Opentip.prototype._updateElementContent = function () {
-    var contentDiv;
-    if (this._newContent || !this.options.cache && this._contentFunction) {
-      contentDiv = this.adapter.find(this.container, "." + this["class"].content);
-      if (contentDiv != null) {
-        if (this._contentFunction) {
-          this.debug("Executing content function.");
-          this.content = this._contentFunction(this);
-        }
-        this.adapter.update(contentDiv, this.content, this.options.escapeContent);
-      }
-      this._newContent = false;
-    }
-    this._storeAndLockDimensions();
-    return this.reposition();
-  };
-
-  Opentip.prototype._storeAndLockDimensions = function () {
-    var prevDimension;
-    if (!this.container) {
-      return;
-    }
-    prevDimension = this.dimensions;
-    this.adapter.css(this.container, {
-      width: "auto",
-      left: "0px",
-      top: "0px"
-    });
-    this.dimensions = this.adapter.dimensions(this.container);
-    this.dimensions.width += 1;
-    this.adapter.css(this.container, {
-      width: "" + this.dimensions.width + "px",
-      top: "" + this.currentPosition.top + "px",
-      left: "" + this.currentPosition.left + "px"
-    });
-    if (!this._dimensionsEqual(this.dimensions, prevDimension)) {
-      this.redraw = true;
-      return this._draw();
-    }
-  };
-
-  Opentip.prototype.activate = function () {
-    return this._setupObservers("hidden", "hiding");
-  };
-
-  Opentip.prototype.deactivate = function () {
-    this.debug("Deactivating tooltip.");
-    this.hide();
-    return this._setupObservers("-showing", "-visible", "-hidden", "-hiding");
-  };
-
-  Opentip.prototype._setupObservers = function () {
-    var observeOrStop,
-        removeObserver,
-        state,
-        states,
-        trigger,
-        _i,
-        _j,
-        _k,
-        _l,
-        _len,
-        _len1,
-        _len2,
-        _len3,
-        _ref,
-        _ref1,
-        _ref2,
-        _this = this;
-    states = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    for (_i = 0, _len = states.length; _i < _len; _i++) {
-      state = states[_i];
-      removeObserver = false;
-      if (state.charAt(0) === "-") {
-        removeObserver = true;
-        state = state.substr(1);
-      }
-      if (this.currentObservers[state] === !removeObserver) {
-        continue;
-      }
-      this.currentObservers[state] = !removeObserver;
-      observeOrStop = function observeOrStop() {
-        var args, _ref, _ref1;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        if (removeObserver) {
-          return (_ref = _this.adapter).stopObserving.apply(_ref, args);
-        } else {
-          return (_ref1 = _this.adapter).observe.apply(_ref1, args);
-        }
-      };
-      switch (state) {
-        case "showing":
-          _ref = this.hideTriggers;
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            trigger = _ref[_j];
-            observeOrStop(trigger.element, trigger.event, this.bound.prepareToHide);
-          }
-          observeOrStop(document.onresize != null ? document : window, "resize", this.bound.reposition);
-          observeOrStop(window, "scroll", this.bound.reposition);
-          break;
-        case "visible":
-          _ref1 = this.showTriggersWhenVisible;
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            trigger = _ref1[_k];
-            observeOrStop(trigger.element, trigger.event, this.bound.prepareToShow);
-          }
-          break;
-        case "hiding":
-          _ref2 = this.showTriggers;
-          for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
-            trigger = _ref2[_l];
-            observeOrStop(trigger.element, trigger.event, this.bound.prepareToShow);
-          }
-          break;
-        case "hidden":
-          break;
-        default:
-          throw new Error("Unknown state: " + state);
-      }
-    }
-    return null;
-  };
-
-  Opentip.prototype.prepareToShow = function () {
-    this._abortHiding();
-    this._abortShowing();
-    if (this.visible) {
-      return;
-    }
-    this.debug("Showing in " + this.options.delay + "s.");
-    if (this.container == null) {
-      this._setup();
-    }
-    if (this.options.group) {
-      Opentip._abortShowingGroup(this.options.group, this);
-    }
-    this.preparingToShow = true;
-    this._setupObservers("-hidden", "-hiding", "showing");
-    this._followMousePosition();
-    if (this.options.fixed && !this.options.target) {
-      this.initialMousePosition = mousePosition;
-    }
-    this.reposition();
-    return this._showTimeoutId = this.setTimeout(this.bound.show, this.options.delay || 0);
-  };
-
-  Opentip.prototype.show = function () {
-    var _this = this;
-    this._abortHiding();
-    if (this.visible) {
-      return;
-    }
-    this._clearTimeouts();
-    if (!this._triggerElementExists()) {
-      return this.deactivate();
-    }
-    this.debug("Showing now.");
-    if (this.container == null) {
-      this._setup();
-    }
-    if (this.options.group) {
-      Opentip._hideGroup(this.options.group, this);
-    }
-    this.visible = true;
-    this.preparingToShow = false;
-    if (this.tooltipElement == null) {
-      this._buildElements();
-    }
-    this._updateElementContent();
-    if (this.options.ajax && (!this.loaded || !this.options.cache)) {
-      this._loadAjax();
-    }
-    this._searchAndActivateCloseButtons();
-    this._startEnsureTriggerElement();
-    this.adapter.css(this.container, {
-      zIndex: Opentip.lastZIndex++
-    });
-    this._setupObservers("-hidden", "-hiding", "-showing", "-visible", "showing", "visible");
-    if (this.options.fixed && !this.options.target) {
-      this.initialMousePosition = mousePosition;
-    }
-    this.reposition();
-    this.adapter.removeClass(this.container, this["class"].hiding);
-    this.adapter.removeClass(this.container, this["class"].hidden);
-    this.adapter.addClass(this.container, this["class"].goingToShow);
-    this.setCss3Style(this.container, {
-      transitionDuration: "0s"
-    });
-    this.defer(function () {
-      var delay;
-      if (!_this.visible || _this.preparingToHide) {
-        return;
-      }
-      _this.adapter.removeClass(_this.container, _this["class"].goingToShow);
-      _this.adapter.addClass(_this.container, _this["class"].showing);
-      delay = 0;
-      if (_this.options.showEffect && _this.options.showEffectDuration) {
-        delay = _this.options.showEffectDuration;
-      }
-      _this.setCss3Style(_this.container, {
-        transitionDuration: "" + delay + "s"
-      });
-      _this._visibilityStateTimeoutId = _this.setTimeout(function () {
-        _this.adapter.removeClass(_this.container, _this["class"].showing);
-        return _this.adapter.addClass(_this.container, _this["class"].visible);
-      }, delay);
-      return _this._activateFirstInput();
-    });
-    return this._draw();
-  };
-
-  Opentip.prototype._abortShowing = function () {
-    if (this.preparingToShow) {
-      this.debug("Aborting showing.");
-      this._clearTimeouts();
-      this._stopFollowingMousePosition();
-      this.preparingToShow = false;
-      return this._setupObservers("-showing", "-visible", "hiding", "hidden");
-    }
-  };
-
-  Opentip.prototype.prepareToHide = function () {
-    this._abortShowing();
-    this._abortHiding();
-    if (!this.visible) {
-      return;
-    }
-    this.debug("Hiding in " + this.options.hideDelay + "s");
-    this.preparingToHide = true;
-    this._setupObservers("-showing", "visible", "-hidden", "hiding");
-    return this._hideTimeoutId = this.setTimeout(this.bound.hide, this.options.hideDelay);
-  };
-
-  Opentip.prototype.hide = function () {
-    var _this = this;
-    this._abortShowing();
-    if (!this.visible) {
-      return;
-    }
-    this._clearTimeouts();
-    this.debug("Hiding!");
-    this.visible = false;
-    this.preparingToHide = false;
-    this._stopEnsureTriggerElement();
-    this._setupObservers("-showing", "-visible", "-hiding", "-hidden", "hiding", "hidden");
-    if (!this.options.fixed) {
-      this._stopFollowingMousePosition();
-    }
-    if (!this.container) {
-      return;
-    }
-    this.adapter.removeClass(this.container, this["class"].visible);
-    this.adapter.removeClass(this.container, this["class"].showing);
-    this.adapter.addClass(this.container, this["class"].goingToHide);
-    this.setCss3Style(this.container, {
-      transitionDuration: "0s"
-    });
-    return this.defer(function () {
-      var hideDelay;
-      _this.adapter.removeClass(_this.container, _this["class"].goingToHide);
-      _this.adapter.addClass(_this.container, _this["class"].hiding);
-      hideDelay = 0;
-      if (_this.options.hideEffect && _this.options.hideEffectDuration) {
-        hideDelay = _this.options.hideEffectDuration;
-      }
-      _this.setCss3Style(_this.container, {
-        transitionDuration: "" + hideDelay + "s"
-      });
-      return _this._visibilityStateTimeoutId = _this.setTimeout(function () {
-        _this.adapter.removeClass(_this.container, _this["class"].hiding);
-        _this.adapter.addClass(_this.container, _this["class"].hidden);
-        _this.setCss3Style(_this.container, {
-          transitionDuration: "0s"
-        });
-        if (_this.options.removeElementsOnHide) {
-          _this.debug("Removing HTML elements.");
-          _this.adapter.remove(_this.container);
-          delete _this.container;
-          return delete _this.tooltipElement;
-        }
-      }, hideDelay);
-    });
-  };
-
-  Opentip.prototype._abortHiding = function () {
-    if (this.preparingToHide) {
-      this.debug("Aborting hiding.");
-      this._clearTimeouts();
-      this.preparingToHide = false;
-      return this._setupObservers("-hiding", "showing", "visible");
-    }
-  };
-
-  Opentip.prototype.reposition = function () {
-    var position,
-        stem,
-        _ref,
-        _this = this;
-    position = this.getPosition();
-    if (position == null) {
-      return;
-    }
-    stem = this.options.stem;
-    if (this.options.containInViewport) {
-      _ref = this._ensureViewportContainment(position), position = _ref.position, stem = _ref.stem;
-    }
-    if (this._positionsEqual(position, this.currentPosition)) {
-      return;
-    }
-    if (!(!this.options.stem || stem.eql(this.currentStem))) {
-      this.redraw = true;
-    }
-    this.currentPosition = position;
-    this.currentStem = stem;
-    this._draw();
-    this.adapter.css(this.container, {
-      left: "" + position.left + "px",
-      top: "" + position.top + "px"
-    });
-    return this.defer(function () {
-      var rawContainer, redrawFix;
-      rawContainer = _this.adapter.unwrap(_this.container);
-      rawContainer.style.visibility = "hidden";
-      redrawFix = rawContainer.offsetHeight;
-      return rawContainer.style.visibility = "visible";
-    });
-  };
-
-  Opentip.prototype.getPosition = function (tipJoint, targetJoint, stem) {
-    var additionalHorizontal, additionalVertical, offsetDistance, position, stemLength, targetDimensions, targetPosition, unwrappedTarget, _ref;
-    if (!this.container) {
-      return;
-    }
-    if (tipJoint == null) {
-      tipJoint = this.options.tipJoint;
-    }
-    if (targetJoint == null) {
-      targetJoint = this.options.targetJoint;
-    }
-    position = {};
-    if (this.options.target) {
-      targetPosition = this.adapter.offset(this.options.target);
-      targetDimensions = this.adapter.dimensions(this.options.target);
-      position = targetPosition;
-      if (targetJoint.right) {
-        unwrappedTarget = this.adapter.unwrap(this.options.target);
-        if (unwrappedTarget.getBoundingClientRect != null) {
-          position.left = unwrappedTarget.getBoundingClientRect().right + ((_ref = window.pageXOffset) != null ? _ref : document.body.scrollLeft);
-        } else {
-          position.left += targetDimensions.width;
-        }
-      } else if (targetJoint.center) {
-        position.left += Math.round(targetDimensions.width / 2);
-      }
-      if (targetJoint.bottom) {
-        position.top += targetDimensions.height;
-      } else if (targetJoint.middle) {
-        position.top += Math.round(targetDimensions.height / 2);
-      }
-      if (this.options.borderWidth) {
-        if (this.options.tipJoint.left) {
-          position.left += this.options.borderWidth;
-        }
-        if (this.options.tipJoint.right) {
-          position.left -= this.options.borderWidth;
-        }
-        if (this.options.tipJoint.top) {
-          position.top += this.options.borderWidth;
-        } else if (this.options.tipJoint.bottom) {
-          position.top -= this.options.borderWidth;
-        }
-      }
-    } else {
-      if (this.initialMousePosition) {
-        position = {
-          top: this.initialMousePosition.y,
-          left: this.initialMousePosition.x
-        };
-      } else {
-        position = {
-          top: mousePosition.y,
-          left: mousePosition.x
-        };
-      }
-    }
-    if (this.options.autoOffset) {
-      stemLength = this.options.stem ? this.options.stemLength : 0;
-      offsetDistance = stemLength && this.options.fixed ? 2 : 10;
-      additionalHorizontal = tipJoint.middle && !this.options.fixed ? 15 : 0;
-      additionalVertical = tipJoint.center && !this.options.fixed ? 15 : 0;
-      if (tipJoint.right) {
-        position.left -= offsetDistance + additionalHorizontal;
-      } else if (tipJoint.left) {
-        position.left += offsetDistance + additionalHorizontal;
-      }
-      if (tipJoint.bottom) {
-        position.top -= offsetDistance + additionalVertical;
-      } else if (tipJoint.top) {
-        position.top += offsetDistance + additionalVertical;
-      }
-      if (stemLength) {
-        if (stem == null) {
-          stem = this.options.stem;
-        }
-        if (stem.right) {
-          position.left -= stemLength;
-        } else if (stem.left) {
-          position.left += stemLength;
-        }
-        if (stem.bottom) {
-          position.top -= stemLength;
-        } else if (stem.top) {
-          position.top += stemLength;
-        }
-      }
-    }
-    position.left += this.options.offset[0];
-    position.top += this.options.offset[1];
-    if (tipJoint.right) {
-      position.left -= this.dimensions.width;
-    } else if (tipJoint.center) {
-      position.left -= Math.round(this.dimensions.width / 2);
-    }
-    if (tipJoint.bottom) {
-      position.top -= this.dimensions.height;
-    } else if (tipJoint.middle) {
-      position.top -= Math.round(this.dimensions.height / 2);
-    }
-    return position;
-  };
-
-  Opentip.prototype._ensureViewportContainment = function (position) {
-    var needsRepositioning, newSticksOut, originals, revertedX, revertedY, scrollOffset, stem, sticksOut, targetJoint, tipJoint, viewportDimensions, viewportPosition;
-    stem = this.options.stem;
-    originals = {
-      position: position,
-      stem: stem
-    };
-    if (!(this.visible && position)) {
-      return originals;
-    }
-    sticksOut = this._sticksOut(position);
-    if (!(sticksOut[0] || sticksOut[1])) {
-      return originals;
-    }
-    tipJoint = new Opentip.Joint(this.options.tipJoint);
-    if (this.options.targetJoint) {
-      targetJoint = new Opentip.Joint(this.options.targetJoint);
-    }
-    scrollOffset = this.adapter.scrollOffset();
-    viewportDimensions = this.adapter.viewportDimensions();
-    viewportPosition = [position.left - scrollOffset[0], position.top - scrollOffset[1]];
-    needsRepositioning = false;
-    if (viewportDimensions.width >= this.dimensions.width) {
-      if (sticksOut[0]) {
-        needsRepositioning = true;
-        switch (sticksOut[0]) {
-          case this.STICKS_OUT_LEFT:
-            tipJoint.setHorizontal("left");
-            if (this.options.targetJoint) {
-              targetJoint.setHorizontal("right");
-            }
-            break;
-          case this.STICKS_OUT_RIGHT:
-            tipJoint.setHorizontal("right");
-            if (this.options.targetJoint) {
-              targetJoint.setHorizontal("left");
-            }
-        }
-      }
-    }
-    if (viewportDimensions.height >= this.dimensions.height) {
-      if (sticksOut[1]) {
-        needsRepositioning = true;
-        switch (sticksOut[1]) {
-          case this.STICKS_OUT_TOP:
-            tipJoint.setVertical("top");
-            if (this.options.targetJoint) {
-              targetJoint.setVertical("bottom");
-            }
-            break;
-          case this.STICKS_OUT_BOTTOM:
-            tipJoint.setVertical("bottom");
-            if (this.options.targetJoint) {
-              targetJoint.setVertical("top");
-            }
-        }
-      }
-    }
-    if (!needsRepositioning) {
-      return originals;
-    }
-    if (this.options.stem) {
-      stem = tipJoint;
-    }
-    position = this.getPosition(tipJoint, targetJoint, stem);
-    newSticksOut = this._sticksOut(position);
-    revertedX = false;
-    revertedY = false;
-    if (newSticksOut[0] && newSticksOut[0] !== sticksOut[0]) {
-      revertedX = true;
-      tipJoint.setHorizontal(this.options.tipJoint.horizontal);
-      if (this.options.targetJoint) {
-        targetJoint.setHorizontal(this.options.targetJoint.horizontal);
-      }
-    }
-    if (newSticksOut[1] && newSticksOut[1] !== sticksOut[1]) {
-      revertedY = true;
-      tipJoint.setVertical(this.options.tipJoint.vertical);
-      if (this.options.targetJoint) {
-        targetJoint.setVertical(this.options.targetJoint.vertical);
-      }
-    }
-    if (revertedX && revertedY) {
-      return originals;
-    }
-    if (revertedX || revertedY) {
-      if (this.options.stem) {
-        stem = tipJoint;
-      }
-      position = this.getPosition(tipJoint, targetJoint, stem);
-    }
-    return {
-      position: position,
-      stem: stem
-    };
-  };
-
-  Opentip.prototype._sticksOut = function (position) {
-    var positionOffset, scrollOffset, sticksOut, viewportDimensions;
-    scrollOffset = this.adapter.scrollOffset();
-    viewportDimensions = this.adapter.viewportDimensions();
-    positionOffset = [position.left - scrollOffset[0], position.top - scrollOffset[1]];
-    sticksOut = [false, false];
-    if (positionOffset[0] < 0) {
-      sticksOut[0] = this.STICKS_OUT_LEFT;
-    } else if (positionOffset[0] + this.dimensions.width > viewportDimensions.width) {
-      sticksOut[0] = this.STICKS_OUT_RIGHT;
-    }
-    if (positionOffset[1] < 0) {
-      sticksOut[1] = this.STICKS_OUT_TOP;
-    } else if (positionOffset[1] + this.dimensions.height > viewportDimensions.height) {
-      sticksOut[1] = this.STICKS_OUT_BOTTOM;
-    }
-    return sticksOut;
-  };
-
-  Opentip.prototype._draw = function () {
-    var backgroundCanvas,
-        bulge,
-        canvasDimensions,
-        canvasPosition,
-        closeButton,
-        closeButtonInner,
-        closeButtonOuter,
-        ctx,
-        drawCorner,
-        drawLine,
-        hb,
-        position,
-        stemBase,
-        stemLength,
-        _i,
-        _len,
-        _ref,
-        _ref1,
-        _ref2,
-        _this = this;
-    if (!(this.backgroundCanvas && this.redraw)) {
-      return;
-    }
-    this.debug("Drawing background.");
-    this.redraw = false;
-    if (this.currentStem) {
-      _ref = ["top", "right", "bottom", "left"];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        position = _ref[_i];
-        this.adapter.removeClass(this.container, "stem-" + position);
-      }
-      this.adapter.addClass(this.container, "stem-" + this.currentStem.horizontal);
-      this.adapter.addClass(this.container, "stem-" + this.currentStem.vertical);
-    }
-    closeButtonInner = [0, 0];
-    closeButtonOuter = [0, 0];
-    if (__indexOf.call(this.options.hideTriggers, "closeButton") >= 0) {
-      closeButton = new Opentip.Joint(((_ref1 = this.currentStem) != null ? _ref1.toString() : void 0) === "top right" ? "top left" : "top right");
-      closeButtonInner = [this.options.closeButtonRadius + this.options.closeButtonOffset[0], this.options.closeButtonRadius + this.options.closeButtonOffset[1]];
-      closeButtonOuter = [this.options.closeButtonRadius - this.options.closeButtonOffset[0], this.options.closeButtonRadius - this.options.closeButtonOffset[1]];
-    }
-    canvasDimensions = this.adapter.clone(this.dimensions);
-    canvasPosition = [0, 0];
-    if (this.options.borderWidth) {
-      canvasDimensions.width += this.options.borderWidth * 2;
-      canvasDimensions.height += this.options.borderWidth * 2;
-      canvasPosition[0] -= this.options.borderWidth;
-      canvasPosition[1] -= this.options.borderWidth;
-    }
-    if (this.options.shadow) {
-      canvasDimensions.width += this.options.shadowBlur * 2;
-      canvasDimensions.width += Math.max(0, this.options.shadowOffset[0] - this.options.shadowBlur * 2);
-      canvasDimensions.height += this.options.shadowBlur * 2;
-      canvasDimensions.height += Math.max(0, this.options.shadowOffset[1] - this.options.shadowBlur * 2);
-      canvasPosition[0] -= Math.max(0, this.options.shadowBlur - this.options.shadowOffset[0]);
-      canvasPosition[1] -= Math.max(0, this.options.shadowBlur - this.options.shadowOffset[1]);
-    }
-    bulge = {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0
-    };
-    if (this.currentStem) {
-      if (this.currentStem.left) {
-        bulge.left = this.options.stemLength;
-      } else if (this.currentStem.right) {
-        bulge.right = this.options.stemLength;
-      }
-      if (this.currentStem.top) {
-        bulge.top = this.options.stemLength;
-      } else if (this.currentStem.bottom) {
-        bulge.bottom = this.options.stemLength;
-      }
-    }
-    if (closeButton) {
-      if (closeButton.left) {
-        bulge.left = Math.max(bulge.left, closeButtonOuter[0]);
-      } else if (closeButton.right) {
-        bulge.right = Math.max(bulge.right, closeButtonOuter[0]);
-      }
-      if (closeButton.top) {
-        bulge.top = Math.max(bulge.top, closeButtonOuter[1]);
-      } else if (closeButton.bottom) {
-        bulge.bottom = Math.max(bulge.bottom, closeButtonOuter[1]);
-      }
-    }
-    canvasDimensions.width += bulge.left + bulge.right;
-    canvasDimensions.height += bulge.top + bulge.bottom;
-    canvasPosition[0] -= bulge.left;
-    canvasPosition[1] -= bulge.top;
-    if (this.currentStem && this.options.borderWidth) {
-      _ref2 = this._getPathStemMeasures(this.options.stemBase, this.options.stemLength, this.options.borderWidth), stemLength = _ref2.stemLength, stemBase = _ref2.stemBase;
-    }
-    backgroundCanvas = this.adapter.unwrap(this.backgroundCanvas);
-    backgroundCanvas.width = canvasDimensions.width;
-    backgroundCanvas.height = canvasDimensions.height;
-    this.adapter.css(this.backgroundCanvas, {
-      width: "" + backgroundCanvas.width + "px",
-      height: "" + backgroundCanvas.height + "px",
-      left: "" + canvasPosition[0] + "px",
-      top: "" + canvasPosition[1] + "px"
-    });
-    ctx = backgroundCanvas.getContext("2d");
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
-    ctx.beginPath();
-    ctx.fillStyle = this._getColor(ctx, this.dimensions, this.options.background, this.options.backgroundGradientHorizontal);
-    ctx.lineJoin = "miter";
-    ctx.miterLimit = 500;
-    hb = this.options.borderWidth / 2;
-    if (this.options.borderWidth) {
-      ctx.strokeStyle = this.options.borderColor;
-      ctx.lineWidth = this.options.borderWidth;
-    } else {
-      stemLength = this.options.stemLength;
-      stemBase = this.options.stemBase;
-    }
-    if (stemBase == null) {
-      stemBase = 0;
-    }
-    drawLine = function drawLine(length, stem, first) {
-      if (first) {
-        ctx.moveTo(Math.max(stemBase, _this.options.borderRadius, closeButtonInner[0]) + 1 - hb, -hb);
-      }
-      if (stem) {
-        ctx.lineTo(length / 2 - stemBase / 2, -hb);
-        ctx.lineTo(length / 2, -stemLength - hb);
-        return ctx.lineTo(length / 2 + stemBase / 2, -hb);
-      }
-    };
-    drawCorner = function drawCorner(stem, closeButton, i) {
-      var angle1, angle2, innerWidth, offset;
-      if (stem) {
-        ctx.lineTo(-stemBase + hb, 0 - hb);
-        ctx.lineTo(stemLength + hb, -stemLength - hb);
-        return ctx.lineTo(hb, stemBase - hb);
-      } else if (closeButton) {
-        offset = _this.options.closeButtonOffset;
-        innerWidth = closeButtonInner[0];
-        if (i % 2 !== 0) {
-          offset = [offset[1], offset[0]];
-          innerWidth = closeButtonInner[1];
-        }
-        angle1 = Math.acos(offset[1] / _this.options.closeButtonRadius);
-        angle2 = Math.acos(offset[0] / _this.options.closeButtonRadius);
-        ctx.lineTo(-innerWidth + hb, -hb);
-        return ctx.arc(hb - offset[0], -hb + offset[1], _this.options.closeButtonRadius, -(Math.PI / 2 + angle1), angle2, false);
-      } else {
-        ctx.lineTo(-_this.options.borderRadius + hb, -hb);
-        return ctx.quadraticCurveTo(hb, -hb, hb, _this.options.borderRadius - hb);
-      }
-    };
-    ctx.translate(-canvasPosition[0], -canvasPosition[1]);
-    ctx.save();
-    (function () {
-      var cornerStem, i, lineLength, lineStem, positionIdx, positionX, positionY, rotation, _j, _ref3, _results;
-      _results = [];
-      for (i = _j = 0, _ref3 = Opentip.positions.length / 2; 0 <= _ref3 ? _j < _ref3 : _j > _ref3; i = 0 <= _ref3 ? ++_j : --_j) {
-        positionIdx = i * 2;
-        positionX = i === 0 || i === 3 ? 0 : _this.dimensions.width;
-        positionY = i < 2 ? 0 : _this.dimensions.height;
-        rotation = Math.PI / 2 * i;
-        lineLength = i % 2 === 0 ? _this.dimensions.width : _this.dimensions.height;
-        lineStem = new Opentip.Joint(Opentip.positions[positionIdx]);
-        cornerStem = new Opentip.Joint(Opentip.positions[positionIdx + 1]);
-        ctx.save();
-        ctx.translate(positionX, positionY);
-        ctx.rotate(rotation);
-        drawLine(lineLength, lineStem.eql(_this.currentStem), i === 0);
-        ctx.translate(lineLength, 0);
-        drawCorner(cornerStem.eql(_this.currentStem), cornerStem.eql(closeButton), i);
-        _results.push(ctx.restore());
-      }
-      return _results;
-    })();
-    ctx.closePath();
-    ctx.save();
-    if (this.options.shadow) {
-      ctx.shadowColor = this.options.shadowColor;
-      ctx.shadowBlur = this.options.shadowBlur;
-      ctx.shadowOffsetX = this.options.shadowOffset[0];
-      ctx.shadowOffsetY = this.options.shadowOffset[1];
-    }
-    ctx.fill();
-    ctx.restore();
-    if (this.options.borderWidth) {
-      ctx.stroke();
-    }
-    ctx.restore();
-    if (closeButton) {
-      return function () {
-        var crossCenter, crossHeight, crossWidth, hcs, linkCenter;
-        crossWidth = crossHeight = _this.options.closeButtonRadius * 2;
-        if (closeButton.toString() === "top right") {
-          linkCenter = [_this.dimensions.width - _this.options.closeButtonOffset[0], _this.options.closeButtonOffset[1]];
-          crossCenter = [linkCenter[0] + hb, linkCenter[1] - hb];
-        } else {
-          linkCenter = [_this.options.closeButtonOffset[0], _this.options.closeButtonOffset[1]];
-          crossCenter = [linkCenter[0] - hb, linkCenter[1] - hb];
-        }
-        ctx.translate(crossCenter[0], crossCenter[1]);
-        hcs = _this.options.closeButtonCrossSize / 2;
-        ctx.save();
-        ctx.beginPath();
-        ctx.strokeStyle = _this.options.closeButtonCrossColor;
-        ctx.lineWidth = _this.options.closeButtonCrossLineWidth;
-        ctx.lineCap = "round";
-        ctx.moveTo(-hcs, -hcs);
-        ctx.lineTo(hcs, hcs);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(hcs, -hcs);
-        ctx.lineTo(-hcs, hcs);
-        ctx.stroke();
-        ctx.restore();
-        return _this.adapter.css(_this.closeButtonElement, {
-          left: "" + (linkCenter[0] - hcs - _this.options.closeButtonLinkOverscan) + "px",
-          top: "" + (linkCenter[1] - hcs - _this.options.closeButtonLinkOverscan) + "px",
-          width: "" + (_this.options.closeButtonCrossSize + _this.options.closeButtonLinkOverscan * 2) + "px",
-          height: "" + (_this.options.closeButtonCrossSize + _this.options.closeButtonLinkOverscan * 2) + "px"
-        });
-      }();
-    }
-  };
-
-  Opentip.prototype._getPathStemMeasures = function (outerStemBase, outerStemLength, borderWidth) {
-    var angle, distanceBetweenTips, halfAngle, hb, rhombusSide, stemBase, stemLength;
-    hb = borderWidth / 2;
-    halfAngle = Math.atan(outerStemBase / 2 / outerStemLength);
-    angle = halfAngle * 2;
-    rhombusSide = hb / Math.sin(angle);
-    distanceBetweenTips = 2 * rhombusSide * Math.cos(halfAngle);
-    stemLength = hb + outerStemLength - distanceBetweenTips;
-    if (stemLength < 0) {
-      throw new Error("Sorry but your stemLength / stemBase ratio is strange.");
-    }
-    stemBase = Math.tan(halfAngle) * stemLength * 2;
-    return {
-      stemLength: stemLength,
-      stemBase: stemBase
-    };
-  };
-
-  Opentip.prototype._getColor = function (ctx, dimensions, color, horizontal) {
-    var colorStop, gradient, i, _i, _len;
-    if (horizontal == null) {
-      horizontal = false;
-    }
-    if (typeof color === "string") {
-      return color;
-    }
-    if (horizontal) {
-      gradient = ctx.createLinearGradient(0, 0, dimensions.width, 0);
-    } else {
-      gradient = ctx.createLinearGradient(0, 0, 0, dimensions.height);
-    }
-    for (i = _i = 0, _len = color.length; _i < _len; i = ++_i) {
-      colorStop = color[i];
-      gradient.addColorStop(colorStop[0], colorStop[1]);
-    }
-    return gradient;
-  };
-
-  Opentip.prototype._searchAndActivateCloseButtons = function () {
-    var element, _i, _len, _ref;
-    _ref = this.adapter.findAll(this.container, "." + this["class"].close);
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      element = _ref[_i];
-      this.hideTriggers.push({
-        element: this.adapter.wrap(element),
-        event: "click"
-      });
-    }
-    if (this.currentObservers.showing) {
-      this._setupObservers("-showing", "showing");
-    }
-    if (this.currentObservers.visible) {
-      return this._setupObservers("-visible", "visible");
-    }
-  };
-
-  Opentip.prototype._activateFirstInput = function () {
-    var input;
-    input = this.adapter.unwrap(this.adapter.find(this.container, "input, textarea"));
-    return input != null ? typeof input.focus === "function" ? input.focus() : void 0 : void 0;
-  };
-
-  Opentip.prototype._followMousePosition = function () {
-    if (!this.options.fixed) {
-      return Opentip._observeMousePosition(this.bound.reposition);
-    }
-  };
-
-  Opentip.prototype._stopFollowingMousePosition = function () {
-    if (!this.options.fixed) {
-      return Opentip._stopObservingMousePosition(this.bound.reposition);
-    }
-  };
-
-  Opentip.prototype._clearShowTimeout = function () {
-    return clearTimeout(this._showTimeoutId);
-  };
-
-  Opentip.prototype._clearHideTimeout = function () {
-    return clearTimeout(this._hideTimeoutId);
-  };
-
-  Opentip.prototype._clearTimeouts = function () {
-    clearTimeout(this._visibilityStateTimeoutId);
-    this._clearShowTimeout();
-    return this._clearHideTimeout();
-  };
-
-  Opentip.prototype._triggerElementExists = function () {
-    var el;
-    el = this.adapter.unwrap(this.triggerElement);
-    while (el.parentNode) {
-      if (el.parentNode.tagName === "BODY") {
-        return true;
-      }
-      el = el.parentNode;
-    }
-    return false;
-  };
-
-  Opentip.prototype._loadAjax = function () {
-    var _this = this;
-    if (this.loading) {
-      return;
-    }
-    this.loaded = false;
-    this.loading = true;
-    this.adapter.addClass(this.container, this["class"].loading);
-    this.setContent("");
-    this.debug("Loading content from " + this.options.ajax);
-    return this.adapter.ajax({
-      url: this.options.ajax,
-      method: this.options.ajaxMethod,
-      onSuccess: function onSuccess(responseText) {
-        _this.debug("Loading successful.");
-        _this.adapter.removeClass(_this.container, _this["class"].loading);
-        return _this.setContent(responseText);
-      },
-      onError: function onError(error) {
-        var message;
-        message = _this.options.ajaxErrorMessage;
-        _this.debug(message, error);
-        _this.setContent(message);
-        return _this.adapter.addClass(_this.container, _this["class"].ajaxError);
-      },
-      onComplete: function onComplete() {
-        _this.adapter.removeClass(_this.container, _this["class"].loading);
-        _this.loading = false;
-        _this.loaded = true;
-        _this._searchAndActivateCloseButtons();
-        _this._activateFirstInput();
-        return _this.reposition();
-      }
-    });
-  };
-
-  Opentip.prototype._ensureTriggerElement = function () {
-    if (!this._triggerElementExists()) {
-      this.deactivate();
-      return this._stopEnsureTriggerElement();
-    }
-  };
-
-  Opentip.prototype._ensureTriggerElementInterval = 1000;
-
-  Opentip.prototype._startEnsureTriggerElement = function () {
-    var _this = this;
-    return this._ensureTriggerElementTimeoutId = setInterval(function () {
-      return _this._ensureTriggerElement();
-    }, this._ensureTriggerElementInterval);
-  };
-
-  Opentip.prototype._stopEnsureTriggerElement = function () {
-    return clearInterval(this._ensureTriggerElementTimeoutId);
-  };
-
-  return Opentip;
-}();
-
-vendors = ["khtml", "ms", "o", "moz", "webkit"];
-
-Opentip.prototype.setCss3Style = function (element, styles) {
-  var prop, value, vendor, vendorProp, _results;
-  element = this.adapter.unwrap(element);
-  _results = [];
-  for (prop in styles) {
-    if (!__hasProp.call(styles, prop)) continue;
-    value = styles[prop];
-    if (element.style[prop] != null) {
-      _results.push(element.style[prop] = value);
-    } else {
-      _results.push(function () {
-        var _i, _len, _results1;
-        _results1 = [];
-        for (_i = 0, _len = vendors.length; _i < _len; _i++) {
-          vendor = vendors[_i];
-          vendorProp = "" + this.ucfirst(vendor) + this.ucfirst(prop);
-          if (element.style[vendorProp] != null) {
-            _results1.push(element.style[vendorProp] = value);
-          } else {
-            _results1.push(void 0);
-          }
-        }
-        return _results1;
-      }.call(this));
-    }
-  }
-  return _results;
-};
-
-Opentip.prototype.defer = function (func) {
-  return setTimeout(func, 0);
-};
-
-Opentip.prototype.setTimeout = function (func, seconds) {
-  return setTimeout(func, seconds ? seconds * 1000 : 0);
-};
-
-Opentip.prototype.ucfirst = function (string) {
-  if (string == null) {
-    return "";
-  }
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-Opentip.prototype.dasherize = function (string) {
-  return string.replace(/([A-Z])/g, function (_, character) {
-    return "-" + character.toLowerCase();
-  });
-};
-
-mousePositionObservers = [];
-
-mousePosition = {
-  x: 0,
-  y: 0
-};
-
-mouseMoved = function mouseMoved(e) {
-  var observer, _i, _len, _results;
-  mousePosition = Opentip.adapter.mousePosition(e);
-  _results = [];
-  for (_i = 0, _len = mousePositionObservers.length; _i < _len; _i++) {
-    observer = mousePositionObservers[_i];
-    _results.push(observer());
-  }
-  return _results;
-};
-
-Opentip.followMousePosition = function () {
-  return Opentip.adapter.observe(document.body, "mousemove", mouseMoved);
-};
-
-Opentip._observeMousePosition = function (observer) {
-  return mousePositionObservers.push(observer);
-};
-
-Opentip._stopObservingMousePosition = function (removeObserver) {
-  var observer;
-  return mousePositionObservers = function () {
-    var _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = mousePositionObservers.length; _i < _len; _i++) {
-      observer = mousePositionObservers[_i];
-      if (observer !== removeObserver) {
-        _results.push(observer);
-      }
-    }
-    return _results;
-  }();
-};
-
-Opentip.Joint = function () {
-
-  function Joint(pointerString) {
-    if (pointerString == null) {
-      return;
-    }
-    if (pointerString instanceof Opentip.Joint) {
-      pointerString = pointerString.toString();
-    }
-    this.set(pointerString);
-    this;
-  }
-
-  Joint.prototype.set = function (string) {
-    string = string.toLowerCase();
-    this.setHorizontal(string);
-    this.setVertical(string);
-    return this;
-  };
-
-  Joint.prototype.setHorizontal = function (string) {
-    var i, valid, _i, _j, _len, _len1, _results;
-    valid = ["left", "center", "right"];
-    for (_i = 0, _len = valid.length; _i < _len; _i++) {
-      i = valid[_i];
-      if (~string.indexOf(i)) {
-        this.horizontal = i.toLowerCase();
-      }
-    }
-    if (this.horizontal == null) {
-      this.horizontal = "center";
-    }
-    _results = [];
-    for (_j = 0, _len1 = valid.length; _j < _len1; _j++) {
-      i = valid[_j];
-      _results.push(this[i] = this.horizontal === i ? i : void 0);
-    }
-    return _results;
-  };
-
-  Joint.prototype.setVertical = function (string) {
-    var i, valid, _i, _j, _len, _len1, _results;
-    valid = ["top", "middle", "bottom"];
-    for (_i = 0, _len = valid.length; _i < _len; _i++) {
-      i = valid[_i];
-      if (~string.indexOf(i)) {
-        this.vertical = i.toLowerCase();
-      }
-    }
-    if (this.vertical == null) {
-      this.vertical = "middle";
-    }
-    _results = [];
-    for (_j = 0, _len1 = valid.length; _j < _len1; _j++) {
-      i = valid[_j];
-      _results.push(this[i] = this.vertical === i ? i : void 0);
-    }
-    return _results;
-  };
-
-  Joint.prototype.eql = function (pointer) {
-    return pointer != null && this.horizontal === pointer.horizontal && this.vertical === pointer.vertical;
-  };
-
-  Joint.prototype.flip = function () {
-    var flippedIndex, positionIdx;
-    positionIdx = Opentip.position[this.toString(true)];
-    flippedIndex = (positionIdx + 4) % 8;
-    this.set(Opentip.positions[flippedIndex]);
-    return this;
-  };
-
-  Joint.prototype.toString = function (camelized) {
-    var horizontal, vertical;
-    if (camelized == null) {
-      camelized = false;
-    }
-    vertical = this.vertical === "middle" ? "" : this.vertical;
-    horizontal = this.horizontal === "center" ? "" : this.horizontal;
-    if (vertical && horizontal) {
-      if (camelized) {
-        horizontal = Opentip.prototype.ucfirst(horizontal);
-      } else {
-        horizontal = " " + horizontal;
-      }
-    }
-    return "" + vertical + horizontal;
-  };
-
-  return Joint;
-}();
-
-Opentip.prototype._positionsEqual = function (posA, posB) {
-  return posA != null && posB != null && posA.left === posB.left && posA.top === posB.top;
-};
-
-Opentip.prototype._dimensionsEqual = function (dimA, dimB) {
-  return dimA != null && dimB != null && dimA.width === dimB.width && dimA.height === dimB.height;
-};
-
-Opentip.prototype.debug = function () {
-  var args;
-  args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-  if (Opentip.debug && (typeof console !== "undefined" && console !== null ? console.debug : void 0) != null) {
-    args.unshift("#" + this.id + " |");
-    return console.debug.apply(console, args);
-  }
-};
-
-Opentip.findElements = function () {
-  var adapter, content, element, optionName, optionValue, options, _i, _len, _ref, _results;
-  adapter = Opentip.adapter;
-  _ref = adapter.findAll(document.body, "[data-ot]");
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    element = _ref[_i];
-    options = {};
-    content = adapter.data(element, "ot");
-    if (content === "" || content === "true" || content === "yes") {
-      content = adapter.attr(element, "title");
-      adapter.attr(element, "title", "");
-    }
-    content = content || "";
-    for (optionName in Opentip.styles.standard) {
-      optionValue = adapter.data(element, "ot" + Opentip.prototype.ucfirst(optionName));
-      if (optionValue != null) {
-        if (optionValue === "yes" || optionValue === "true" || optionValue === "on") {
-          optionValue = true;
-        } else if (optionValue === "no" || optionValue === "false" || optionValue === "off") {
-          optionValue = false;
-        }
-        options[optionName] = optionValue;
-      }
-    }
-    _results.push(new Opentip(element, content, options));
-  }
-  return _results;
-};
-
-Opentip.version = "2.4.6";
-
-Opentip.debug = false;
-
-Opentip.lastId = 0;
-
-Opentip.lastZIndex = 100;
-
-Opentip.tips = [];
-
-Opentip._abortShowingGroup = function (group, originatingOpentip) {
-  var opentip, _i, _len, _ref, _results;
-  _ref = Opentip.tips;
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    opentip = _ref[_i];
-    if (opentip !== originatingOpentip && opentip.options.group === group) {
-      _results.push(opentip._abortShowing());
-    } else {
-      _results.push(void 0);
-    }
-  }
-  return _results;
-};
-
-Opentip._hideGroup = function (group, originatingOpentip) {
-  var opentip, _i, _len, _ref, _results;
-  _ref = Opentip.tips;
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    opentip = _ref[_i];
-    if (opentip !== originatingOpentip && opentip.options.group === group) {
-      _results.push(opentip.hide());
-    } else {
-      _results.push(void 0);
-    }
-  }
-  return _results;
-};
-
-Opentip.adapters = {};
-
-Opentip.adapter = null;
-
-firstAdapter = true;
-
-Opentip.addAdapter = function (adapter) {
-  Opentip.adapters[adapter.name] = adapter;
-  if (firstAdapter) {
-    Opentip.adapter = adapter;
-    adapter.domReady(Opentip.findElements);
-    adapter.domReady(Opentip.followMousePosition);
-    return firstAdapter = false;
-  }
-};
-
-Opentip.positions = ["top", "topRight", "right", "bottomRight", "bottom", "bottomLeft", "left", "topLeft"];
-
-Opentip.position = {};
-
-_ref = Opentip.positions;
-for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-  position = _ref[i];
-  Opentip.position[position] = i;
-}
-
-Opentip.styles = {
-  standard: {
-    "extends": null,
-    title: void 0,
-    escapeTitle: true,
-    escapeContent: false,
-    className: "standard",
-    stem: true,
-    delay: null,
-    hideDelay: 0.1,
-    fixed: false,
-    showOn: "mouseover",
-    hideTrigger: "trigger",
-    hideTriggers: [],
-    hideOn: null,
-    removeElementsOnHide: false,
-    offset: [0, 0],
-    containInViewport: true,
-    autoOffset: true,
-    showEffect: "appear",
-    hideEffect: "fade",
-    showEffectDuration: 0.3,
-    hideEffectDuration: 0.2,
-    stemLength: 5,
-    stemBase: 8,
-    tipJoint: "top left",
-    target: null,
-    targetJoint: null,
-    cache: true,
-    ajax: false,
-    ajaxMethod: "GET",
-    ajaxErrorMessage: "There was a problem downloading the content.",
-    group: null,
-    style: null,
-    background: "#fff18f",
-    backgroundGradientHorizontal: false,
-    closeButtonOffset: [5, 5],
-    closeButtonRadius: 7,
-    closeButtonCrossSize: 4,
-    closeButtonCrossColor: "#d2c35b",
-    closeButtonCrossLineWidth: 1.5,
-    closeButtonLinkOverscan: 6,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#f2e37b",
-    shadow: true,
-    shadowBlur: 10,
-    shadowOffset: [3, 3],
-    shadowColor: "rgba(0, 0, 0, 0.1)"
-  },
-  glass: {
-    "extends": "standard",
-    className: "glass",
-    background: [[0, "rgba(252, 252, 252, 0.8)"], [0.5, "rgba(255, 255, 255, 0.8)"], [0.5, "rgba(250, 250, 250, 0.9)"], [1, "rgba(245, 245, 245, 0.9)"]],
-    borderColor: "#eee",
-    closeButtonCrossColor: "rgba(0, 0, 0, 0.2)",
-    borderRadius: 15,
-    closeButtonRadius: 10,
-    closeButtonOffset: [8, 8]
-  },
-  dark: {
-    "extends": "standard",
-    className: "dark",
-    borderRadius: 13,
-    borderColor: "#444",
-    closeButtonCrossColor: "rgba(240, 240, 240, 1)",
-    shadowColor: "rgba(0, 0, 0, 0.3)",
-    shadowOffset: [2, 2],
-    background: [[0, "rgba(30, 30, 30, 0.7)"], [0.5, "rgba(30, 30, 30, 0.8)"], [0.5, "rgba(10, 10, 10, 0.8)"], [1, "rgba(10, 10, 10, 0.9)"]]
-  },
-  alert: {
-    "extends": "standard",
-    className: "alert",
-    borderRadius: 1,
-    borderColor: "#AE0D11",
-    closeButtonCrossColor: "rgba(255, 255, 255, 1)",
-    shadowColor: "rgba(0, 0, 0, 0.3)",
-    shadowOffset: [2, 2],
-    background: [[0, "rgba(203, 15, 19, 0.7)"], [0.5, "rgba(203, 15, 19, 0.8)"], [0.5, "rgba(189, 14, 18, 0.8)"], [1, "rgba(179, 14, 17, 0.9)"]]
-  }
-};
-
-Opentip.defaultStyle = "standard";
-
-if (typeof module !== "undefined" && module !== null) {
-  module.exports = Opentip;
-} else {
-  window.Opentip = Opentip;
-}
-
-// Generated by CoffeeScript 1.4.0
-var __slice = [].slice;
-
-(function ($) {
-  var Adapter;
-  $.fn.opentip = function (content, title, options) {
-    return new Opentip(this, content, title, options);
-  };
-  Adapter = function () {
-
-    function Adapter() {}
-
-    Adapter.prototype.name = "jquery";
-
-    Adapter.prototype.domReady = function (callback) {
-      return $(callback);
-    };
-
-    Adapter.prototype.create = function (html) {
-      return $(html);
-    };
-
-    Adapter.prototype.wrap = function (element) {
-      element = $(element);
-      if (element.length > 1) {
-        throw new Error("Multiple elements provided.");
-      }
-      return element;
-    };
-
-    Adapter.prototype.unwrap = function (element) {
-      return $(element)[0];
-    };
-
-    Adapter.prototype.tagName = function (element) {
-      return this.unwrap(element).tagName;
-    };
-
-    Adapter.prototype.attr = function () {
-      var args, element, _ref;
-      element = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return (_ref = $(element)).attr.apply(_ref, args);
-    };
-
-    Adapter.prototype.data = function () {
-      var args, element, _ref;
-      element = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return (_ref = $(element)).data.apply(_ref, args);
-    };
-
-    Adapter.prototype.find = function (element, selector) {
-      return $(element).find(selector).get(0);
-    };
-
-    Adapter.prototype.findAll = function (element, selector) {
-      return $(element).find(selector);
-    };
-
-    Adapter.prototype.update = function (element, content, escape) {
-      element = $(element);
-      if (escape) {
-        return element.text(content);
-      } else {
-        return element.html(content);
-      }
-    };
-
-    Adapter.prototype.append = function (element, child) {
-      return $(element).append(child);
-    };
-
-    Adapter.prototype.remove = function (element) {
-      return $(element).remove();
-    };
-
-    Adapter.prototype.addClass = function (element, className) {
-      return $(element).addClass(className);
-    };
-
-    Adapter.prototype.removeClass = function (element, className) {
-      return $(element).removeClass(className);
-    };
-
-    Adapter.prototype.css = function (element, properties) {
-      return $(element).css(properties);
-    };
-
-    Adapter.prototype.dimensions = function (element) {
-      return {
-        width: $(element).outerWidth(),
-        height: $(element).outerHeight()
-      };
-    };
-
-    Adapter.prototype.scrollOffset = function () {
-      return [window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft, window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop];
-    };
-
-    Adapter.prototype.viewportDimensions = function () {
-      return {
-        width: document.documentElement.clientWidth,
-        height: document.documentElement.clientHeight
-      };
-    };
-
-    Adapter.prototype.mousePosition = function (e) {
-      if (e == null) {
-        return null;
-      }
-      return {
-        x: e.pageX,
-        y: e.pageY
-      };
-    };
-
-    Adapter.prototype.offset = function (element) {
-      var offset;
-      offset = $(element).offset();
-      return {
-        left: offset.left,
-        top: offset.top
-      };
-    };
-
-    Adapter.prototype.observe = function (element, eventName, observer) {
-      return $(element).bind(eventName, observer);
-    };
-
-    Adapter.prototype.stopObserving = function (element, eventName, observer) {
-      return $(element).unbind(eventName, observer);
-    };
-
-    Adapter.prototype.ajax = function (options) {
-      var _ref, _ref1;
-      if (options.url == null) {
-        throw new Error("No url provided");
-      }
-      return $.ajax({
-        url: options.url,
-        type: (_ref = (_ref1 = options.method) != null ? _ref1.toUpperCase() : void 0) != null ? _ref : "GET"
-      }).done(function (content) {
-        return typeof options.onSuccess === "function" ? options.onSuccess(content) : void 0;
-      }).fail(function (request) {
-        return typeof options.onError === "function" ? options.onError("Server responded with status " + request.status) : void 0;
-      }).always(function () {
-        return typeof options.onComplete === "function" ? options.onComplete() : void 0;
-      });
-    };
-
-    Adapter.prototype.clone = function (object) {
-      return $.extend({}, object);
-    };
-
-    Adapter.prototype.extend = function () {
-      var sources, target;
-      target = arguments[0], sources = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return $.extend.apply($, [target].concat(__slice.call(sources)));
-    };
-
-    return Adapter;
-  }();
-  return Opentip.addAdapter(new Adapter());
-})(_jquery2.default);
-
-exports.default = Opentip;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43)(module)))
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.default = {
-	REST: 'rest',
-	LANGUAGELIST: 'rest/l/l',
-	GETLOCALE: 'rest/l/get',
-	CONFIG: 'rest/c/e',
-	REGISTER: 'rest/u/r',
-	FORGOTPASS: 'rest/user/forgotpassword',
-	TICKET: 'rest/misc/ticket',
-	PRODUCTS: 'rest/i/p',
-	PROFILE: 'rest/user/profile',
-	AUTOPROXY: 'rest/misc/autoproxy',
-	FEEDBACK: 'rest/misc/feedback',
-	NOTIFICATION: 'rest/user/profile/notification',
-	PING: 'rest/p',
-	SUPPORT: 'support/',
-	TICKETTOKEN: 'rest/misc/persist',
-	DISCONNECTS: 'rest/misc/disconnects',
-	RESENDACTIVATION: 'rest/user/activation/resend'
-};
-
-/***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16814,7 +16317,7 @@ var Sticked = function () {
 exports.default = new Sticked();
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16826,11 +16329,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -16842,7 +16345,7 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _otherTools = __webpack_require__(50);
+var _otherTools = __webpack_require__(53);
 
 var _otherTools2 = _interopRequireDefault(_otherTools);
 
@@ -16934,7 +16437,7 @@ var OtherToolsView = function () {
 exports.default = new OtherToolsView();
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16943,32 +16446,289 @@ exports.default = new OtherToolsView();
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = {
-  ActivationVerifyEmail: 'Verify your email address',
-  ActivationTitle: 'Yay! You\'re Almost There.',
-  ActivationTitle2: 'Activate your account to finish your signing up.',
-  ActivationText: 'We\'ve sent you a welcome email with an activation link. Simply click that link and afterwards login to your account.',
-  ActivationWarning: 'It can take up to 5 minutes to receive the email with an activation link. Please don\'t forget to check your spam and junk folder.',
-  ActivationResendError: 'You have requested this function too many times in a short amount of time. Please try again in 5 minutes.',
-  ActivationResendSuccess: 'New Activation Link Sent'
-};
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _UpgradeView = __webpack_require__(12);
+
+var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GetPremiumView = function () {
+  function GetPremiumView() {
+    _classCallCheck(this, GetPremiumView);
+
+    this.template = _folders2.default.VIEWS + '/get-premium.html';
+  }
+
+  _createClass(GetPremiumView, [{
+    key: 'show',
+    value: function show() {
+      var _this2 = this;
+
+      var _this = this;
+
+      _Utils2.default.getLocaleInStorage().then(function (locale) {
+        _this2.App = (0, _jquery2.default)('#app');
+        _this2.App.html("");
+
+        _jquery2.default.get(_this.template, function (template) {
+          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+          _this.App.append(loadedTemplate);
+          _this.selectElements();
+        }, "html");
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {
+      var _this = this;
+      _this.closeButton = (0, _jquery2.default)('#getprem-close');
+      _this.upgradeButton = (0, _jquery2.default)('#getprem-upgrade-btn');
+      _this.setEvents();
+    }
+  }, {
+    key: 'setEvents',
+    value: function setEvents() {
+      var _this = this;
+
+      _this.closeButton.click(_this.onCloseButtonClicked.bind(this));
+      _this.upgradeButton.click(_this.onUpgradeButtonClicked.bind(this));
+    }
+  }, {
+    key: 'onCloseButtonClicked',
+    value: function onCloseButtonClicked() {
+      location.reload();
+    }
+  }, {
+    key: 'onUpgradeButtonClicked',
+    value: function onUpgradeButtonClicked() {
+      _UpgradeView2.default.initView();
+    }
+  }]);
+
+  return GetPremiumView;
+}();
+
+exports.default = new GetPremiumView();
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _jquery = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _Main = __webpack_require__(27);
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TrialView = function () {
+  function TrialView() {
+    _classCallCheck(this, TrialView);
+
+    this.template = _folders2.default.VIEWS + '/trial.html';
+  }
+
+  _createClass(TrialView, [{
+    key: 'show',
+    value: function show(trialDays, userData) {
+      var _this2 = this;
+
+      var _this = this;
+      this.trialDays = trialDays;
+      this.userData = userData;
+
+      _Utils2.default.getLocaleInStorage().then(function (locale) {
+        _this2.App = (0, _jquery2.default)('#app');
+        _this2.App.html("");
+
+        _jquery2.default.get(_this.template, function (template) {
+          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+          _this.App.append(loadedTemplate);
+          _this.selectElements();
+
+          _this.setTrialDays(trialDays);
+        }, "html");
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {
+      var _this = this;
+      _this.closeButton = (0, _jquery2.default)('#gettrial-close');
+      _this.upgradeButton = (0, _jquery2.default)('#gettrial-upgrade-btn');
+
+      _this.loadingDiv = (0, _jquery2.default)('#loading-div');
+      _this.loadingImg = (0, _jquery2.default)('#gettrial-loading-img');
+
+      _this.contentDiv = (0, _jquery2.default)('#trial-content');
+
+      _this.errorDiv = (0, _jquery2.default)('#error-div');
+      _this.successDiv = (0, _jquery2.default)('#success-div');
+      _this.setEvents();
+    }
+  }, {
+    key: 'setEvents',
+    value: function setEvents() {
+      var _this = this;
+
+      _this.closeButton.click(_this.onCloseButtonClicked.bind(this));
+      _this.upgradeButton.click(_this.onUpgradeButtonClicked.bind(this));
+    }
+  }, {
+    key: 'setTrialDays',
+    value: function setTrialDays(days) {
+      (0, _jquery2.default)('#t-d1').text(days);
+      (0, _jquery2.default)('#t-d2').text(days);
+    }
+  }, {
+    key: 'onCloseButtonClicked',
+    value: function onCloseButtonClicked() {
+      location.reload();
+    }
+  }, {
+    key: 'onUpgradeButtonClicked',
+    value: function onUpgradeButtonClicked() {
+      var _this = this;
+      _this.setLoading();
+      var data = {};
+      if (_this.userData && _this.userData.authcode) {
+        data = {
+          authcode: _this.userData.authcode
+        };
+      } else {
+        data = {
+          email: _this.userData.email,
+          hpassword: _this.userData.password
+        };
+      }
+      _BackgroundRequester2.default.request('api', 'getTrial', data).then(function (response) {
+
+        _this.unsetLoading();
+
+        if (response && response.Retcode === 200) return _this.trialSuccess(response);
+
+        if (response && response.Retcode < 0) return _this.trialError(response.Message);
+
+        _this.trialError(["No Retcode, Unknow error"]);
+      });
+    }
+  }, {
+    key: 'trialSuccess',
+    value: function trialSuccess(response) {
+      var _this = this;
+      _this.successDiv.css('display', 'block');
+      (0, _jquery2.default)('#success-con').css('display', 'block');
+      if (response.Message) (0, _jquery2.default)('#success-title').text(response.Message);
+      (0, _jquery2.default)('#expiration-date').text(_Utils2.default.getUserExpirationData(response.expiration));
+    }
+  }, {
+    key: 'trialError',
+    value: function trialError(error) {
+      var _this = this;
+      (0, _jquery2.default)('#fail-con').css('display', 'block');
+      if (Array.isArray(error) && error.length > 0) return _this.errorDiv.text(error[0]);
+      _this.errorDiv.text("Unknow error, contact support");
+    }
+  }, {
+    key: 'setLoading',
+    value: function setLoading() {
+      var _this = this;
+      _this.loadingImg.html(_ServiceMeta2.default.LOADINGIMG);
+      _this.loadingDiv.css('display', 'block');
+      _this.contentDiv.css('display', 'none');
+      _this.closeButton.css('display', 'none');
+    }
+  }, {
+    key: 'unsetLoading',
+    value: function unsetLoading() {
+      var _this = this;
+      _this.loadingDiv.css('display', 'none');
+      _this.closeButton.css('display', 'block');
+    }
+  }]);
+
+  return TrialView;
+}();
+
+exports.default = new TrialView();
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _Main = __webpack_require__(30);
 
 var _Main2 = _interopRequireDefault(_Main);
 
-var _browserTabs = __webpack_require__(57);
+var _browserTabs = __webpack_require__(63);
 
 var _browserTabs2 = _interopRequireDefault(_browserTabs);
 
@@ -16984,7 +16744,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   var htmlElement = document.querySelector("html");
   var screenResolutionFactor = _browserTabs2.default.getScreenResolutionFactor();
 
-  if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "chrome") {
+  if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "chrome" || _ServiceMeta2.default.PLATFORM.toLowerCase() == "edge") {
     _browserTabs2.default.isZoomed().then(function (settings) {
       if (settings.isZoomed) {
         var fixingZoomFactor = _browserTabs2.default.getZoomFactor(settings.zoomFactor);
@@ -16995,7 +16755,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 });
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17007,15 +16767,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _LanguageView = __webpack_require__(12);
+var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _BaseSearchView = __webpack_require__(30);
+var _BaseSearchView = __webpack_require__(33);
 
 var _BaseSearchView2 = _interopRequireDefault(_BaseSearchView);
 
@@ -17023,7 +16783,7 @@ var _LoginView = __webpack_require__(7);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _DashboardView = __webpack_require__(11);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -17039,21 +16799,25 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _ProxySearchView = __webpack_require__(18);
+var _ProxySearchView = __webpack_require__(21);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _Extension = __webpack_require__(56);
+var _Extension = __webpack_require__(62);
 
 var _Extension2 = _interopRequireDefault(_Extension);
 
-var _PermissionView = __webpack_require__(16);
+var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
+
+var _UpdateRequiredView = __webpack_require__(20);
+
+var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17084,23 +16848,37 @@ var Main = function () {
 				if (permission === false) {
 					_PermissionView2.default.show();
 				} else {
-					chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK], function (storage) {
-
-						chrome.storage.onChanged.addListener(_this.onSettingsChanged.bind(_this));
-
-						if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return _BaseSearchView2.default.initView();
-
-						if (!storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE]) return _LanguageView2.default.initView();
-
-						if (storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA]) return _this.userIsLoggedIn(storage);
-
-						_LoginView2.default.initView();
+					_Extension2.default.isVersionStop().then(function (isStop) {
+						if (isStop) {
+							_UpdateRequiredView2.default.show(true);
+							return;
+						}
+						_this.run();
+					}).catch(function () {
+						_this.run();
 					});
 				}
 			});
 			/*
    		}, "html");
    */
+		}
+	}, {
+		key: 'run',
+		value: function run() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK], function (storage) {
+
+				chrome.storage.onChanged.addListener(_this.onSettingsChanged.bind(_this));
+
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return _BaseSearchView2.default.initView();
+
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE]) return _LanguageView2.default.initView();
+
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA]) return _this.userIsLoggedIn(storage);
+
+				_LoginView2.default.initView();
+			});
 		}
 	}, {
 		key: 'onSettingsChanged',
@@ -17180,7 +16958,7 @@ var Main = function () {
 exports.default = new Main();
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17195,7 +16973,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17214,7 +16992,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17226,11 +17004,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -17435,7 +17213,25 @@ var BaseSearchView = function () {
 exports.default = new BaseSearchView();
 
 /***/ }),
-/* 31 */
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = {
+	"mainbase_search_timeout": 10000,
+	"tierbase_search_timeout": 15000,
+	"mainbase_api_timeout": 20000,
+	"tierbase_api_timeout": 25000,
+	"proxy_search_timeout": 10000
+};
+
+/***/ }),
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17521,7 +17317,7 @@ var Tabs = function () {
 exports.default = Tabs;
 
 /***/ }),
-/* 32 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17681,7 +17477,7 @@ var ServerList = function () {
 exports.default = new ServerList();
 
 /***/ }),
-/* 33 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17693,11 +17489,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -17709,11 +17505,11 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _LanguageView = __webpack_require__(12);
+var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _DashboardView = __webpack_require__(11);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -17721,9 +17517,17 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+var _CloseAccountView = __webpack_require__(38);
+
+var _CloseAccountView2 = _interopRequireDefault(_CloseAccountView);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17731,7 +17535,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var shajs = __webpack_require__(14);
+var shajs = __webpack_require__(15);
 
 var UserProfileView = function () {
 	function UserProfileView() {
@@ -17763,15 +17567,14 @@ var UserProfileView = function () {
 					_this.loadStorageData().then(function (storage) {
 						_this.Storage = storage;
 
-						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+						var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
 						_this.App.append(loadedTemplate);
 
 						_this.selectElements(locale);
 						_this.setHeaderBackButton();
+						_this.setAuthcode(storage);
 
 						_this.setPlaceholder(storage);
-
-						_this.setNotificationState(storage);
 
 						_this.setInAppNotificationState();
 
@@ -17782,6 +17585,15 @@ var UserProfileView = function () {
 			}, "html");
 		}
 	}, {
+		key: 'setAuthcode',
+		value: function setAuthcode() {
+			var _this = this;
+			if (_this.Storage.userData.authcode) {
+				_this.userProfileAuthcode.text(_this.Storage.userData.authcode);
+				(0, _jquery2.default)('#authcode-container').css('display', 'block');
+			}
+		}
+	}, {
 		key: 'selectElements',
 		value: function selectElements(locale) {
 			var _this = this;
@@ -17789,32 +17601,14 @@ var UserProfileView = function () {
 			_this.headerLogo = (0, _jquery2.default)('#header-logo');
 			_this.headerVersion = (0, _jquery2.default)('#header-version');
 
-			_this.passwordField = (0, _jquery2.default)('#user-profile-password');
-			_this.passwordConfirmField = (0, _jquery2.default)('#user-profile-password-confirm');
-
-			_this.showPassword = (0, _jquery2.default)('#show-password');
-			_this.showPasswordImg = (0, _jquery2.default)('#show-password-img');
+			_this.userProfileAuthcode = (0, _jquery2.default)('#user-profile-authcode');
+			_this.userProfileAuthcodeCopied = (0, _jquery2.default)('#authcode-copied-clipboard');
+			_this.userProfileShowAuthcode = (0, _jquery2.default)('#show-authcode');
 
 			_this.changeLanguageButton = (0, _jquery2.default)('#change-language-button');
-			_this.changeProfileButton = (0, _jquery2.default)('#change-profile-button');
-
-			_this.changeSuccessMessage = (0, _jquery2.default)('#change-success-message');
 			_this.changeBackButton = (0, _jquery2.default)('#user-profile-back-button');
 
-			_this.userProfileSuccessView = (0, _jquery2.default)('#user-profile-success');
-			_this.userProfileFormView = (0, _jquery2.default)('#user-profile-form');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			/* Notification */
-			_this.notificationCheckbox = (0, _jquery2.default)('#notification');
-			_this.notificationLabel = (0, _jquery2.default)('#notification-label');
-			_this.notificationNormalState = (0, _jquery2.default)('#notification-normal-state');
-			_this.notificationLoadingState = (0, _jquery2.default)('#notification-loading-state');
-			_this.notificationVerifyStep = (0, _jquery2.default)('#notification-verify-step');
-			_this.notificationDisableYesButton = (0, _jquery2.default)('#notification-disable-yes-button');
-			_this.notificationDisableNoButton = (0, _jquery2.default)('#notification-disable-no-button');
-			/* ----------- */
+			_this.closeAccountButton = (0, _jquery2.default)('#close-account-btn');
 
 			/* In-App Notification */
 			_this.inAppNotificationContainer = (0, _jquery2.default)('#notification-inapp-container');
@@ -17828,106 +17622,24 @@ var UserProfileView = function () {
 			var _this = this;
 			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
 			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
-
-			//Linux/Ubuntu password field focus bug fix
-			chrome.runtime.getPlatformInfo(function (platformInfo) {
-				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
-					_this.passwordField.attr('type', 'text');
-					_this.passwordField.focus(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (passwordShowState == 'off') {
-							_this.passwordField.css('font-family', 'dotfont');
-							_this.passwordField.css('font-size', '8px');
-						}
-						if (_this.passwordField.val() === '') {
-							_this.passwordField.attr('placeholder', '');
-						}
-					});
-					_this.passwordField.focusout(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (_this.passwordField.val() === '') {
-							if (passwordShowState == 'off') {
-								_this.passwordField.css('font-family', '');
-								_this.passwordField.css('font-size', '');
-							}
-							_this.passwordField.attr('placeholder', locale.EditProfileNewPass);
-						}
-					});
-
-					_this.passwordConfirmField.attr('type', 'text');
-					_this.passwordConfirmField.focus(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (passwordShowState == 'off') {
-							_this.passwordConfirmField.css('font-family', 'dotfont');
-							_this.passwordConfirmField.css('font-size', '8px');
-						}
-						if (_this.passwordConfirmField.val() === '') {
-							_this.passwordConfirmField.attr('placeholder', '');
-						}
-					});
-					_this.passwordConfirmField.focusout(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (_this.passwordConfirmField.val() === '') {
-							if (passwordShowState == 'off') {
-								_this.passwordConfirmField.css('font-family', '');
-								_this.passwordConfirmField.css('font-size', '');
-							}
-							_this.passwordConfirmField.attr('placeholder', locale.EditProfileNewPassCofirm);
-						}
-					});
-				}
-			});
 		}
 	}, {
 		key: 'setEvents',
 		value: function setEvents() {
 			var _this = this;
 
-			_this.showPassword.click(_this.onShowPasswordClicked.bind(this));
+			_this.userProfileAuthcode.click(_this.onUserProfileAuthcodeClicked.bind(this));
+			_this.userProfileShowAuthcode.click(_this.onUserProfileShowAuthcodeClicked.bind(this));
+
+			_this.closeAccountButton.click(_this.onCloseAccountClicked.bind(this));
 		}
 	}, {
-		key: 'onShowPasswordClicked',
-		value: function onShowPasswordClicked(e) {
+		key: 'onCloseAccountClicked',
+		value: function onCloseAccountClicked() {
 			var _this = this;
-			var current = _this.showPassword.attr('data');
 
-			chrome.runtime.getPlatformInfo(function (platformInfo) {
-				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
-					_this.passwordField.attr('type', 'text');
-					_this.passwordConfirmField.attr('type', 'text');
-
-					if (current == 'off') {
-						_this.showPasswordImg.attr('src', './images/red-eye.png');
-						_this.showPassword.attr('data', 'on');
-						_this.passwordField.css('font-family', '');
-						_this.passwordField.css('font-size', '');
-						_this.passwordConfirmField.css('font-family', '');
-						_this.passwordConfirmField.css('font-size', '');
-					} else {
-						_this.showPassword.attr('data', 'off');
-						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
-						if (_this.passwordField.val() != "") {
-							_this.passwordField.css('font-family', 'dotfont');
-							_this.passwordField.css('font-size', '8px');
-						}
-						if (_this.passwordConfirmField.val() != "") {
-							_this.passwordConfirmField.css('font-family', 'dotfont');
-							_this.passwordConfirmField.css('font-size', '8px');
-						}
-					}
-				} else {
-					if (current == 'off') {
-						_this.showPasswordImg.attr('src', './images/red-eye.png');
-						_this.showPassword.attr('data', 'on');
-						_this.passwordField.attr('type', 'text');
-						_this.passwordConfirmField.attr('type', 'text');
-					} else {
-						_this.showPassword.attr('data', 'off');
-						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
-						_this.passwordField.attr('type', 'password');
-						_this.passwordConfirmField.attr('type', 'password');
-					}
-				}
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+				_CloseAccountView2.default.show(storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA]);
 			});
 		}
 	}, {
@@ -17944,15 +17656,8 @@ var UserProfileView = function () {
 			var _this = this;
 
 			_this.changeLanguageButton.click(_this.onChangeLanguageClicked.bind(this));
-			_this.changeProfileButton.click(_this.onChangeProfileClicked.bind(this));
 
 			_this.changeBackButton.click(_this.onBackButtonClicked.bind(this));
-
-			/* Notification */
-			_this.notificationCheckbox.click(_this.onNotificationSwitchChanged.bind(this));
-
-			/* In-App Notification */
-			_this.inAppNotificationCheckbox.click(_this.onInAppNotificationSwitchChanged.bind(this));
 		}
 	}, {
 		key: 'setNotificationState',
@@ -18012,114 +17717,37 @@ var UserProfileView = function () {
 				}
 			});
 		}
-
-		/* Modifier */
-
 	}, {
-		key: 'makeButtonInactive',
-		value: function makeButtonInactive(button) {
-			button.unbind('click');
-			button.addClass('btn--inactive');
-		}
-	}, {
-		key: 'makeButtonActive',
-		value: function makeButtonActive(button, buttonEvent) {
-			button.click(buttonEvent.bind(this));
-			button.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
+		key: 'fallbackCopyTextToClipboard',
+		value: function fallbackCopyTextToClipboard(text) {
 			var _this = this;
+			var textArea = document.createElement("textarea");
+			textArea.value = text;
+			textArea.style.position = "fixed"; //avoid scrolling to bottom
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
 
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.makeButtonInactive(_this.changeProfileButton);
-			_this.makeButtonInactive(_this.changeLanguageButton);
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.errorMessage.html("");
-			_this.makeButtonActive(_this.changeProfileButton, _this.onChangeProfileClicked);
-			_this.makeButtonActive(_this.changeLanguageButton, _this.onChangeLanguageClicked);
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(errors) {
-			var _this = this;
-			_this.errorMessage.html("");
-
-			for (var i = 0; i < errors.length; i++) {
-				if (i <= 2) {
-					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
-					_this.errorMessage.append(errorElm);
-				}
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'successful' : 'unsuccessful';
+			} catch (err) {
+				console.error('Fallback: Oops, unable to copy', err);
 			}
-		}
 
-		/* Actions */
-
-	}, {
-		key: 'updateNotificationState',
-		value: function updateNotificationState() {
-			var _this = this;
-
-			var notificationSwitch = _this.notificationCheckbox.prop('checked');
-
-			var data = {
-				state: notificationSwitch ? 'y' : 'n',
-				email: _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].email ? _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].email : "",
-				password: _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].password ? _this.Storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA].password : ""
-			};
-
-			_this.setLoading();
-
-			_BackgroundRequester2.default.request('api', 'setNotificationState', data).then(function (response) {
-
-				_this.unsetLoading();
-
-				if (response && response.Retcode == 200 && _this.Storage) {
-					var config = _this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
-					config.notificationstate = data.state;
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, config), function () {
-
-						var newState = data.state == 'y' ? true : false;
-						_this.notificationCheckbox.prop('checked', newState);
-					});
-				}
-			});
+			document.body.removeChild(textArea);
 		}
 	}, {
-		key: 'showNotificationVerifyStep',
-		value: function showNotificationVerifyStep(data) {
+		key: 'copyTextToClipboard',
+		value: function copyTextToClipboard(text) {
 			var _this = this;
 
-			_Utils2.default.hideElement(_this.notificationNormalState);
-			_Utils2.default.hideElement(_this.changeLanguageButton);
-			_Utils2.default.hideElement(_this.changeProfileButton);
-			_Utils2.default.hideElement(_this.inAppNotificationContainer);
-			_Utils2.default.showElement(_this.notificationVerifyStep);
-
-			_this.notificationDisableYesButton.click(function () {
-				_this.notificationDisableYesButton.unbind("click");
-				_this.updateNotificationState(data);
-				_Utils2.default.showElement(_this.notificationNormalState);
-				_Utils2.default.showElement(_this.changeLanguageButton);
-				_Utils2.default.showElement(_this.changeProfileButton);
-				_Utils2.default.showElement(_this.inAppNotificationContainer);
-				_Utils2.default.hideElement(_this.notificationVerifyStep);
-			});
-
-			_this.notificationDisableNoButton.click(function () {
-				_this.notificationDisableYesButton.unbind("click");
-				_Utils2.default.showElement(_this.notificationNormalState);
-				_Utils2.default.showElement(_this.changeLanguageButton);
-				_Utils2.default.showElement(_this.changeProfileButton);
-				_Utils2.default.showElement(_this.inAppNotificationContainer);
-				_Utils2.default.hideElement(_this.notificationVerifyStep);
-				_this.notificationCheckbox.prop('checked', true);
+			if (!navigator.clipboard) {
+				_this.fallbackCopyTextToClipboard(text);
+				return;
+			}
+			navigator.clipboard.writeText(text).then(function () {}, function (err) {
+				console.error('Async: Could not copy text: ', err);
 			});
 		}
 
@@ -18134,70 +17762,6 @@ var UserProfileView = function () {
 		key: 'onChangeLanguageClicked',
 		value: function onChangeLanguageClicked() {
 			_LanguageView2.default.initView();
-		}
-	}, {
-		key: 'onChangeProfileClicked',
-		value: function onChangeProfileClicked() {
-			var _this = this;
-
-			var errorMessages = [];
-			_this.errorMessage.html("");
-
-			var changeData = {};
-
-			_this.loadStorageData().then(function (storage) {
-				var locale = storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE];
-				var passwordToShortError = locale && locale.RegisterPasswordToShort ? locale.RegisterPasswordToShort : "Please type at least 6 characters as password for your own security. Typed password is too short";
-				var registerPasswordWhiteSpaceError = locale && locale.RegisterPasswordWhiteSpaceError ? locale.RegisterPasswordWhiteSpaceError : "Please do not use whitespace/space/empty at the beginning or end of your password";
-
-				var passwordField = _this.passwordField.val();
-				var passwordFieldConfirm = _this.passwordConfirmField.val();
-
-				if (passwordField != "" && passwordField == passwordFieldConfirm) changeData.newhpassword = shajs('sha512').update(passwordField).digest('hex');
-
-				if (passwordField != "" && passwordField != passwordFieldConfirm) errorMessages.push(storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]["RegisterPasswordConfirm"]);
-
-				if (passwordField.length < 6) errorMessages.push(passwordToShortError);
-
-				if (_jquery2.default.trim(passwordField).length !== passwordField.length) errorMessages.push(registerPasswordWhiteSpaceError);
-
-				if (errorMessages.length > 0) return _this.displayErrors(errorMessages);
-
-				if (_Utils2.default.isEmpty(changeData)) return 0;
-
-				_this.setLoading();
-
-				_BackgroundRequester2.default.request('api', 'changeProfile', changeData).then(function (response) {
-
-					_this.unsetLoading();
-
-					if (response && response.Retcode == 200) {
-						_this.changeSuccessMessage.text(response.Message);
-						_this.userProfileSuccessView.addClass('user-profile-view--success--on');
-						_this.userProfileFormView.addClass('user-profile-view--success');
-
-						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
-					} else {
-
-						if (response && response.Message) return _this.displayErrors(response.Message);
-					}
-				});
-			});
-		}
-	}, {
-		key: 'onNotificationSwitchChanged',
-		value: function onNotificationSwitchChanged() {
-			var _this = this;
-
-			var notificationSwitch = _this.notificationCheckbox.prop('checked');
-
-			var data = {
-				state: notificationSwitch ? 'y' : 'n'
-			};
-
-			if (!notificationSwitch) return _this.showNotificationVerifyStep(data);
-
-			_this.updateNotificationState(data);
 		}
 	}, {
 		key: 'onInAppNotificationSwitchChanged',
@@ -18220,6 +17784,33 @@ var UserProfileView = function () {
 				chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF, inAppNotification));
 			});
 		}
+	}, {
+		key: 'onUserProfileAuthcodeClicked',
+		value: function onUserProfileAuthcodeClicked() {
+			var _this = this;
+			var authcode = (0, _jquery2.default)('#user-profile-authcode').text().toUpperCase();
+
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
+				_this.fallbackCopyTextToClipboard(authcode);
+			} else {
+				_this.copyTextToClipboard(authcode);
+			}
+
+			_this.userProfileAuthcode.css('display', 'none');
+			_this.userProfileAuthcodeCopied.css('display', 'block');
+
+			setTimeout(function () {
+				_this.userProfileAuthcodeCopied.css('display', 'none');
+				_this.userProfileAuthcode.css('display', 'block');
+			}, 5000);
+		}
+	}, {
+		key: 'onUserProfileShowAuthcodeClicked',
+		value: function onUserProfileShowAuthcodeClicked() {
+			var _this = this;
+			_this.userProfileShowAuthcode.css('display', 'none');
+			_this.userProfileAuthcode.css('display', 'block');
+		}
 	}]);
 
 	return UserProfileView;
@@ -18228,7 +17819,167 @@ var UserProfileView = function () {
 exports.default = new UserProfileView();
 
 /***/ }),
-/* 34 */
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CloseAccountView = function () {
+  function CloseAccountView() {
+    _classCallCheck(this, CloseAccountView);
+
+    this.template = _folders2.default.VIEWS + '/close-account.html';
+  }
+
+  _createClass(CloseAccountView, [{
+    key: 'show',
+    value: function show(userData) {
+      var _this2 = this;
+
+      var _this = this;
+      _this.userData = userData;
+
+      _Utils2.default.getLocaleInStorage().then(function (locale) {
+        _this2.App = (0, _jquery2.default)('#app');
+        _this2.App.html("");
+
+        _jquery2.default.get(_this.template, function (template) {
+          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+          _this.App.append(loadedTemplate);
+          _this.selectElements();
+        }, "html");
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {
+      var _this = this;
+
+      _this.closeAccountButton = (0, _jquery2.default)('#close-account-btn');
+      _this.goBackButton = (0, _jquery2.default)('#go-back-btn');
+      _this.closeIcon = (0, _jquery2.default)('#close-icon');
+
+      _this.loadingImg = (0, _jquery2.default)('#close-account-loading');
+      _this.loadingDiv = (0, _jquery2.default)('#loading-div');
+
+      _this.contentDiv = (0, _jquery2.default)('#content-div');
+
+      _this.errorDiv = (0, _jquery2.default)('#error-div');
+
+      _this.successDiv = (0, _jquery2.default)('#success-div');
+
+      _this.setEvents();
+    }
+  }, {
+    key: 'setEvents',
+    value: function setEvents() {
+      var _this = this;
+
+      _this.closeAccountButton.click(_this.onCloseAccountClicked.bind(this));
+      _this.goBackButton.click(_this.onCancel.bind(this));
+      _this.closeIcon.click(_this.onCancel.bind(this));
+    }
+
+    // Events
+
+  }, {
+    key: 'onCloseAccountClicked',
+    value: function onCloseAccountClicked() {
+      var _this = this;
+      _this.setLoading();
+      _BackgroundRequester2.default.request('api', 'closeAccount', {
+        email: _this.userData.email,
+        hpassword: _this.userData.password,
+        authcode: _this.userData.authcode.toLowerCase()
+      }).then(function (response) {
+
+        _this.unsetLoading();
+
+        if (response && response.Retcode === 200) return _this.accountClosed();
+
+        if (response && response.Retcode < 0) return _this.showError(response.Message);
+      });
+    }
+  }, {
+    key: 'onCancel',
+    value: function onCancel() {
+      var _this = this;
+      location.reload();
+    }
+  }, {
+    key: 'accountClosed',
+    value: function accountClosed() {
+      var _this = this;
+      _this.successDiv.css('display', 'block');
+    }
+  }, {
+    key: 'showError',
+    value: function showError(error) {
+      var _this = this;
+      if (Array.isArray(error) && error.length > 0) return _this.errorDiv.text(error[0]);
+      _this.errorDiv.text("Unknow error, contact support");
+    }
+  }, {
+    key: 'setLoading',
+    value: function setLoading() {
+      var _this = this;
+      _this.loadingImg.html(_ServiceMeta2.default.LOADINGIMG);
+      _this.loadingDiv.css('display', 'block');
+      _this.contentDiv.css('display', 'none');
+      _this.closeIcon.css('display', 'none');
+    }
+  }, {
+    key: 'unsetLoading',
+    value: function unsetLoading() {
+      var _this = this;
+      _this.loadingDiv.css('display', 'none');
+      _this.closeIcon.css('display', 'block');
+    }
+  }]);
+
+  return CloseAccountView;
+}();
+
+exports.default = new CloseAccountView();
+
+/***/ }),
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -18239,9 +17990,9 @@ exports.default = new UserProfileView();
  * operation was added.
  */
 
-var inherits = __webpack_require__(9)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -18328,7 +18079,7 @@ module.exports = Sha
 
 
 /***/ }),
-/* 35 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18342,9 +18093,9 @@ module.exports = Sha
 
 
 
-var base64 = __webpack_require__(37)
-var ieee754 = __webpack_require__(38)
-var isArray = __webpack_require__(39)
+var base64 = __webpack_require__(41)
+var ieee754 = __webpack_require__(42)
+var isArray = __webpack_require__(43)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -20122,37 +19873,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22)))
 
 /***/ }),
-/* 36 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 37 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20273,7 +19997,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 38 */
+/* 42 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -20363,7 +20087,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 39 */
+/* 43 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -20374,7 +20098,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 40 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -20386,9 +20110,9 @@ module.exports = Array.isArray || function (arr) {
  * See http://pajhome.org.uk/crypt/md5 for details.
  */
 
-var inherits = __webpack_require__(9)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -20479,7 +20203,7 @@ module.exports = Sha1
 
 
 /***/ }),
-/* 41 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -20490,10 +20214,10 @@ module.exports = Sha1
  *
  */
 
-var inherits = __webpack_require__(9)
-var Sha256 = __webpack_require__(19)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var Sha256 = __webpack_require__(23)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var W = new Array(64)
 
@@ -20538,13 +20262,13 @@ module.exports = Sha224
 
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var inherits = __webpack_require__(9)
-var SHA512 = __webpack_require__(20)
-var Hash = __webpack_require__(10)
-var Buffer = __webpack_require__(8).Buffer
+var inherits = __webpack_require__(10)
+var SHA512 = __webpack_require__(24)
+var Hash = __webpack_require__(11)
+var Buffer = __webpack_require__(9).Buffer
 
 var W = new Array(160)
 
@@ -20601,35 +20325,7 @@ module.exports = Sha384
 
 
 /***/ }),
-/* 43 */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-/* 44 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20641,11 +20337,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -20661,11 +20357,11 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
-var _localhosts = __webpack_require__(45);
+var _localhosts = __webpack_require__(48);
 
 var _localhosts2 = _interopRequireDefault(_localhosts);
 
@@ -20903,7 +20599,7 @@ var BypassConfigView = function () {
 exports.default = new BypassConfigView();
 
 /***/ }),
-/* 45 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20915,7 +20611,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = ["localhost", "127.0.0.1", "local", "intra", "intranet", "onion"];
 
 /***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20927,11 +20623,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -20947,11 +20643,7 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _OpenTip = __webpack_require__(21);
-
-var _OpenTip2 = _interopRequireDefault(_OpenTip);
-
-var _Sticked = __webpack_require__(23);
+var _Sticked = __webpack_require__(25);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
 
@@ -20959,25 +20651,29 @@ var _DOMPurify = __webpack_require__(6);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _WebRTCAddon = __webpack_require__(47);
+var _WebRTCAddon = __webpack_require__(50);
 
 var _WebRTCAddon2 = _interopRequireDefault(_WebRTCAddon);
 
-var _WebRTCAddonView = __webpack_require__(49);
+var _WebRTCAddonView = __webpack_require__(52);
 
 var _WebRTCAddonView2 = _interopRequireDefault(_WebRTCAddonView);
 
-var _DesktopClientInfoView = __webpack_require__(15);
+var _DesktopClientInfoView = __webpack_require__(17);
 
 var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
 
-var _PermissionView = __webpack_require__(16);
+var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
 
-var _OtherToolsView = __webpack_require__(24);
+var _OtherToolsView = __webpack_require__(26);
 
 var _OtherToolsView2 = _interopRequireDefault(_OtherToolsView);
+
+var _Tooltip = __webpack_require__(19);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -21079,6 +20775,11 @@ var ConnectedView = function () {
 			_this.pinCountryButton = (0, _jquery2.default)('#pin-country');
 
 			_this.webRTCCheckbox = (0, _jquery2.default)('#webrtc-checkbox');
+			_this.webRTCContainer = (0, _jquery2.default)('#webrtc-container');
+			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == 'edge') {
+				_this.webRTCContainer.css('display', 'none');
+				_this.otherToolsButton.css('display', 'none');
+			}
 		}
 	}, {
 		key: 'setOtherToolsGif',
@@ -21213,15 +20914,17 @@ var ConnectedView = function () {
 		value: function pinButtonForFreeUser() {
 			var _this = this;
 
-			var options = {
-				tipJoint: "bottom",
-				background: "#fff",
-				borderColor: '#fff'
-			};
-
 			_this.deactivatePinButton();
 
-			new _OpenTip2.default(_this.pinCountryButton, "Only accessible for premium user", options);
+			var options = {
+				placement: 'top', // or bottom, left, right, and variations
+				title: "Top"
+			};
+
+			new _Tooltip2.default(_this.pinCountryButton, {
+				placement: 'top', // or bottom, left, right, and variations
+				title: "Only accessible for premium user"
+			});
 		}
 	}, {
 		key: 'getCountryElementIdByServer',
@@ -21347,7 +21050,7 @@ var ConnectedView = function () {
 exports.default = new ConnectedView();
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21359,7 +21062,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Management = __webpack_require__(48);
+var _Management = __webpack_require__(51);
 
 var _Management2 = _interopRequireDefault(_Management);
 
@@ -21466,7 +21169,7 @@ var WebRTCAddon = function () {
 exports.default = new WebRTCAddon();
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21607,53 +21310,6 @@ var Management = function () {
 					break;
 			}
 		}
-
-		/* Actions */
-
-		/*
-  	getIdOfAllExtensionsWithProxyPermission () {
-  		var _this = this;
-  		return new Promise((resolve, reject) => {
-  
-  			browser.management.getAll().then((listOfExtensions) => {
-  
-  
-  				var extensionIds = [];
-  
-  				for (var i = 0; i < listOfExtensions.length; i++) {
-  
-  					if(_this.hasExtensionProxyPermission(listOfExtensions[i]))
-  						extensionIds.push(listOfExtensions[i].id);
-  
-  				};
-  
-  				resolve(extensionIds);
-  
-  			});
-  
-  
-  		});
-  	}
-  */
-		/*
-  	disableExtensions (extensionIds) {
-  
-  		return new Promise((resolve, reject) => {
-  			var promises = [];
-  
-  			for (var i = 0; i < extensionIds.length; i++) {
-  				promises.push(browser.management.setEnabled(extensionIds[i], false));
-  			};
-  
-  			Promise.all(promises).then(values => {
-  				resolve(values);
-  			});
-  
-  
-  		});
-  	}
-  */
-
 	}, {
 		key: 'hasExtensionProxyPermission',
 		value: function hasExtensionProxyPermission(ext) {
@@ -21667,7 +21323,7 @@ var Management = function () {
 exports.default = new Management();
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21679,11 +21335,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -21829,7 +21485,7 @@ var WebRTCAddonView = function () {
 exports.default = new WebRTCAddonView();
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21851,7 +21507,2619 @@ exports.default = {
 };
 
 /***/ }),
-/* 51 */
+/* 54 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/**!
+ * @fileOverview Kickass library to create and place poppers near their reference elements.
+ * @version 1.15.0
+ * @license
+ * Copyright (c) 2016 Federico Zivolo and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
+var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
+var timeoutDuration = 0;
+for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
+  if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
+    timeoutDuration = 1;
+    break;
+  }
+}
+
+function microtaskDebounce(fn) {
+  var called = false;
+  return function () {
+    if (called) {
+      return;
+    }
+    called = true;
+    window.Promise.resolve().then(function () {
+      called = false;
+      fn();
+    });
+  };
+}
+
+function taskDebounce(fn) {
+  var scheduled = false;
+  return function () {
+    if (!scheduled) {
+      scheduled = true;
+      setTimeout(function () {
+        scheduled = false;
+        fn();
+      }, timeoutDuration);
+    }
+  };
+}
+
+var supportsMicroTasks = isBrowser && window.Promise;
+
+/**
+* Create a debounced version of a method, that's asynchronously deferred
+* but called in the minimum time possible.
+*
+* @method
+* @memberof Popper.Utils
+* @argument {Function} fn
+* @returns {Function}
+*/
+var debounce = supportsMicroTasks ? microtaskDebounce : taskDebounce;
+
+/**
+ * Check if the given variable is a function
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Any} functionToCheck - variable to check
+ * @returns {Boolean} answer to: is a function?
+ */
+function isFunction(functionToCheck) {
+  var getType = {};
+  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+/**
+ * Get CSS computed property of the given element
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Eement} element
+ * @argument {String} property
+ */
+function getStyleComputedProperty(element, property) {
+  if (element.nodeType !== 1) {
+    return [];
+  }
+  // NOTE: 1 DOM access here
+  var window = element.ownerDocument.defaultView;
+  var css = window.getComputedStyle(element, null);
+  return property ? css[property] : css;
+}
+
+/**
+ * Returns the parentNode or the host of the element
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @returns {Element} parent
+ */
+function getParentNode(element) {
+  if (element.nodeName === 'HTML') {
+    return element;
+  }
+  return element.parentNode || element.host;
+}
+
+/**
+ * Returns the scrolling parent of the given element
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @returns {Element} scroll parent
+ */
+function getScrollParent(element) {
+  // Return body, `getScroll` will take care to get the correct `scrollTop` from it
+  if (!element) {
+    return document.body;
+  }
+
+  switch (element.nodeName) {
+    case 'HTML':
+    case 'BODY':
+      return element.ownerDocument.body;
+    case '#document':
+      return element.body;
+  }
+
+  // Firefox want us to check `-x` and `-y` variations as well
+
+  var _getStyleComputedProp = getStyleComputedProperty(element),
+      overflow = _getStyleComputedProp.overflow,
+      overflowX = _getStyleComputedProp.overflowX,
+      overflowY = _getStyleComputedProp.overflowY;
+
+  if (/(auto|scroll|overlay)/.test(overflow + overflowY + overflowX)) {
+    return element;
+  }
+
+  return getScrollParent(getParentNode(element));
+}
+
+var isIE11 = isBrowser && !!(window.MSInputMethodContext && document.documentMode);
+var isIE10 = isBrowser && /MSIE 10/.test(navigator.userAgent);
+
+/**
+ * Determines if the browser is Internet Explorer
+ * @method
+ * @memberof Popper.Utils
+ * @param {Number} version to check
+ * @returns {Boolean} isIE
+ */
+function isIE(version) {
+  if (version === 11) {
+    return isIE11;
+  }
+  if (version === 10) {
+    return isIE10;
+  }
+  return isIE11 || isIE10;
+}
+
+/**
+ * Returns the offset parent of the given element
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @returns {Element} offset parent
+ */
+function getOffsetParent(element) {
+  if (!element) {
+    return document.documentElement;
+  }
+
+  var noOffsetParent = isIE(10) ? document.body : null;
+
+  // NOTE: 1 DOM access here
+  var offsetParent = element.offsetParent || null;
+  // Skip hidden elements which don't have an offsetParent
+  while (offsetParent === noOffsetParent && element.nextElementSibling) {
+    offsetParent = (element = element.nextElementSibling).offsetParent;
+  }
+
+  var nodeName = offsetParent && offsetParent.nodeName;
+
+  if (!nodeName || nodeName === 'BODY' || nodeName === 'HTML') {
+    return element ? element.ownerDocument.documentElement : document.documentElement;
+  }
+
+  // .offsetParent will return the closest TH, TD or TABLE in case
+  // no offsetParent is present, I hate this job...
+  if (['TH', 'TD', 'TABLE'].indexOf(offsetParent.nodeName) !== -1 && getStyleComputedProperty(offsetParent, 'position') === 'static') {
+    return getOffsetParent(offsetParent);
+  }
+
+  return offsetParent;
+}
+
+function isOffsetContainer(element) {
+  var nodeName = element.nodeName;
+
+  if (nodeName === 'BODY') {
+    return false;
+  }
+  return nodeName === 'HTML' || getOffsetParent(element.firstElementChild) === element;
+}
+
+/**
+ * Finds the root node (document, shadowDOM root) of the given element
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} node
+ * @returns {Element} root node
+ */
+function getRoot(node) {
+  if (node.parentNode !== null) {
+    return getRoot(node.parentNode);
+  }
+
+  return node;
+}
+
+/**
+ * Finds the offset parent common to the two provided nodes
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element1
+ * @argument {Element} element2
+ * @returns {Element} common offset parent
+ */
+function findCommonOffsetParent(element1, element2) {
+  // This check is needed to avoid errors in case one of the elements isn't defined for any reason
+  if (!element1 || !element1.nodeType || !element2 || !element2.nodeType) {
+    return document.documentElement;
+  }
+
+  // Here we make sure to give as "start" the element that comes first in the DOM
+  var order = element1.compareDocumentPosition(element2) & Node.DOCUMENT_POSITION_FOLLOWING;
+  var start = order ? element1 : element2;
+  var end = order ? element2 : element1;
+
+  // Get common ancestor container
+  var range = document.createRange();
+  range.setStart(start, 0);
+  range.setEnd(end, 0);
+  var commonAncestorContainer = range.commonAncestorContainer;
+
+  // Both nodes are inside #document
+
+  if (element1 !== commonAncestorContainer && element2 !== commonAncestorContainer || start.contains(end)) {
+    if (isOffsetContainer(commonAncestorContainer)) {
+      return commonAncestorContainer;
+    }
+
+    return getOffsetParent(commonAncestorContainer);
+  }
+
+  // one of the nodes is inside shadowDOM, find which one
+  var element1root = getRoot(element1);
+  if (element1root.host) {
+    return findCommonOffsetParent(element1root.host, element2);
+  } else {
+    return findCommonOffsetParent(element1, getRoot(element2).host);
+  }
+}
+
+/**
+ * Gets the scroll value of the given element in the given side (top and left)
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @argument {String} side `top` or `left`
+ * @returns {number} amount of scrolled pixels
+ */
+function getScroll(element) {
+  var side = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'top';
+
+  var upperSide = side === 'top' ? 'scrollTop' : 'scrollLeft';
+  var nodeName = element.nodeName;
+
+  if (nodeName === 'BODY' || nodeName === 'HTML') {
+    var html = element.ownerDocument.documentElement;
+    var scrollingElement = element.ownerDocument.scrollingElement || html;
+    return scrollingElement[upperSide];
+  }
+
+  return element[upperSide];
+}
+
+/*
+ * Sum or subtract the element scroll values (left and top) from a given rect object
+ * @method
+ * @memberof Popper.Utils
+ * @param {Object} rect - Rect object you want to change
+ * @param {HTMLElement} element - The element from the function reads the scroll values
+ * @param {Boolean} subtract - set to true if you want to subtract the scroll values
+ * @return {Object} rect - The modifier rect object
+ */
+function includeScroll(rect, element) {
+  var subtract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var scrollTop = getScroll(element, 'top');
+  var scrollLeft = getScroll(element, 'left');
+  var modifier = subtract ? -1 : 1;
+  rect.top += scrollTop * modifier;
+  rect.bottom += scrollTop * modifier;
+  rect.left += scrollLeft * modifier;
+  rect.right += scrollLeft * modifier;
+  return rect;
+}
+
+/*
+ * Helper to detect borders of a given element
+ * @method
+ * @memberof Popper.Utils
+ * @param {CSSStyleDeclaration} styles
+ * Result of `getStyleComputedProperty` on the given element
+ * @param {String} axis - `x` or `y`
+ * @return {number} borders - The borders size of the given axis
+ */
+
+function getBordersSize(styles, axis) {
+  var sideA = axis === 'x' ? 'Left' : 'Top';
+  var sideB = sideA === 'Left' ? 'Right' : 'Bottom';
+
+  return parseFloat(styles['border' + sideA + 'Width'], 10) + parseFloat(styles['border' + sideB + 'Width'], 10);
+}
+
+function getSize(axis, body, html, computedStyle) {
+  return Math.max(body['offset' + axis], body['scroll' + axis], html['client' + axis], html['offset' + axis], html['scroll' + axis], isIE(10) ? parseInt(html['offset' + axis]) + parseInt(computedStyle['margin' + (axis === 'Height' ? 'Top' : 'Left')]) + parseInt(computedStyle['margin' + (axis === 'Height' ? 'Bottom' : 'Right')]) : 0);
+}
+
+function getWindowSizes(document) {
+  var body = document.body;
+  var html = document.documentElement;
+  var computedStyle = isIE(10) && getComputedStyle(html);
+
+  return {
+    height: getSize('Height', body, html, computedStyle),
+    width: getSize('Width', body, html, computedStyle)
+  };
+}
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+/**
+ * Given element offsets, generate an output similar to getBoundingClientRect
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Object} offsets
+ * @returns {Object} ClientRect like output
+ */
+function getClientRect(offsets) {
+  return _extends({}, offsets, {
+    right: offsets.left + offsets.width,
+    bottom: offsets.top + offsets.height
+  });
+}
+
+/**
+ * Get bounding client rect of given element
+ * @method
+ * @memberof Popper.Utils
+ * @param {HTMLElement} element
+ * @return {Object} client rect
+ */
+function getBoundingClientRect(element) {
+  var rect = {};
+
+  // IE10 10 FIX: Please, don't ask, the element isn't
+  // considered in DOM in some circumstances...
+  // This isn't reproducible in IE10 compatibility mode of IE11
+  try {
+    if (isIE(10)) {
+      rect = element.getBoundingClientRect();
+      var scrollTop = getScroll(element, 'top');
+      var scrollLeft = getScroll(element, 'left');
+      rect.top += scrollTop;
+      rect.left += scrollLeft;
+      rect.bottom += scrollTop;
+      rect.right += scrollLeft;
+    } else {
+      rect = element.getBoundingClientRect();
+    }
+  } catch (e) {}
+
+  var result = {
+    left: rect.left,
+    top: rect.top,
+    width: rect.right - rect.left,
+    height: rect.bottom - rect.top
+  };
+
+  // subtract scrollbar size from sizes
+  var sizes = element.nodeName === 'HTML' ? getWindowSizes(element.ownerDocument) : {};
+  var width = sizes.width || element.clientWidth || result.right - result.left;
+  var height = sizes.height || element.clientHeight || result.bottom - result.top;
+
+  var horizScrollbar = element.offsetWidth - width;
+  var vertScrollbar = element.offsetHeight - height;
+
+  // if an hypothetical scrollbar is detected, we must be sure it's not a `border`
+  // we make this check conditional for performance reasons
+  if (horizScrollbar || vertScrollbar) {
+    var styles = getStyleComputedProperty(element);
+    horizScrollbar -= getBordersSize(styles, 'x');
+    vertScrollbar -= getBordersSize(styles, 'y');
+
+    result.width -= horizScrollbar;
+    result.height -= vertScrollbar;
+  }
+
+  return getClientRect(result);
+}
+
+function getOffsetRectRelativeToArbitraryNode(children, parent) {
+  var fixedPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  var isIE10 = isIE(10);
+  var isHTML = parent.nodeName === 'HTML';
+  var childrenRect = getBoundingClientRect(children);
+  var parentRect = getBoundingClientRect(parent);
+  var scrollParent = getScrollParent(children);
+
+  var styles = getStyleComputedProperty(parent);
+  var borderTopWidth = parseFloat(styles.borderTopWidth, 10);
+  var borderLeftWidth = parseFloat(styles.borderLeftWidth, 10);
+
+  // In cases where the parent is fixed, we must ignore negative scroll in offset calc
+  if (fixedPosition && isHTML) {
+    parentRect.top = Math.max(parentRect.top, 0);
+    parentRect.left = Math.max(parentRect.left, 0);
+  }
+  var offsets = getClientRect({
+    top: childrenRect.top - parentRect.top - borderTopWidth,
+    left: childrenRect.left - parentRect.left - borderLeftWidth,
+    width: childrenRect.width,
+    height: childrenRect.height
+  });
+  offsets.marginTop = 0;
+  offsets.marginLeft = 0;
+
+  // Subtract margins of documentElement in case it's being used as parent
+  // we do this only on HTML because it's the only element that behaves
+  // differently when margins are applied to it. The margins are included in
+  // the box of the documentElement, in the other cases not.
+  if (!isIE10 && isHTML) {
+    var marginTop = parseFloat(styles.marginTop, 10);
+    var marginLeft = parseFloat(styles.marginLeft, 10);
+
+    offsets.top -= borderTopWidth - marginTop;
+    offsets.bottom -= borderTopWidth - marginTop;
+    offsets.left -= borderLeftWidth - marginLeft;
+    offsets.right -= borderLeftWidth - marginLeft;
+
+    // Attach marginTop and marginLeft because in some circumstances we may need them
+    offsets.marginTop = marginTop;
+    offsets.marginLeft = marginLeft;
+  }
+
+  if (isIE10 && !fixedPosition ? parent.contains(scrollParent) : parent === scrollParent && scrollParent.nodeName !== 'BODY') {
+    offsets = includeScroll(offsets, parent);
+  }
+
+  return offsets;
+}
+
+function getViewportOffsetRectRelativeToArtbitraryNode(element) {
+  var excludeScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+  var html = element.ownerDocument.documentElement;
+  var relativeOffset = getOffsetRectRelativeToArbitraryNode(element, html);
+  var width = Math.max(html.clientWidth, window.innerWidth || 0);
+  var height = Math.max(html.clientHeight, window.innerHeight || 0);
+
+  var scrollTop = !excludeScroll ? getScroll(html) : 0;
+  var scrollLeft = !excludeScroll ? getScroll(html, 'left') : 0;
+
+  var offset = {
+    top: scrollTop - relativeOffset.top + relativeOffset.marginTop,
+    left: scrollLeft - relativeOffset.left + relativeOffset.marginLeft,
+    width: width,
+    height: height
+  };
+
+  return getClientRect(offset);
+}
+
+/**
+ * Check if the given element is fixed or is inside a fixed parent
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @argument {Element} customContainer
+ * @returns {Boolean} answer to "isFixed?"
+ */
+function isFixed(element) {
+  var nodeName = element.nodeName;
+  if (nodeName === 'BODY' || nodeName === 'HTML') {
+    return false;
+  }
+  if (getStyleComputedProperty(element, 'position') === 'fixed') {
+    return true;
+  }
+  var parentNode = getParentNode(element);
+  if (!parentNode) {
+    return false;
+  }
+  return isFixed(parentNode);
+}
+
+/**
+ * Finds the first parent of an element that has a transformed property defined
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @returns {Element} first transformed parent or documentElement
+ */
+
+function getFixedPositionOffsetParent(element) {
+  // This check is needed to avoid errors in case one of the elements isn't defined for any reason
+  if (!element || !element.parentElement || isIE()) {
+    return document.documentElement;
+  }
+  var el = element.parentElement;
+  while (el && getStyleComputedProperty(el, 'transform') === 'none') {
+    el = el.parentElement;
+  }
+  return el || document.documentElement;
+}
+
+/**
+ * Computed the boundaries limits and return them
+ * @method
+ * @memberof Popper.Utils
+ * @param {HTMLElement} popper
+ * @param {HTMLElement} reference
+ * @param {number} padding
+ * @param {HTMLElement} boundariesElement - Element used to define the boundaries
+ * @param {Boolean} fixedPosition - Is in fixed position mode
+ * @returns {Object} Coordinates of the boundaries
+ */
+function getBoundaries(popper, reference, padding, boundariesElement) {
+  var fixedPosition = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
+  // NOTE: 1 DOM access here
+
+  var boundaries = { top: 0, left: 0 };
+  var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+
+  // Handle viewport case
+  if (boundariesElement === 'viewport') {
+    boundaries = getViewportOffsetRectRelativeToArtbitraryNode(offsetParent, fixedPosition);
+  } else {
+    // Handle other cases based on DOM element used as boundaries
+    var boundariesNode = void 0;
+    if (boundariesElement === 'scrollParent') {
+      boundariesNode = getScrollParent(getParentNode(reference));
+      if (boundariesNode.nodeName === 'BODY') {
+        boundariesNode = popper.ownerDocument.documentElement;
+      }
+    } else if (boundariesElement === 'window') {
+      boundariesNode = popper.ownerDocument.documentElement;
+    } else {
+      boundariesNode = boundariesElement;
+    }
+
+    var offsets = getOffsetRectRelativeToArbitraryNode(boundariesNode, offsetParent, fixedPosition);
+
+    // In case of HTML, we need a different computation
+    if (boundariesNode.nodeName === 'HTML' && !isFixed(offsetParent)) {
+      var _getWindowSizes = getWindowSizes(popper.ownerDocument),
+          height = _getWindowSizes.height,
+          width = _getWindowSizes.width;
+
+      boundaries.top += offsets.top - offsets.marginTop;
+      boundaries.bottom = height + offsets.top;
+      boundaries.left += offsets.left - offsets.marginLeft;
+      boundaries.right = width + offsets.left;
+    } else {
+      // for all the other DOM elements, this one is good
+      boundaries = offsets;
+    }
+  }
+
+  // Add paddings
+  padding = padding || 0;
+  var isPaddingNumber = typeof padding === 'number';
+  boundaries.left += isPaddingNumber ? padding : padding.left || 0;
+  boundaries.top += isPaddingNumber ? padding : padding.top || 0;
+  boundaries.right -= isPaddingNumber ? padding : padding.right || 0;
+  boundaries.bottom -= isPaddingNumber ? padding : padding.bottom || 0;
+
+  return boundaries;
+}
+
+function getArea(_ref) {
+  var width = _ref.width,
+      height = _ref.height;
+
+  return width * height;
+}
+
+/**
+ * Utility used to transform the `auto` placement to the placement with more
+ * available space.
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function computeAutoPlacement(placement, refRect, popper, reference, boundariesElement) {
+  var padding = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+
+  if (placement.indexOf('auto') === -1) {
+    return placement;
+  }
+
+  var boundaries = getBoundaries(popper, reference, padding, boundariesElement);
+
+  var rects = {
+    top: {
+      width: boundaries.width,
+      height: refRect.top - boundaries.top
+    },
+    right: {
+      width: boundaries.right - refRect.right,
+      height: boundaries.height
+    },
+    bottom: {
+      width: boundaries.width,
+      height: boundaries.bottom - refRect.bottom
+    },
+    left: {
+      width: refRect.left - boundaries.left,
+      height: boundaries.height
+    }
+  };
+
+  var sortedAreas = Object.keys(rects).map(function (key) {
+    return _extends({
+      key: key
+    }, rects[key], {
+      area: getArea(rects[key])
+    });
+  }).sort(function (a, b) {
+    return b.area - a.area;
+  });
+
+  var filteredAreas = sortedAreas.filter(function (_ref2) {
+    var width = _ref2.width,
+        height = _ref2.height;
+    return width >= popper.clientWidth && height >= popper.clientHeight;
+  });
+
+  var computedPlacement = filteredAreas.length > 0 ? filteredAreas[0].key : sortedAreas[0].key;
+
+  var variation = placement.split('-')[1];
+
+  return computedPlacement + (variation ? '-' + variation : '');
+}
+
+/**
+ * Get offsets to the reference element
+ * @method
+ * @memberof Popper.Utils
+ * @param {Object} state
+ * @param {Element} popper - the popper element
+ * @param {Element} reference - the reference element (the popper will be relative to this)
+ * @param {Element} fixedPosition - is in fixed position mode
+ * @returns {Object} An object containing the offsets which will be applied to the popper
+ */
+function getReferenceOffsets(state, popper, reference) {
+  var fixedPosition = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+  var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+  return getOffsetRectRelativeToArbitraryNode(reference, commonOffsetParent, fixedPosition);
+}
+
+/**
+ * Get the outer sizes of the given element (offset size + margins)
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element
+ * @returns {Object} object containing width and height properties
+ */
+function getOuterSizes(element) {
+  var window = element.ownerDocument.defaultView;
+  var styles = window.getComputedStyle(element);
+  var x = parseFloat(styles.marginTop || 0) + parseFloat(styles.marginBottom || 0);
+  var y = parseFloat(styles.marginLeft || 0) + parseFloat(styles.marginRight || 0);
+  var result = {
+    width: element.offsetWidth + y,
+    height: element.offsetHeight + x
+  };
+  return result;
+}
+
+/**
+ * Get the opposite placement of the given one
+ * @method
+ * @memberof Popper.Utils
+ * @argument {String} placement
+ * @returns {String} flipped placement
+ */
+function getOppositePlacement(placement) {
+  var hash = { left: 'right', right: 'left', bottom: 'top', top: 'bottom' };
+  return placement.replace(/left|right|bottom|top/g, function (matched) {
+    return hash[matched];
+  });
+}
+
+/**
+ * Get offsets to the popper
+ * @method
+ * @memberof Popper.Utils
+ * @param {Object} position - CSS position the Popper will get applied
+ * @param {HTMLElement} popper - the popper element
+ * @param {Object} referenceOffsets - the reference offsets (the popper will be relative to this)
+ * @param {String} placement - one of the valid placement options
+ * @returns {Object} popperOffsets - An object containing the offsets which will be applied to the popper
+ */
+function getPopperOffsets(popper, referenceOffsets, placement) {
+  placement = placement.split('-')[0];
+
+  // Get popper node sizes
+  var popperRect = getOuterSizes(popper);
+
+  // Add position, width and height to our offsets object
+  var popperOffsets = {
+    width: popperRect.width,
+    height: popperRect.height
+  };
+
+  // depending by the popper placement we have to compute its offsets slightly differently
+  var isHoriz = ['right', 'left'].indexOf(placement) !== -1;
+  var mainSide = isHoriz ? 'top' : 'left';
+  var secondarySide = isHoriz ? 'left' : 'top';
+  var measurement = isHoriz ? 'height' : 'width';
+  var secondaryMeasurement = !isHoriz ? 'height' : 'width';
+
+  popperOffsets[mainSide] = referenceOffsets[mainSide] + referenceOffsets[measurement] / 2 - popperRect[measurement] / 2;
+  if (placement === secondarySide) {
+    popperOffsets[secondarySide] = referenceOffsets[secondarySide] - popperRect[secondaryMeasurement];
+  } else {
+    popperOffsets[secondarySide] = referenceOffsets[getOppositePlacement(secondarySide)];
+  }
+
+  return popperOffsets;
+}
+
+/**
+ * Mimics the `find` method of Array
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Array} arr
+ * @argument prop
+ * @argument value
+ * @returns index or -1
+ */
+function find(arr, check) {
+  // use native find if supported
+  if (Array.prototype.find) {
+    return arr.find(check);
+  }
+
+  // use `filter` to obtain the same behavior of `find`
+  return arr.filter(check)[0];
+}
+
+/**
+ * Return the index of the matching object
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Array} arr
+ * @argument prop
+ * @argument value
+ * @returns index or -1
+ */
+function findIndex(arr, prop, value) {
+  // use native findIndex if supported
+  if (Array.prototype.findIndex) {
+    return arr.findIndex(function (cur) {
+      return cur[prop] === value;
+    });
+  }
+
+  // use `find` + `indexOf` if `findIndex` isn't supported
+  var match = find(arr, function (obj) {
+    return obj[prop] === value;
+  });
+  return arr.indexOf(match);
+}
+
+/**
+ * Loop trough the list of modifiers and run them in order,
+ * each of them will then edit the data object.
+ * @method
+ * @memberof Popper.Utils
+ * @param {dataObject} data
+ * @param {Array} modifiers
+ * @param {String} ends - Optional modifier name used as stopper
+ * @returns {dataObject}
+ */
+function runModifiers(modifiers, data, ends) {
+  var modifiersToRun = ends === undefined ? modifiers : modifiers.slice(0, findIndex(modifiers, 'name', ends));
+
+  modifiersToRun.forEach(function (modifier) {
+    if (modifier['function']) {
+      // eslint-disable-line dot-notation
+      console.warn('`modifier.function` is deprecated, use `modifier.fn`!');
+    }
+    var fn = modifier['function'] || modifier.fn; // eslint-disable-line dot-notation
+    if (modifier.enabled && isFunction(fn)) {
+      // Add properties to offsets to make them a complete clientRect object
+      // we do this before each modifier to make sure the previous one doesn't
+      // mess with these values
+      data.offsets.popper = getClientRect(data.offsets.popper);
+      data.offsets.reference = getClientRect(data.offsets.reference);
+
+      data = fn(data, modifier);
+    }
+  });
+
+  return data;
+}
+
+/**
+ * Updates the position of the popper, computing the new offsets and applying
+ * the new style.<br />
+ * Prefer `scheduleUpdate` over `update` because of performance reasons.
+ * @method
+ * @memberof Popper
+ */
+function update() {
+  // if popper is destroyed, don't perform any further update
+  if (this.state.isDestroyed) {
+    return;
+  }
+
+  var data = {
+    instance: this,
+    styles: {},
+    arrowStyles: {},
+    attributes: {},
+    flipped: false,
+    offsets: {}
+  };
+
+  // compute reference element offsets
+  data.offsets.reference = getReferenceOffsets(this.state, this.popper, this.reference, this.options.positionFixed);
+
+  // compute auto placement, store placement inside the data object,
+  // modifiers will be able to edit `placement` if needed
+  // and refer to originalPlacement to know the original value
+  data.placement = computeAutoPlacement(this.options.placement, data.offsets.reference, this.popper, this.reference, this.options.modifiers.flip.boundariesElement, this.options.modifiers.flip.padding);
+
+  // store the computed placement inside `originalPlacement`
+  data.originalPlacement = data.placement;
+
+  data.positionFixed = this.options.positionFixed;
+
+  // compute the popper offsets
+  data.offsets.popper = getPopperOffsets(this.popper, data.offsets.reference, data.placement);
+
+  data.offsets.popper.position = this.options.positionFixed ? 'fixed' : 'absolute';
+
+  // run the modifiers
+  data = runModifiers(this.modifiers, data);
+
+  // the first `update` will call `onCreate` callback
+  // the other ones will call `onUpdate` callback
+  if (!this.state.isCreated) {
+    this.state.isCreated = true;
+    this.options.onCreate(data);
+  } else {
+    this.options.onUpdate(data);
+  }
+}
+
+/**
+ * Helper used to know if the given modifier is enabled.
+ * @method
+ * @memberof Popper.Utils
+ * @returns {Boolean}
+ */
+function isModifierEnabled(modifiers, modifierName) {
+  return modifiers.some(function (_ref) {
+    var name = _ref.name,
+        enabled = _ref.enabled;
+    return enabled && name === modifierName;
+  });
+}
+
+/**
+ * Get the prefixed supported property name
+ * @method
+ * @memberof Popper.Utils
+ * @argument {String} property (camelCase)
+ * @returns {String} prefixed property (camelCase or PascalCase, depending on the vendor prefix)
+ */
+function getSupportedPropertyName(property) {
+  var prefixes = [false, 'ms', 'Webkit', 'Moz', 'O'];
+  var upperProp = property.charAt(0).toUpperCase() + property.slice(1);
+
+  for (var i = 0; i < prefixes.length; i++) {
+    var prefix = prefixes[i];
+    var toCheck = prefix ? '' + prefix + upperProp : property;
+    if (typeof document.body.style[toCheck] !== 'undefined') {
+      return toCheck;
+    }
+  }
+  return null;
+}
+
+/**
+ * Destroys the popper.
+ * @method
+ * @memberof Popper
+ */
+function destroy() {
+  this.state.isDestroyed = true;
+
+  // touch DOM only if `applyStyle` modifier is enabled
+  if (isModifierEnabled(this.modifiers, 'applyStyle')) {
+    this.popper.removeAttribute('x-placement');
+    this.popper.style.position = '';
+    this.popper.style.top = '';
+    this.popper.style.left = '';
+    this.popper.style.right = '';
+    this.popper.style.bottom = '';
+    this.popper.style.willChange = '';
+    this.popper.style[getSupportedPropertyName('transform')] = '';
+  }
+
+  this.disableEventListeners();
+
+  // remove the popper if user explicity asked for the deletion on destroy
+  // do not use `remove` because IE11 doesn't support it
+  if (this.options.removeOnDestroy) {
+    this.popper.parentNode.removeChild(this.popper);
+  }
+  return this;
+}
+
+/**
+ * Get the window associated with the element
+ * @argument {Element} element
+ * @returns {Window}
+ */
+function getWindow(element) {
+  var ownerDocument = element.ownerDocument;
+  return ownerDocument ? ownerDocument.defaultView : window;
+}
+
+function attachToScrollParents(scrollParent, event, callback, scrollParents) {
+  var isBody = scrollParent.nodeName === 'BODY';
+  var target = isBody ? scrollParent.ownerDocument.defaultView : scrollParent;
+  target.addEventListener(event, callback, { passive: true });
+
+  if (!isBody) {
+    attachToScrollParents(getScrollParent(target.parentNode), event, callback, scrollParents);
+  }
+  scrollParents.push(target);
+}
+
+/**
+ * Setup needed event listeners used to update the popper position
+ * @method
+ * @memberof Popper.Utils
+ * @private
+ */
+function setupEventListeners(reference, options, state, updateBound) {
+  // Resize event listener on window
+  state.updateBound = updateBound;
+  getWindow(reference).addEventListener('resize', state.updateBound, { passive: true });
+
+  // Scroll event listener on scroll parents
+  var scrollElement = getScrollParent(reference);
+  attachToScrollParents(scrollElement, 'scroll', state.updateBound, state.scrollParents);
+  state.scrollElement = scrollElement;
+  state.eventsEnabled = true;
+
+  return state;
+}
+
+/**
+ * It will add resize/scroll events and start recalculating
+ * position of the popper element when they are triggered.
+ * @method
+ * @memberof Popper
+ */
+function enableEventListeners() {
+  if (!this.state.eventsEnabled) {
+    this.state = setupEventListeners(this.reference, this.options, this.state, this.scheduleUpdate);
+  }
+}
+
+/**
+ * Remove event listeners used to update the popper position
+ * @method
+ * @memberof Popper.Utils
+ * @private
+ */
+function removeEventListeners(reference, state) {
+  // Remove resize event listener on window
+  getWindow(reference).removeEventListener('resize', state.updateBound);
+
+  // Remove scroll event listener on scroll parents
+  state.scrollParents.forEach(function (target) {
+    target.removeEventListener('scroll', state.updateBound);
+  });
+
+  // Reset state
+  state.updateBound = null;
+  state.scrollParents = [];
+  state.scrollElement = null;
+  state.eventsEnabled = false;
+  return state;
+}
+
+/**
+ * It will remove resize/scroll events and won't recalculate popper position
+ * when they are triggered. It also won't trigger `onUpdate` callback anymore,
+ * unless you call `update` method manually.
+ * @method
+ * @memberof Popper
+ */
+function disableEventListeners() {
+  if (this.state.eventsEnabled) {
+    cancelAnimationFrame(this.scheduleUpdate);
+    this.state = removeEventListeners(this.reference, this.state);
+  }
+}
+
+/**
+ * Tells if a given input is a number
+ * @method
+ * @memberof Popper.Utils
+ * @param {*} input to check
+ * @return {Boolean}
+ */
+function isNumeric(n) {
+  return n !== '' && !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+/**
+ * Set the style to the given popper
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element - Element to apply the style to
+ * @argument {Object} styles
+ * Object with a list of properties and values which will be applied to the element
+ */
+function setStyles(element, styles) {
+  Object.keys(styles).forEach(function (prop) {
+    var unit = '';
+    // add unit if the value is numeric and is one of the following
+    if (['width', 'height', 'top', 'right', 'bottom', 'left'].indexOf(prop) !== -1 && isNumeric(styles[prop])) {
+      unit = 'px';
+    }
+    element.style[prop] = styles[prop] + unit;
+  });
+}
+
+/**
+ * Set the attributes to the given popper
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Element} element - Element to apply the attributes to
+ * @argument {Object} styles
+ * Object with a list of properties and values which will be applied to the element
+ */
+function setAttributes(element, attributes) {
+  Object.keys(attributes).forEach(function (prop) {
+    var value = attributes[prop];
+    if (value !== false) {
+      element.setAttribute(prop, attributes[prop]);
+    } else {
+      element.removeAttribute(prop);
+    }
+  });
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Object} data.styles - List of style properties - values to apply to popper element
+ * @argument {Object} data.attributes - List of attribute properties - values to apply to popper element
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The same data object
+ */
+function applyStyle(data) {
+  // any property present in `data.styles` will be applied to the popper,
+  // in this way we can make the 3rd party modifiers add custom styles to it
+  // Be aware, modifiers could override the properties defined in the previous
+  // lines of this modifier!
+  setStyles(data.instance.popper, data.styles);
+
+  // any property present in `data.attributes` will be applied to the popper,
+  // they will be set as HTML attributes of the element
+  setAttributes(data.instance.popper, data.attributes);
+
+  // if arrowElement is defined and arrowStyles has some properties
+  if (data.arrowElement && Object.keys(data.arrowStyles).length) {
+    setStyles(data.arrowElement, data.arrowStyles);
+  }
+
+  return data;
+}
+
+/**
+ * Set the x-placement attribute before everything else because it could be used
+ * to add margins to the popper margins needs to be calculated to get the
+ * correct popper offsets.
+ * @method
+ * @memberof Popper.modifiers
+ * @param {HTMLElement} reference - The reference element used to position the popper
+ * @param {HTMLElement} popper - The HTML element used as popper
+ * @param {Object} options - Popper.js options
+ */
+function applyStyleOnLoad(reference, popper, options, modifierOptions, state) {
+  // compute reference element offsets
+  var referenceOffsets = getReferenceOffsets(state, popper, reference, options.positionFixed);
+
+  // compute auto placement, store placement inside the data object,
+  // modifiers will be able to edit `placement` if needed
+  // and refer to originalPlacement to know the original value
+  var placement = computeAutoPlacement(options.placement, referenceOffsets, popper, reference, options.modifiers.flip.boundariesElement, options.modifiers.flip.padding);
+
+  popper.setAttribute('x-placement', placement);
+
+  // Apply `position` to popper before anything else because
+  // without the position applied we can't guarantee correct computations
+  setStyles(popper, { position: options.positionFixed ? 'fixed' : 'absolute' });
+
+  return options;
+}
+
+/**
+ * @function
+ * @memberof Popper.Utils
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Boolean} shouldRound - If the offsets should be rounded at all
+ * @returns {Object} The popper's position offsets rounded
+ *
+ * The tale of pixel-perfect positioning. It's still not 100% perfect, but as
+ * good as it can be within reason.
+ * Discussion here: https://github.com/FezVrasta/popper.js/pull/715
+ *
+ * Low DPI screens cause a popper to be blurry if not using full pixels (Safari
+ * as well on High DPI screens).
+ *
+ * Firefox prefers no rounding for positioning and does not have blurriness on
+ * high DPI screens.
+ *
+ * Only horizontal placement and left/right values need to be considered.
+ */
+function getRoundedOffsets(data, shouldRound) {
+  var _data$offsets = data.offsets,
+      popper = _data$offsets.popper,
+      reference = _data$offsets.reference;
+  var round = Math.round,
+      floor = Math.floor;
+
+  var noRound = function noRound(v) {
+    return v;
+  };
+
+  var referenceWidth = round(reference.width);
+  var popperWidth = round(popper.width);
+
+  var isVertical = ['left', 'right'].indexOf(data.placement) !== -1;
+  var isVariation = data.placement.indexOf('-') !== -1;
+  var sameWidthParity = referenceWidth % 2 === popperWidth % 2;
+  var bothOddWidth = referenceWidth % 2 === 1 && popperWidth % 2 === 1;
+
+  var horizontalToInteger = !shouldRound ? noRound : isVertical || isVariation || sameWidthParity ? round : floor;
+  var verticalToInteger = !shouldRound ? noRound : round;
+
+  return {
+    left: horizontalToInteger(bothOddWidth && !isVariation && shouldRound ? popper.left - 1 : popper.left),
+    top: verticalToInteger(popper.top),
+    bottom: verticalToInteger(popper.bottom),
+    right: horizontalToInteger(popper.right)
+  };
+}
+
+var isFirefox = isBrowser && /Firefox/i.test(navigator.userAgent);
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function computeStyle(data, options) {
+  var x = options.x,
+      y = options.y;
+  var popper = data.offsets.popper;
+
+  // Remove this legacy support in Popper.js v2
+
+  var legacyGpuAccelerationOption = find(data.instance.modifiers, function (modifier) {
+    return modifier.name === 'applyStyle';
+  }).gpuAcceleration;
+  if (legacyGpuAccelerationOption !== undefined) {
+    console.warn('WARNING: `gpuAcceleration` option moved to `computeStyle` modifier and will not be supported in future versions of Popper.js!');
+  }
+  var gpuAcceleration = legacyGpuAccelerationOption !== undefined ? legacyGpuAccelerationOption : options.gpuAcceleration;
+
+  var offsetParent = getOffsetParent(data.instance.popper);
+  var offsetParentRect = getBoundingClientRect(offsetParent);
+
+  // Styles
+  var styles = {
+    position: popper.position
+  };
+
+  var offsets = getRoundedOffsets(data, window.devicePixelRatio < 2 || !isFirefox);
+
+  var sideA = x === 'bottom' ? 'top' : 'bottom';
+  var sideB = y === 'right' ? 'left' : 'right';
+
+  // if gpuAcceleration is set to `true` and transform is supported,
+  //  we use `translate3d` to apply the position to the popper we
+  // automatically use the supported prefixed version if needed
+  var prefixedProperty = getSupportedPropertyName('transform');
+
+  // now, let's make a step back and look at this code closely (wtf?)
+  // If the content of the popper grows once it's been positioned, it
+  // may happen that the popper gets misplaced because of the new content
+  // overflowing its reference element
+  // To avoid this problem, we provide two options (x and y), which allow
+  // the consumer to define the offset origin.
+  // If we position a popper on top of a reference element, we can set
+  // `x` to `top` to make the popper grow towards its top instead of
+  // its bottom.
+  var left = void 0,
+      top = void 0;
+  if (sideA === 'bottom') {
+    // when offsetParent is <html> the positioning is relative to the bottom of the screen (excluding the scrollbar)
+    // and not the bottom of the html element
+    if (offsetParent.nodeName === 'HTML') {
+      top = -offsetParent.clientHeight + offsets.bottom;
+    } else {
+      top = -offsetParentRect.height + offsets.bottom;
+    }
+  } else {
+    top = offsets.top;
+  }
+  if (sideB === 'right') {
+    if (offsetParent.nodeName === 'HTML') {
+      left = -offsetParent.clientWidth + offsets.right;
+    } else {
+      left = -offsetParentRect.width + offsets.right;
+    }
+  } else {
+    left = offsets.left;
+  }
+  if (gpuAcceleration && prefixedProperty) {
+    styles[prefixedProperty] = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
+    styles[sideA] = 0;
+    styles[sideB] = 0;
+    styles.willChange = 'transform';
+  } else {
+    // othwerise, we use the standard `top`, `left`, `bottom` and `right` properties
+    var invertTop = sideA === 'bottom' ? -1 : 1;
+    var invertLeft = sideB === 'right' ? -1 : 1;
+    styles[sideA] = top * invertTop;
+    styles[sideB] = left * invertLeft;
+    styles.willChange = sideA + ', ' + sideB;
+  }
+
+  // Attributes
+  var attributes = {
+    'x-placement': data.placement
+  };
+
+  // Update `data` attributes, styles and arrowStyles
+  data.attributes = _extends({}, attributes, data.attributes);
+  data.styles = _extends({}, styles, data.styles);
+  data.arrowStyles = _extends({}, data.offsets.arrow, data.arrowStyles);
+
+  return data;
+}
+
+/**
+ * Helper used to know if the given modifier depends from another one.<br />
+ * It checks if the needed modifier is listed and enabled.
+ * @method
+ * @memberof Popper.Utils
+ * @param {Array} modifiers - list of modifiers
+ * @param {String} requestingName - name of requesting modifier
+ * @param {String} requestedName - name of requested modifier
+ * @returns {Boolean}
+ */
+function isModifierRequired(modifiers, requestingName, requestedName) {
+  var requesting = find(modifiers, function (_ref) {
+    var name = _ref.name;
+    return name === requestingName;
+  });
+
+  var isRequired = !!requesting && modifiers.some(function (modifier) {
+    return modifier.name === requestedName && modifier.enabled && modifier.order < requesting.order;
+  });
+
+  if (!isRequired) {
+    var _requesting = '`' + requestingName + '`';
+    var requested = '`' + requestedName + '`';
+    console.warn(requested + ' modifier is required by ' + _requesting + ' modifier in order to work, be sure to include it before ' + _requesting + '!');
+  }
+  return isRequired;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function arrow(data, options) {
+  var _data$offsets$arrow;
+
+  // arrow depends on keepTogether in order to work
+  if (!isModifierRequired(data.instance.modifiers, 'arrow', 'keepTogether')) {
+    return data;
+  }
+
+  var arrowElement = options.element;
+
+  // if arrowElement is a string, suppose it's a CSS selector
+  if (typeof arrowElement === 'string') {
+    arrowElement = data.instance.popper.querySelector(arrowElement);
+
+    // if arrowElement is not found, don't run the modifier
+    if (!arrowElement) {
+      return data;
+    }
+  } else {
+    // if the arrowElement isn't a query selector we must check that the
+    // provided DOM node is child of its popper node
+    if (!data.instance.popper.contains(arrowElement)) {
+      console.warn('WARNING: `arrow.element` must be child of its popper element!');
+      return data;
+    }
+  }
+
+  var placement = data.placement.split('-')[0];
+  var _data$offsets = data.offsets,
+      popper = _data$offsets.popper,
+      reference = _data$offsets.reference;
+
+  var isVertical = ['left', 'right'].indexOf(placement) !== -1;
+
+  var len = isVertical ? 'height' : 'width';
+  var sideCapitalized = isVertical ? 'Top' : 'Left';
+  var side = sideCapitalized.toLowerCase();
+  var altSide = isVertical ? 'left' : 'top';
+  var opSide = isVertical ? 'bottom' : 'right';
+  var arrowElementSize = getOuterSizes(arrowElement)[len];
+
+  //
+  // extends keepTogether behavior making sure the popper and its
+  // reference have enough pixels in conjunction
+  //
+
+  // top/left side
+  if (reference[opSide] - arrowElementSize < popper[side]) {
+    data.offsets.popper[side] -= popper[side] - (reference[opSide] - arrowElementSize);
+  }
+  // bottom/right side
+  if (reference[side] + arrowElementSize > popper[opSide]) {
+    data.offsets.popper[side] += reference[side] + arrowElementSize - popper[opSide];
+  }
+  data.offsets.popper = getClientRect(data.offsets.popper);
+
+  // compute center of the popper
+  var center = reference[side] + reference[len] / 2 - arrowElementSize / 2;
+
+  // Compute the sideValue using the updated popper offsets
+  // take popper margin in account because we don't have this info available
+  var css = getStyleComputedProperty(data.instance.popper);
+  var popperMarginSide = parseFloat(css['margin' + sideCapitalized], 10);
+  var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width'], 10);
+  var sideValue = center - data.offsets.popper[side] - popperMarginSide - popperBorderSide;
+
+  // prevent arrowElement from being placed not contiguously to its popper
+  sideValue = Math.max(Math.min(popper[len] - arrowElementSize, sideValue), 0);
+
+  data.arrowElement = arrowElement;
+  data.offsets.arrow = (_data$offsets$arrow = {}, defineProperty(_data$offsets$arrow, side, Math.round(sideValue)), defineProperty(_data$offsets$arrow, altSide, ''), _data$offsets$arrow);
+
+  return data;
+}
+
+/**
+ * Get the opposite placement variation of the given one
+ * @method
+ * @memberof Popper.Utils
+ * @argument {String} placement variation
+ * @returns {String} flipped placement variation
+ */
+function getOppositeVariation(variation) {
+  if (variation === 'end') {
+    return 'start';
+  } else if (variation === 'start') {
+    return 'end';
+  }
+  return variation;
+}
+
+/**
+ * List of accepted placements to use as values of the `placement` option.<br />
+ * Valid placements are:
+ * - `auto`
+ * - `top`
+ * - `right`
+ * - `bottom`
+ * - `left`
+ *
+ * Each placement can have a variation from this list:
+ * - `-start`
+ * - `-end`
+ *
+ * Variations are interpreted easily if you think of them as the left to right
+ * written languages. Horizontally (`top` and `bottom`), `start` is left and `end`
+ * is right.<br />
+ * Vertically (`left` and `right`), `start` is top and `end` is bottom.
+ *
+ * Some valid examples are:
+ * - `top-end` (on top of reference, right aligned)
+ * - `right-start` (on right of reference, top aligned)
+ * - `bottom` (on bottom, centered)
+ * - `auto-end` (on the side with more space available, alignment depends by placement)
+ *
+ * @static
+ * @type {Array}
+ * @enum {String}
+ * @readonly
+ * @method placements
+ * @memberof Popper
+ */
+var placements = ['auto-start', 'auto', 'auto-end', 'top-start', 'top', 'top-end', 'right-start', 'right', 'right-end', 'bottom-end', 'bottom', 'bottom-start', 'left-end', 'left', 'left-start'];
+
+// Get rid of `auto` `auto-start` and `auto-end`
+var validPlacements = placements.slice(3);
+
+/**
+ * Given an initial placement, returns all the subsequent placements
+ * clockwise (or counter-clockwise).
+ *
+ * @method
+ * @memberof Popper.Utils
+ * @argument {String} placement - A valid placement (it accepts variations)
+ * @argument {Boolean} counter - Set to true to walk the placements counterclockwise
+ * @returns {Array} placements including their variations
+ */
+function clockwise(placement) {
+  var counter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+  var index = validPlacements.indexOf(placement);
+  var arr = validPlacements.slice(index + 1).concat(validPlacements.slice(0, index));
+  return counter ? arr.reverse() : arr;
+}
+
+var BEHAVIORS = {
+  FLIP: 'flip',
+  CLOCKWISE: 'clockwise',
+  COUNTERCLOCKWISE: 'counterclockwise'
+};
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function flip(data, options) {
+  // if `inner` modifier is enabled, we can't use the `flip` modifier
+  if (isModifierEnabled(data.instance.modifiers, 'inner')) {
+    return data;
+  }
+
+  if (data.flipped && data.placement === data.originalPlacement) {
+    // seems like flip is trying to loop, probably there's not enough space on any of the flippable sides
+    return data;
+  }
+
+  var boundaries = getBoundaries(data.instance.popper, data.instance.reference, options.padding, options.boundariesElement, data.positionFixed);
+
+  var placement = data.placement.split('-')[0];
+  var placementOpposite = getOppositePlacement(placement);
+  var variation = data.placement.split('-')[1] || '';
+
+  var flipOrder = [];
+
+  switch (options.behavior) {
+    case BEHAVIORS.FLIP:
+      flipOrder = [placement, placementOpposite];
+      break;
+    case BEHAVIORS.CLOCKWISE:
+      flipOrder = clockwise(placement);
+      break;
+    case BEHAVIORS.COUNTERCLOCKWISE:
+      flipOrder = clockwise(placement, true);
+      break;
+    default:
+      flipOrder = options.behavior;
+  }
+
+  flipOrder.forEach(function (step, index) {
+    if (placement !== step || flipOrder.length === index + 1) {
+      return data;
+    }
+
+    placement = data.placement.split('-')[0];
+    placementOpposite = getOppositePlacement(placement);
+
+    var popperOffsets = data.offsets.popper;
+    var refOffsets = data.offsets.reference;
+
+    // using floor because the reference offsets may contain decimals we are not going to consider here
+    var floor = Math.floor;
+    var overlapsRef = placement === 'left' && floor(popperOffsets.right) > floor(refOffsets.left) || placement === 'right' && floor(popperOffsets.left) < floor(refOffsets.right) || placement === 'top' && floor(popperOffsets.bottom) > floor(refOffsets.top) || placement === 'bottom' && floor(popperOffsets.top) < floor(refOffsets.bottom);
+
+    var overflowsLeft = floor(popperOffsets.left) < floor(boundaries.left);
+    var overflowsRight = floor(popperOffsets.right) > floor(boundaries.right);
+    var overflowsTop = floor(popperOffsets.top) < floor(boundaries.top);
+    var overflowsBottom = floor(popperOffsets.bottom) > floor(boundaries.bottom);
+
+    var overflowsBoundaries = placement === 'left' && overflowsLeft || placement === 'right' && overflowsRight || placement === 'top' && overflowsTop || placement === 'bottom' && overflowsBottom;
+
+    // flip the variation if required
+    var isVertical = ['top', 'bottom'].indexOf(placement) !== -1;
+
+    // flips variation if reference element overflows boundaries
+    var flippedVariationByRef = !!options.flipVariations && (isVertical && variation === 'start' && overflowsLeft || isVertical && variation === 'end' && overflowsRight || !isVertical && variation === 'start' && overflowsTop || !isVertical && variation === 'end' && overflowsBottom);
+
+    // flips variation if popper content overflows boundaries
+    var flippedVariationByContent = !!options.flipVariationsByContent && (isVertical && variation === 'start' && overflowsRight || isVertical && variation === 'end' && overflowsLeft || !isVertical && variation === 'start' && overflowsBottom || !isVertical && variation === 'end' && overflowsTop);
+
+    var flippedVariation = flippedVariationByRef || flippedVariationByContent;
+
+    if (overlapsRef || overflowsBoundaries || flippedVariation) {
+      // this boolean to detect any flip loop
+      data.flipped = true;
+
+      if (overlapsRef || overflowsBoundaries) {
+        placement = flipOrder[index + 1];
+      }
+
+      if (flippedVariation) {
+        variation = getOppositeVariation(variation);
+      }
+
+      data.placement = placement + (variation ? '-' + variation : '');
+
+      // this object contains `position`, we want to preserve it along with
+      // any additional property we may add in the future
+      data.offsets.popper = _extends({}, data.offsets.popper, getPopperOffsets(data.instance.popper, data.offsets.reference, data.placement));
+
+      data = runModifiers(data.instance.modifiers, data, 'flip');
+    }
+  });
+  return data;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function keepTogether(data) {
+  var _data$offsets = data.offsets,
+      popper = _data$offsets.popper,
+      reference = _data$offsets.reference;
+
+  var placement = data.placement.split('-')[0];
+  var floor = Math.floor;
+  var isVertical = ['top', 'bottom'].indexOf(placement) !== -1;
+  var side = isVertical ? 'right' : 'bottom';
+  var opSide = isVertical ? 'left' : 'top';
+  var measurement = isVertical ? 'width' : 'height';
+
+  if (popper[side] < floor(reference[opSide])) {
+    data.offsets.popper[opSide] = floor(reference[opSide]) - popper[measurement];
+  }
+  if (popper[opSide] > floor(reference[side])) {
+    data.offsets.popper[opSide] = floor(reference[side]);
+  }
+
+  return data;
+}
+
+/**
+ * Converts a string containing value + unit into a px value number
+ * @function
+ * @memberof {modifiers~offset}
+ * @private
+ * @argument {String} str - Value + unit string
+ * @argument {String} measurement - `height` or `width`
+ * @argument {Object} popperOffsets
+ * @argument {Object} referenceOffsets
+ * @returns {Number|String}
+ * Value in pixels, or original string if no values were extracted
+ */
+function toValue(str, measurement, popperOffsets, referenceOffsets) {
+  // separate value from unit
+  var split = str.match(/((?:\-|\+)?\d*\.?\d*)(.*)/);
+  var value = +split[1];
+  var unit = split[2];
+
+  // If it's not a number it's an operator, I guess
+  if (!value) {
+    return str;
+  }
+
+  if (unit.indexOf('%') === 0) {
+    var element = void 0;
+    switch (unit) {
+      case '%p':
+        element = popperOffsets;
+        break;
+      case '%':
+      case '%r':
+      default:
+        element = referenceOffsets;
+    }
+
+    var rect = getClientRect(element);
+    return rect[measurement] / 100 * value;
+  } else if (unit === 'vh' || unit === 'vw') {
+    // if is a vh or vw, we calculate the size based on the viewport
+    var size = void 0;
+    if (unit === 'vh') {
+      size = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    } else {
+      size = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    }
+    return size / 100 * value;
+  } else {
+    // if is an explicit pixel unit, we get rid of the unit and keep the value
+    // if is an implicit unit, it's px, and we return just the value
+    return value;
+  }
+}
+
+/**
+ * Parse an `offset` string to extrapolate `x` and `y` numeric offsets.
+ * @function
+ * @memberof {modifiers~offset}
+ * @private
+ * @argument {String} offset
+ * @argument {Object} popperOffsets
+ * @argument {Object} referenceOffsets
+ * @argument {String} basePlacement
+ * @returns {Array} a two cells array with x and y offsets in numbers
+ */
+function parseOffset(offset, popperOffsets, referenceOffsets, basePlacement) {
+  var offsets = [0, 0];
+
+  // Use height if placement is left or right and index is 0 otherwise use width
+  // in this way the first offset will use an axis and the second one
+  // will use the other one
+  var useHeight = ['right', 'left'].indexOf(basePlacement) !== -1;
+
+  // Split the offset string to obtain a list of values and operands
+  // The regex addresses values with the plus or minus sign in front (+10, -20, etc)
+  var fragments = offset.split(/(\+|\-)/).map(function (frag) {
+    return frag.trim();
+  });
+
+  // Detect if the offset string contains a pair of values or a single one
+  // they could be separated by comma or space
+  var divider = fragments.indexOf(find(fragments, function (frag) {
+    return frag.search(/,|\s/) !== -1;
+  }));
+
+  if (fragments[divider] && fragments[divider].indexOf(',') === -1) {
+    console.warn('Offsets separated by white space(s) are deprecated, use a comma (,) instead.');
+  }
+
+  // If divider is found, we divide the list of values and operands to divide
+  // them by ofset X and Y.
+  var splitRegex = /\s*,\s*|\s+/;
+  var ops = divider !== -1 ? [fragments.slice(0, divider).concat([fragments[divider].split(splitRegex)[0]]), [fragments[divider].split(splitRegex)[1]].concat(fragments.slice(divider + 1))] : [fragments];
+
+  // Convert the values with units to absolute pixels to allow our computations
+  ops = ops.map(function (op, index) {
+    // Most of the units rely on the orientation of the popper
+    var measurement = (index === 1 ? !useHeight : useHeight) ? 'height' : 'width';
+    var mergeWithPrevious = false;
+    return op
+    // This aggregates any `+` or `-` sign that aren't considered operators
+    // e.g.: 10 + +5 => [10, +, +5]
+    .reduce(function (a, b) {
+      if (a[a.length - 1] === '' && ['+', '-'].indexOf(b) !== -1) {
+        a[a.length - 1] = b;
+        mergeWithPrevious = true;
+        return a;
+      } else if (mergeWithPrevious) {
+        a[a.length - 1] += b;
+        mergeWithPrevious = false;
+        return a;
+      } else {
+        return a.concat(b);
+      }
+    }, [])
+    // Here we convert the string values into number values (in px)
+    .map(function (str) {
+      return toValue(str, measurement, popperOffsets, referenceOffsets);
+    });
+  });
+
+  // Loop trough the offsets arrays and execute the operations
+  ops.forEach(function (op, index) {
+    op.forEach(function (frag, index2) {
+      if (isNumeric(frag)) {
+        offsets[index] += frag * (op[index2 - 1] === '-' ? -1 : 1);
+      }
+    });
+  });
+  return offsets;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @argument {Number|String} options.offset=0
+ * The offset value as described in the modifier description
+ * @returns {Object} The data object, properly modified
+ */
+function offset(data, _ref) {
+  var offset = _ref.offset;
+  var placement = data.placement,
+      _data$offsets = data.offsets,
+      popper = _data$offsets.popper,
+      reference = _data$offsets.reference;
+
+  var basePlacement = placement.split('-')[0];
+
+  var offsets = void 0;
+  if (isNumeric(+offset)) {
+    offsets = [+offset, 0];
+  } else {
+    offsets = parseOffset(offset, popper, reference, basePlacement);
+  }
+
+  if (basePlacement === 'left') {
+    popper.top += offsets[0];
+    popper.left -= offsets[1];
+  } else if (basePlacement === 'right') {
+    popper.top += offsets[0];
+    popper.left += offsets[1];
+  } else if (basePlacement === 'top') {
+    popper.left += offsets[0];
+    popper.top -= offsets[1];
+  } else if (basePlacement === 'bottom') {
+    popper.left += offsets[0];
+    popper.top += offsets[1];
+  }
+
+  data.popper = popper;
+  return data;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function preventOverflow(data, options) {
+  var boundariesElement = options.boundariesElement || getOffsetParent(data.instance.popper);
+
+  // If offsetParent is the reference element, we really want to
+  // go one step up and use the next offsetParent as reference to
+  // avoid to make this modifier completely useless and look like broken
+  if (data.instance.reference === boundariesElement) {
+    boundariesElement = getOffsetParent(boundariesElement);
+  }
+
+  // NOTE: DOM access here
+  // resets the popper's position so that the document size can be calculated excluding
+  // the size of the popper element itself
+  var transformProp = getSupportedPropertyName('transform');
+  var popperStyles = data.instance.popper.style; // assignment to help minification
+  var top = popperStyles.top,
+      left = popperStyles.left,
+      transform = popperStyles[transformProp];
+
+  popperStyles.top = '';
+  popperStyles.left = '';
+  popperStyles[transformProp] = '';
+
+  var boundaries = getBoundaries(data.instance.popper, data.instance.reference, options.padding, boundariesElement, data.positionFixed);
+
+  // NOTE: DOM access here
+  // restores the original style properties after the offsets have been computed
+  popperStyles.top = top;
+  popperStyles.left = left;
+  popperStyles[transformProp] = transform;
+
+  options.boundaries = boundaries;
+
+  var order = options.priority;
+  var popper = data.offsets.popper;
+
+  var check = {
+    primary: function primary(placement) {
+      var value = popper[placement];
+      if (popper[placement] < boundaries[placement] && !options.escapeWithReference) {
+        value = Math.max(popper[placement], boundaries[placement]);
+      }
+      return defineProperty({}, placement, value);
+    },
+    secondary: function secondary(placement) {
+      var mainSide = placement === 'right' ? 'left' : 'top';
+      var value = popper[mainSide];
+      if (popper[placement] > boundaries[placement] && !options.escapeWithReference) {
+        value = Math.min(popper[mainSide], boundaries[placement] - (placement === 'right' ? popper.width : popper.height));
+      }
+      return defineProperty({}, mainSide, value);
+    }
+  };
+
+  order.forEach(function (placement) {
+    var side = ['left', 'top'].indexOf(placement) !== -1 ? 'primary' : 'secondary';
+    popper = _extends({}, popper, check[side](placement));
+  });
+
+  data.offsets.popper = popper;
+
+  return data;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function shift(data) {
+  var placement = data.placement;
+  var basePlacement = placement.split('-')[0];
+  var shiftvariation = placement.split('-')[1];
+
+  // if shift shiftvariation is specified, run the modifier
+  if (shiftvariation) {
+    var _data$offsets = data.offsets,
+        reference = _data$offsets.reference,
+        popper = _data$offsets.popper;
+
+    var isVertical = ['bottom', 'top'].indexOf(basePlacement) !== -1;
+    var side = isVertical ? 'left' : 'top';
+    var measurement = isVertical ? 'width' : 'height';
+
+    var shiftOffsets = {
+      start: defineProperty({}, side, reference[side]),
+      end: defineProperty({}, side, reference[side] + reference[measurement] - popper[measurement])
+    };
+
+    data.offsets.popper = _extends({}, popper, shiftOffsets[shiftvariation]);
+  }
+
+  return data;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by update method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function hide(data) {
+  if (!isModifierRequired(data.instance.modifiers, 'hide', 'preventOverflow')) {
+    return data;
+  }
+
+  var refRect = data.offsets.reference;
+  var bound = find(data.instance.modifiers, function (modifier) {
+    return modifier.name === 'preventOverflow';
+  }).boundaries;
+
+  if (refRect.bottom < bound.top || refRect.left > bound.right || refRect.top > bound.bottom || refRect.right < bound.left) {
+    // Avoid unnecessary DOM access if visibility hasn't changed
+    if (data.hide === true) {
+      return data;
+    }
+
+    data.hide = true;
+    data.attributes['x-out-of-boundaries'] = '';
+  } else {
+    // Avoid unnecessary DOM access if visibility hasn't changed
+    if (data.hide === false) {
+      return data;
+    }
+
+    data.hide = false;
+    data.attributes['x-out-of-boundaries'] = false;
+  }
+
+  return data;
+}
+
+/**
+ * @function
+ * @memberof Modifiers
+ * @argument {Object} data - The data object generated by `update` method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {Object} The data object, properly modified
+ */
+function inner(data) {
+  var placement = data.placement;
+  var basePlacement = placement.split('-')[0];
+  var _data$offsets = data.offsets,
+      popper = _data$offsets.popper,
+      reference = _data$offsets.reference;
+
+  var isHoriz = ['left', 'right'].indexOf(basePlacement) !== -1;
+
+  var subtractLength = ['top', 'left'].indexOf(basePlacement) === -1;
+
+  popper[isHoriz ? 'left' : 'top'] = reference[basePlacement] - (subtractLength ? popper[isHoriz ? 'width' : 'height'] : 0);
+
+  data.placement = getOppositePlacement(placement);
+  data.offsets.popper = getClientRect(popper);
+
+  return data;
+}
+
+/**
+ * Modifier function, each modifier can have a function of this type assigned
+ * to its `fn` property.<br />
+ * These functions will be called on each update, this means that you must
+ * make sure they are performant enough to avoid performance bottlenecks.
+ *
+ * @function ModifierFn
+ * @argument {dataObject} data - The data object generated by `update` method
+ * @argument {Object} options - Modifiers configuration and options
+ * @returns {dataObject} The data object, properly modified
+ */
+
+/**
+ * Modifiers are plugins used to alter the behavior of your poppers.<br />
+ * Popper.js uses a set of 9 modifiers to provide all the basic functionalities
+ * needed by the library.
+ *
+ * Usually you don't want to override the `order`, `fn` and `onLoad` props.
+ * All the other properties are configurations that could be tweaked.
+ * @namespace modifiers
+ */
+var modifiers = {
+  /**
+   * Modifier used to shift the popper on the start or end of its reference
+   * element.<br />
+   * It will read the variation of the `placement` property.<br />
+   * It can be one either `-end` or `-start`.
+   * @memberof modifiers
+   * @inner
+   */
+  shift: {
+    /** @prop {number} order=100 - Index used to define the order of execution */
+    order: 100,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: shift
+  },
+
+  /**
+   * The `offset` modifier can shift your popper on both its axis.
+   *
+   * It accepts the following units:
+   * - `px` or unit-less, interpreted as pixels
+   * - `%` or `%r`, percentage relative to the length of the reference element
+   * - `%p`, percentage relative to the length of the popper element
+   * - `vw`, CSS viewport width unit
+   * - `vh`, CSS viewport height unit
+   *
+   * For length is intended the main axis relative to the placement of the popper.<br />
+   * This means that if the placement is `top` or `bottom`, the length will be the
+   * `width`. In case of `left` or `right`, it will be the `height`.
+   *
+   * You can provide a single value (as `Number` or `String`), or a pair of values
+   * as `String` divided by a comma or one (or more) white spaces.<br />
+   * The latter is a deprecated method because it leads to confusion and will be
+   * removed in v2.<br />
+   * Additionally, it accepts additions and subtractions between different units.
+   * Note that multiplications and divisions aren't supported.
+   *
+   * Valid examples are:
+   * ```
+   * 10
+   * '10%'
+   * '10, 10'
+   * '10%, 10'
+   * '10 + 10%'
+   * '10 - 5vh + 3%'
+   * '-10px + 5vh, 5px - 6%'
+   * ```
+   * > **NB**: If you desire to apply offsets to your poppers in a way that may make them overlap
+   * > with their reference element, unfortunately, you will have to disable the `flip` modifier.
+   * > You can read more on this at this [issue](https://github.com/FezVrasta/popper.js/issues/373).
+   *
+   * @memberof modifiers
+   * @inner
+   */
+  offset: {
+    /** @prop {number} order=200 - Index used to define the order of execution */
+    order: 200,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: offset,
+    /** @prop {Number|String} offset=0
+     * The offset value as described in the modifier description
+     */
+    offset: 0
+  },
+
+  /**
+   * Modifier used to prevent the popper from being positioned outside the boundary.
+   *
+   * A scenario exists where the reference itself is not within the boundaries.<br />
+   * We can say it has "escaped the boundaries" — or just "escaped".<br />
+   * In this case we need to decide whether the popper should either:
+   *
+   * - detach from the reference and remain "trapped" in the boundaries, or
+   * - if it should ignore the boundary and "escape with its reference"
+   *
+   * When `escapeWithReference` is set to`true` and reference is completely
+   * outside its boundaries, the popper will overflow (or completely leave)
+   * the boundaries in order to remain attached to the edge of the reference.
+   *
+   * @memberof modifiers
+   * @inner
+   */
+  preventOverflow: {
+    /** @prop {number} order=300 - Index used to define the order of execution */
+    order: 300,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: preventOverflow,
+    /**
+     * @prop {Array} [priority=['left','right','top','bottom']]
+     * Popper will try to prevent overflow following these priorities by default,
+     * then, it could overflow on the left and on top of the `boundariesElement`
+     */
+    priority: ['left', 'right', 'top', 'bottom'],
+    /**
+     * @prop {number} padding=5
+     * Amount of pixel used to define a minimum distance between the boundaries
+     * and the popper. This makes sure the popper always has a little padding
+     * between the edges of its container
+     */
+    padding: 5,
+    /**
+     * @prop {String|HTMLElement} boundariesElement='scrollParent'
+     * Boundaries used by the modifier. Can be `scrollParent`, `window`,
+     * `viewport` or any DOM element.
+     */
+    boundariesElement: 'scrollParent'
+  },
+
+  /**
+   * Modifier used to make sure the reference and its popper stay near each other
+   * without leaving any gap between the two. Especially useful when the arrow is
+   * enabled and you want to ensure that it points to its reference element.
+   * It cares only about the first axis. You can still have poppers with margin
+   * between the popper and its reference element.
+   * @memberof modifiers
+   * @inner
+   */
+  keepTogether: {
+    /** @prop {number} order=400 - Index used to define the order of execution */
+    order: 400,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: keepTogether
+  },
+
+  /**
+   * This modifier is used to move the `arrowElement` of the popper to make
+   * sure it is positioned between the reference element and its popper element.
+   * It will read the outer size of the `arrowElement` node to detect how many
+   * pixels of conjunction are needed.
+   *
+   * It has no effect if no `arrowElement` is provided.
+   * @memberof modifiers
+   * @inner
+   */
+  arrow: {
+    /** @prop {number} order=500 - Index used to define the order of execution */
+    order: 500,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: arrow,
+    /** @prop {String|HTMLElement} element='[x-arrow]' - Selector or node used as arrow */
+    element: '[x-arrow]'
+  },
+
+  /**
+   * Modifier used to flip the popper's placement when it starts to overlap its
+   * reference element.
+   *
+   * Requires the `preventOverflow` modifier before it in order to work.
+   *
+   * **NOTE:** this modifier will interrupt the current update cycle and will
+   * restart it if it detects the need to flip the placement.
+   * @memberof modifiers
+   * @inner
+   */
+  flip: {
+    /** @prop {number} order=600 - Index used to define the order of execution */
+    order: 600,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: flip,
+    /**
+     * @prop {String|Array} behavior='flip'
+     * The behavior used to change the popper's placement. It can be one of
+     * `flip`, `clockwise`, `counterclockwise` or an array with a list of valid
+     * placements (with optional variations)
+     */
+    behavior: 'flip',
+    /**
+     * @prop {number} padding=5
+     * The popper will flip if it hits the edges of the `boundariesElement`
+     */
+    padding: 5,
+    /**
+     * @prop {String|HTMLElement} boundariesElement='viewport'
+     * The element which will define the boundaries of the popper position.
+     * The popper will never be placed outside of the defined boundaries
+     * (except if `keepTogether` is enabled)
+     */
+    boundariesElement: 'viewport',
+    /**
+     * @prop {Boolean} flipVariations=false
+     * The popper will switch placement variation between `-start` and `-end` when
+     * the reference element overlaps its boundaries.
+     *
+     * The original placement should have a set variation.
+     */
+    flipVariations: false,
+    /**
+     * @prop {Boolean} flipVariationsByContent=false
+     * The popper will switch placement variation between `-start` and `-end` when
+     * the popper element overlaps its reference boundaries.
+     *
+     * The original placement should have a set variation.
+     */
+    flipVariationsByContent: false
+  },
+
+  /**
+   * Modifier used to make the popper flow toward the inner of the reference element.
+   * By default, when this modifier is disabled, the popper will be placed outside
+   * the reference element.
+   * @memberof modifiers
+   * @inner
+   */
+  inner: {
+    /** @prop {number} order=700 - Index used to define the order of execution */
+    order: 700,
+    /** @prop {Boolean} enabled=false - Whether the modifier is enabled or not */
+    enabled: false,
+    /** @prop {ModifierFn} */
+    fn: inner
+  },
+
+  /**
+   * Modifier used to hide the popper when its reference element is outside of the
+   * popper boundaries. It will set a `x-out-of-boundaries` attribute which can
+   * be used to hide with a CSS selector the popper when its reference is
+   * out of boundaries.
+   *
+   * Requires the `preventOverflow` modifier before it in order to work.
+   * @memberof modifiers
+   * @inner
+   */
+  hide: {
+    /** @prop {number} order=800 - Index used to define the order of execution */
+    order: 800,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: hide
+  },
+
+  /**
+   * Computes the style that will be applied to the popper element to gets
+   * properly positioned.
+   *
+   * Note that this modifier will not touch the DOM, it just prepares the styles
+   * so that `applyStyle` modifier can apply it. This separation is useful
+   * in case you need to replace `applyStyle` with a custom implementation.
+   *
+   * This modifier has `850` as `order` value to maintain backward compatibility
+   * with previous versions of Popper.js. Expect the modifiers ordering method
+   * to change in future major versions of the library.
+   *
+   * @memberof modifiers
+   * @inner
+   */
+  computeStyle: {
+    /** @prop {number} order=850 - Index used to define the order of execution */
+    order: 850,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: computeStyle,
+    /**
+     * @prop {Boolean} gpuAcceleration=true
+     * If true, it uses the CSS 3D transformation to position the popper.
+     * Otherwise, it will use the `top` and `left` properties
+     */
+    gpuAcceleration: true,
+    /**
+     * @prop {string} [x='bottom']
+     * Where to anchor the X axis (`bottom` or `top`). AKA X offset origin.
+     * Change this if your popper should grow in a direction different from `bottom`
+     */
+    x: 'bottom',
+    /**
+     * @prop {string} [x='left']
+     * Where to anchor the Y axis (`left` or `right`). AKA Y offset origin.
+     * Change this if your popper should grow in a direction different from `right`
+     */
+    y: 'right'
+  },
+
+  /**
+   * Applies the computed styles to the popper element.
+   *
+   * All the DOM manipulations are limited to this modifier. This is useful in case
+   * you want to integrate Popper.js inside a framework or view library and you
+   * want to delegate all the DOM manipulations to it.
+   *
+   * Note that if you disable this modifier, you must make sure the popper element
+   * has its position set to `absolute` before Popper.js can do its work!
+   *
+   * Just disable this modifier and define your own to achieve the desired effect.
+   *
+   * @memberof modifiers
+   * @inner
+   */
+  applyStyle: {
+    /** @prop {number} order=900 - Index used to define the order of execution */
+    order: 900,
+    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
+    enabled: true,
+    /** @prop {ModifierFn} */
+    fn: applyStyle,
+    /** @prop {Function} */
+    onLoad: applyStyleOnLoad,
+    /**
+     * @deprecated since version 1.10.0, the property moved to `computeStyle` modifier
+     * @prop {Boolean} gpuAcceleration=true
+     * If true, it uses the CSS 3D transformation to position the popper.
+     * Otherwise, it will use the `top` and `left` properties
+     */
+    gpuAcceleration: undefined
+  }
+};
+
+/**
+ * The `dataObject` is an object containing all the information used by Popper.js.
+ * This object is passed to modifiers and to the `onCreate` and `onUpdate` callbacks.
+ * @name dataObject
+ * @property {Object} data.instance The Popper.js instance
+ * @property {String} data.placement Placement applied to popper
+ * @property {String} data.originalPlacement Placement originally defined on init
+ * @property {Boolean} data.flipped True if popper has been flipped by flip modifier
+ * @property {Boolean} data.hide True if the reference element is out of boundaries, useful to know when to hide the popper
+ * @property {HTMLElement} data.arrowElement Node used as arrow by arrow modifier
+ * @property {Object} data.styles Any CSS property defined here will be applied to the popper. It expects the JavaScript nomenclature (eg. `marginBottom`)
+ * @property {Object} data.arrowStyles Any CSS property defined here will be applied to the popper arrow. It expects the JavaScript nomenclature (eg. `marginBottom`)
+ * @property {Object} data.boundaries Offsets of the popper boundaries
+ * @property {Object} data.offsets The measurements of popper, reference and arrow elements
+ * @property {Object} data.offsets.popper `top`, `left`, `width`, `height` values
+ * @property {Object} data.offsets.reference `top`, `left`, `width`, `height` values
+ * @property {Object} data.offsets.arrow] `top` and `left` offsets, only one of them will be different from 0
+ */
+
+/**
+ * Default options provided to Popper.js constructor.<br />
+ * These can be overridden using the `options` argument of Popper.js.<br />
+ * To override an option, simply pass an object with the same
+ * structure of the `options` object, as the 3rd argument. For example:
+ * ```
+ * new Popper(ref, pop, {
+ *   modifiers: {
+ *     preventOverflow: { enabled: false }
+ *   }
+ * })
+ * ```
+ * @type {Object}
+ * @static
+ * @memberof Popper
+ */
+var Defaults = {
+  /**
+   * Popper's placement.
+   * @prop {Popper.placements} placement='bottom'
+   */
+  placement: 'bottom',
+
+  /**
+   * Set this to true if you want popper to position it self in 'fixed' mode
+   * @prop {Boolean} positionFixed=false
+   */
+  positionFixed: false,
+
+  /**
+   * Whether events (resize, scroll) are initially enabled.
+   * @prop {Boolean} eventsEnabled=true
+   */
+  eventsEnabled: true,
+
+  /**
+   * Set to true if you want to automatically remove the popper when
+   * you call the `destroy` method.
+   * @prop {Boolean} removeOnDestroy=false
+   */
+  removeOnDestroy: false,
+
+  /**
+   * Callback called when the popper is created.<br />
+   * By default, it is set to no-op.<br />
+   * Access Popper.js instance with `data.instance`.
+   * @prop {onCreate}
+   */
+  onCreate: function onCreate() {},
+
+  /**
+   * Callback called when the popper is updated. This callback is not called
+   * on the initialization/creation of the popper, but only on subsequent
+   * updates.<br />
+   * By default, it is set to no-op.<br />
+   * Access Popper.js instance with `data.instance`.
+   * @prop {onUpdate}
+   */
+  onUpdate: function onUpdate() {},
+
+  /**
+   * List of modifiers used to modify the offsets before they are applied to the popper.
+   * They provide most of the functionalities of Popper.js.
+   * @prop {modifiers}
+   */
+  modifiers: modifiers
+};
+
+/**
+ * @callback onCreate
+ * @param {dataObject} data
+ */
+
+/**
+ * @callback onUpdate
+ * @param {dataObject} data
+ */
+
+// Utils
+// Methods
+var Popper = function () {
+  /**
+   * Creates a new Popper.js instance.
+   * @class Popper
+   * @param {Element|referenceObject} reference - The reference element used to position the popper
+   * @param {Element} popper - The HTML / XML element used as the popper
+   * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
+   * @return {Object} instance - The generated Popper.js instance
+   */
+  function Popper(reference, popper) {
+    var _this = this;
+
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    classCallCheck(this, Popper);
+
+    this.scheduleUpdate = function () {
+      return requestAnimationFrame(_this.update);
+    };
+
+    // make update() debounced, so that it only runs at most once-per-tick
+    this.update = debounce(this.update.bind(this));
+
+    // with {} we create a new object with the options inside it
+    this.options = _extends({}, Popper.Defaults, options);
+
+    // init state
+    this.state = {
+      isDestroyed: false,
+      isCreated: false,
+      scrollParents: []
+    };
+
+    // get reference and popper elements (allow jQuery wrappers)
+    this.reference = reference && reference.jquery ? reference[0] : reference;
+    this.popper = popper && popper.jquery ? popper[0] : popper;
+
+    // Deep merge modifiers options
+    this.options.modifiers = {};
+    Object.keys(_extends({}, Popper.Defaults.modifiers, options.modifiers)).forEach(function (name) {
+      _this.options.modifiers[name] = _extends({}, Popper.Defaults.modifiers[name] || {}, options.modifiers ? options.modifiers[name] : {});
+    });
+
+    // Refactoring modifiers' list (Object => Array)
+    this.modifiers = Object.keys(this.options.modifiers).map(function (name) {
+      return _extends({
+        name: name
+      }, _this.options.modifiers[name]);
+    })
+    // sort the modifiers by order
+    .sort(function (a, b) {
+      return a.order - b.order;
+    });
+
+    // modifiers have the ability to execute arbitrary code when Popper.js get inited
+    // such code is executed in the same order of its modifier
+    // they could add new properties to their options configuration
+    // BE AWARE: don't add options to `options.modifiers.name` but to `modifierOptions`!
+    this.modifiers.forEach(function (modifierOptions) {
+      if (modifierOptions.enabled && isFunction(modifierOptions.onLoad)) {
+        modifierOptions.onLoad(_this.reference, _this.popper, _this.options, modifierOptions, _this.state);
+      }
+    });
+
+    // fire the first update to position the popper in the right place
+    this.update();
+
+    var eventsEnabled = this.options.eventsEnabled;
+    if (eventsEnabled) {
+      // setup event listeners, they will take care of update the position in specific situations
+      this.enableEventListeners();
+    }
+
+    this.state.eventsEnabled = eventsEnabled;
+  }
+
+  // We can't use class properties because they don't get listed in the
+  // class prototype and break stuff like Sinon stubs
+
+
+  createClass(Popper, [{
+    key: 'update',
+    value: function update$$1() {
+      return update.call(this);
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy$$1() {
+      return destroy.call(this);
+    }
+  }, {
+    key: 'enableEventListeners',
+    value: function enableEventListeners$$1() {
+      return enableEventListeners.call(this);
+    }
+  }, {
+    key: 'disableEventListeners',
+    value: function disableEventListeners$$1() {
+      return disableEventListeners.call(this);
+    }
+
+    /**
+     * Schedules an update. It will run on the next UI update available.
+     * @method scheduleUpdate
+     * @memberof Popper
+     */
+
+
+    /**
+     * Collection of utilities useful when writing custom modifiers.
+     * Starting from version 1.7, this method is available only if you
+     * include `popper-utils.js` before `popper.js`.
+     *
+     * **DEPRECATION**: This way to access PopperUtils is deprecated
+     * and will be removed in v2! Use the PopperUtils module directly instead.
+     * Due to the high instability of the methods contained in Utils, we can't
+     * guarantee them to follow semver. Use them at your own risk!
+     * @static
+     * @private
+     * @type {Object}
+     * @deprecated since version 1.8
+     * @member Utils
+     * @memberof Popper
+     */
+
+  }]);
+  return Popper;
+}();
+
+/**
+ * The `referenceObject` is an object that provides an interface compatible with Popper.js
+ * and lets you use it as replacement of a real DOM node.<br />
+ * You can use this method to position a popper relatively to a set of coordinates
+ * in case you don't have a DOM node to use as reference.
+ *
+ * ```
+ * new Popper(referenceObject, popperNode);
+ * ```
+ *
+ * NB: This feature isn't supported in Internet Explorer 10.
+ * @name referenceObject
+ * @property {Function} data.getBoundingClientRect
+ * A function that returns a set of coordinates compatible with the native `getBoundingClientRect` method.
+ * @property {number} data.clientWidth
+ * An ES6 getter that will return the width of the virtual reference element.
+ * @property {number} data.clientHeight
+ * An ES6 getter that will return the height of the virtual reference element.
+ */
+
+
+Popper.Utils = (typeof window !== 'undefined' ? window : global).PopperUtils;
+Popper.placements = placements;
+Popper.Defaults = Defaults;
+
+/* harmony default export */ __webpack_exports__["a"] = (Popper);
+//# sourceMappingURL=popper.js.map
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(22)))
+
+/***/ }),
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21863,11 +24131,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -21875,7 +24143,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -21977,7 +24245,147 @@ var GifView = function () {
 exports.default = GifView;
 
 /***/ }),
-/* 52 */
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _UpgradeView = __webpack_require__(12);
+
+var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
+
+var _GetPremiumView = __webpack_require__(27);
+
+var _GetPremiumView2 = _interopRequireDefault(_GetPremiumView);
+
+var _TrialView = __webpack_require__(28);
+
+var _TrialView2 = _interopRequireDefault(_TrialView);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TeaserView = function () {
+  function TeaserView() {
+    _classCallCheck(this, TeaserView);
+
+    this.template = _folders2.default.VIEWS + '/teaser.html';
+  }
+
+  _createClass(TeaserView, [{
+    key: 'show',
+    value: function show(trialDays, userData) {
+      var _this2 = this;
+
+      var _this = this;
+      this.trialDays = trialDays;
+      this.userData = userData;
+
+      _Utils2.default.getLocaleInStorage().then(function (locale) {
+        _this2.App = (0, _jquery2.default)('#app');
+        _this2.App.html("");
+
+        _jquery2.default.get(_this.template, function (template) {
+          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+          _this.App.append(loadedTemplate);
+          _this.selectElements();
+
+          _this.setTrialButton(trialDays, userData);
+        }, "html");
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {
+      var _this = this;
+      _this.closeButton = (0, _jquery2.default)('#getprem-close');
+      _this.upgradeButton = (0, _jquery2.default)('#getprem-upgrade-btn');
+      _this.moreFeatures = (0, _jquery2.default)('#more-feature');
+      _this.continueButton = (0, _jquery2.default)('#continue-button');
+
+      _this.getTrialButton = (0, _jquery2.default)('#gettrial-btn');
+      _this.setEvents();
+    }
+  }, {
+    key: 'setEvents',
+    value: function setEvents() {
+      var _this = this;
+
+      _this.closeButton.click(_this.onCloseButtonClicked.bind(this));
+      _this.upgradeButton.click(_this.onUpgradeButtonClicked.bind(this));
+
+      _this.moreFeatures.click(function () {
+        _GetPremiumView2.default.show();
+      });
+
+      _this.continueButton.click(function () {
+        location.reload();
+      });
+    }
+  }, {
+    key: 'setTrialButton',
+    value: function setTrialButton(trialDays, userData) {
+      var _this = this;
+      if (trialDays > 0) {
+        _this.getTrialButton.text("Start " + trialDays + "-days free Premium");
+        _this.getTrialButton.click(function () {
+          _TrialView2.default.show(trialDays, userData);
+        });
+        _this.getTrialButton.css('display', 'block');
+      }
+    }
+  }, {
+    key: 'onCloseButtonClicked',
+    value: function onCloseButtonClicked() {
+      location.reload();
+    }
+  }, {
+    key: 'onUpgradeButtonClicked',
+    value: function onUpgradeButtonClicked() {
+      _UpgradeView2.default.initView();
+    }
+  }]);
+
+  return TeaserView;
+}();
+
+exports.default = new TeaserView();
+
+/***/ }),
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21989,11 +24397,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -22017,11 +24425,11 @@ var _DOMPurify = __webpack_require__(6);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
-var _Register3SuccessView = __webpack_require__(53);
+var _Register3SuccessView = __webpack_require__(58);
 
 var _Register3SuccessView2 = _interopRequireDefault(_Register3SuccessView);
 
@@ -22031,7 +24439,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var shajs = __webpack_require__(14);
+var shajs = __webpack_require__(15);
 
 var Register3View = function () {
 	function Register3View() {
@@ -22117,9 +24525,9 @@ var Register3View = function () {
 			if (locale.RegisterLegalAgreement && locale.TermsAndConditions && locale.PrivacyPolicy && locale.LicenseAgreement && locale.RegisterButton) {
 				var legalText = locale.RegisterLegalAgreement;
 				legalText = legalText.replace('{0}', '"' + locale.RegisterButton + '"');
-				legalText = legalText.replace('{1}', '<a id="tos-link" href="#" data="html/tos.php">' + locale.TermsAndConditions + '</a>');
-				legalText = legalText.replace('{2}', '<a id="pp-link" href="#" data="html/pp.php">' + locale.PrivacyPolicy + '</a>');
-				legalText = legalText.replace('{3}', '<a id="eula-link" href="#" data="html/eula.php">' + locale.LicenseAgreement + '</a>');
+				legalText = legalText.replace('{1}', '<a id="tos-link" href="#" data="/html/tos.php">' + locale.TermsAndConditions + '</a>');
+				legalText = legalText.replace('{2}', '<a id="pp-link" href="#" data="/html/pp.php">' + locale.PrivacyPolicy + '</a>');
+				legalText = legalText.replace('{3}', '<a id="eula-link" href="#" data="/html/eula.php">' + locale.LicenseAgreement + '</a>');
 
 				return legalText;
 			} else {
@@ -22151,13 +24559,8 @@ var Register3View = function () {
 		value: function setServiceElements(locale) {
 			var _this = this;
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
-				var logosource = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] ? storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + "rest/img/logo/dashboard/150.png" : _ServiceMeta2.default.IMAGES.HEADERLOGO;
-				var iid = "";
 
-				if (storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID]) iid = "&iid=" + storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID];
-
-				var headerlogo = logosource + "?cv=" + _ServiceMeta2.default.VERSION + iid;
-				_this.headerLogo.attr('src', headerlogo);
+				_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
 			});
 			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
 
@@ -22413,7 +24816,8 @@ var Register3View = function () {
 		key: 'onRegisterSuccess',
 		value: function onRegisterSuccess(successMessage) {
 			var _this = this;
-			_Register3SuccessView2.default.show();
+			location.reload();
+			//Register3SuccessView.show();
 			/*
    		_this.registerSuccessMessage.text(successMessage);
    		_this.registerSuccessView.addClass('register-view--success--on');
@@ -22446,7 +24850,7 @@ var Register3View = function () {
 exports.default = new Register3View();
 
 /***/ }),
-/* 53 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22458,11 +24862,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -22474,7 +24878,7 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _localeFallback = __webpack_require__(25);
+var _localeFallback = __webpack_require__(5);
 
 var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
@@ -22538,7 +24942,7 @@ var Register3SuccessView = function () {
 exports.default = new Register3SuccessView();
 
 /***/ }),
-/* 54 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22550,11 +24954,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -22578,7 +24982,7 @@ var _DOMPurify = __webpack_require__(6);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -22808,7 +25212,7 @@ var ForgotpassView = function () {
 exports.default = new ForgotpassView();
 
 /***/ }),
-/* 55 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22820,11 +25224,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(1);
+var _jquery = __webpack_require__(2);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _folders = __webpack_require__(2);
+var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
@@ -22836,7 +25240,7 @@ var _Utils = __webpack_require__(3);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _localeFallback = __webpack_require__(25);
+var _localeFallback = __webpack_require__(5);
 
 var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
@@ -22848,7 +25252,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Sanitize = __webpack_require__(5);
+var _Sanitize = __webpack_require__(8);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -23006,7 +25410,333 @@ var ActivationView = function () {
 exports.default = new ActivationView();
 
 /***/ }),
-/* 56 */
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(2);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _Utils = __webpack_require__(3);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _LoginView = __webpack_require__(7);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CreateAuthcodeView = function () {
+	function CreateAuthcodeView() {
+		_classCallCheck(this, CreateAuthcodeView);
+
+		this.template = _folders2.default.VIEWS + '/create-authcode-view.html';
+		this.header = _folders2.default.VIEWS + '/header.html';
+		this.locale = {};
+
+		this.fallbackCopyTextToClipboard = this.fallbackCopyTextToClipboard.bind(this);
+		this.copyTextToClipboard = this.copyTextToClipboard.bind(this);
+	}
+
+	_createClass(CreateAuthcodeView, [{
+		key: 'initView',
+		value: function initView() {
+			var _this = this;
+
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
+
+			_jquery2.default.get(_this.header, function (header) {
+				_this.App.append(header);
+				_jquery2.default.get(_this.template, function (template) {
+					var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+					_this.App.append(loadedTemplate);
+					_this.setHeaderBackButton();
+					_this.selectElements();
+					_this.setServiceElements();
+					_this.setEvents();
+					_this.setAgreement(locale);
+					_this.locale = locale;
+				}, "html");
+			}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements() {
+			var _this = this;
+			_this.createAuthcodeContainer = (0, _jquery2.default)('#create-authcode-container');
+			_this.successAuthcodeContainer = (0, _jquery2.default)('#success-authcode-container');
+			_this.errorAuthcodeContainer = (0, _jquery2.default)('#error-authcode-container');
+
+			_this.createAuthcodeButton = (0, _jquery2.default)('#create-authcode');
+			_this.loginAuthcodeButton = (0, _jquery2.default)('#login-with-authcode');
+
+			_this.authcode = (0, _jquery2.default)('#authcode');
+			_this.autcodeError = (0, _jquery2.default)('#autcode-errormsg');
+			_this.authcodeCopied = (0, _jquery2.default)('#authcode-copied-clipboard');
+
+			_this.headerVersion = (0, _jquery2.default)('#header-version');
+			_this.headerLogo = (0, _jquery2.default)('#header-logo');
+		}
+	}, {
+		key: 'setEvents',
+		value: function setEvents() {
+			var _this = this;
+
+			_this.createAuthcodeButton.click(_this.onCreateAuthcodeClicked.bind(_this));
+			_this.loginAuthcodeButton.click(_this.onLoginWithAuthcodeClicked.bind(_this));
+
+			_this.authcode.click(_this.onAuthcodeClicked.bind(this));
+
+			(0, _jquery2.default)('.create-authcode-view__launch').click(_this.openPolicyPage);
+		}
+	}, {
+		key: 'setHeaderBackButton',
+		value: function setHeaderBackButton() {
+			var _this = this;
+			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
+			_this.headerBackButton.css('display', 'block');
+			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements() {
+			var _this = this;
+
+			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
+			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
+		}
+	}, {
+		key: 'setAgreement',
+		value: function setAgreement(locale) {
+			var _this = this;
+
+			(0, _jquery2.default)('#pp-label').text(locale.PrivacyPolicy);
+			(0, _jquery2.default)('#terms-label').text(locale.TermsAndConditions);
+			(0, _jquery2.default)('#eula-label').text(locale.LicenseAgreement);
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+
+			//todo what happen if it take to long? loading screen is showed?
+			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
+				if (resp != undefined && resp != "" && resp.Retcode === 200) {
+
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
+						window.location.reload(true);
+					});
+				} else {
+					//todo can't get locale
+				}
+			});
+		}
+	}, {
+		key: 'showSuccess',
+		value: function showSuccess(authcode) {
+			var _this = this;
+			_this.createAuthcodeContainer.css('display', 'none');
+			_this.errorAuthcodeContainer.css('display', 'none');
+			_this.successAuthcodeContainer.css('display', 'block');
+			_this.authcode.text(authcode);
+		}
+	}, {
+		key: 'showError',
+		value: function showError(errormsg) {
+			var _this = this;
+			_this.createAuthcodeContainer.css('display', 'none');
+			_this.errorAuthcodeContainer.css('display', 'block');
+			_this.successAuthcodeContainer.css('display', 'none');
+			if (Array.isArray(errormsg)) {
+				errormsg.forEach(function (msg) {
+					_this.autcodeError.append("<p>" + msg + "</p>");
+				});
+			}
+		}
+	}, {
+		key: 'showAgreementError',
+		value: function showAgreementError(errors) {
+			var _this = this;
+			(0, _jquery2.default)('#inline-error').html("");
+			errors.forEach(function (errormsg) {
+				(0, _jquery2.default)('#inline-error').append("<p>" + errormsg + "</p>");
+			});
+			(0, _jquery2.default)('#inline-error').css('display', 'block');
+		}
+	}, {
+		key: 'clearAgreementError',
+		value: function clearAgreementError() {
+			(0, _jquery2.default)('#inline-error').html("");
+		}
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			(0, _jquery2.default)('#create-authcode').css('display', 'none');
+			(0, _jquery2.default)('#loading-container').html(_ServiceMeta2.default.LOADINGIMG);
+			(0, _jquery2.default)('#loading-container').css('display', 'block');
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			(0, _jquery2.default)('#create-authcode').css('display', 'block');
+			(0, _jquery2.default)('#loading-container').html("");
+			(0, _jquery2.default)('#loading-container').css('display', 'none');
+		}
+	}, {
+		key: 'openPolicyPage',
+		value: function openPolicyPage() {
+			var _this = this;
+
+			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] && (0, _jquery2.default)(_this).attr('data')) {
+					var policyLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + (0, _jquery2.default)(_this).attr('data');
+					chrome.tabs.create({ url: policyLink });
+				}
+			});
+		}
+
+		//Events
+
+	}, {
+		key: 'onCreateAuthcodeClicked',
+		value: function onCreateAuthcodeClicked() {
+			var _this = this;
+			_this.clearAgreementError();
+			var errors = [];
+			if (!(0, _jquery2.default)('#pp-checkbox').prop("checked")) errors.push(_this.locale.RegisterErrorPP);
+
+			if (!(0, _jquery2.default)('#terms-checkbox').prop("checked")) errors.push(_this.locale.RegisterErrorTOS);
+
+			if (!(0, _jquery2.default)('#eula-checkbox').prop("checked")) errors.push("You have to agree with our License Agreement");
+
+			if (errors.length > 0) return _this.showAgreementError(errors);
+			_this.setLoading();
+			_BackgroundRequester2.default.request("api", "createAuthcode", {}).then(function (response) {
+				_this.unsetLoading();
+
+				if (response && response != "" && response.Retcode === 200 && response.hasOwnProperty("Authcode")) {
+					_this.showSuccess(response.Authcode);
+				} else {
+					if (response && response != "" && response.Retcode < 0 && response.hasOwnProperty("Message")) return _this.showError(response.Message);
+
+					_this.showError(["Something went wrong. Please contact support."]);
+				}
+			});
+		}
+	}, {
+		key: 'onLoginWithAuthcodeClicked',
+		value: function onLoginWithAuthcodeClicked() {
+			var _this = this;
+
+			location.reload();
+		}
+	}, {
+		key: 'onHeaderBackButtonClicked',
+		value: function onHeaderBackButtonClicked() {
+			_LoginView2.default.initView();
+		}
+	}, {
+		key: 'onAuthcodeClicked',
+		value: function onAuthcodeClicked() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+				var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+				if (userdata && userdata.authcode) {
+					_this.copyTextToClipboard(userdata.authcode);
+					_this.authcode.css('display', 'none');
+					_this.authcodeCopied.css('display', 'block');
+
+					setTimeout(function () {
+						_this.authcodeCopied.css('display', 'none');
+						_this.authcode.css('display', 'block');
+					}, 5000);
+				}
+			});
+		}
+	}, {
+		key: 'copyTextToClipboard',
+		value: function copyTextToClipboard(text) {
+			var _this = this;
+
+			if (!navigator.clipboard) {
+				_this.fallbackCopyTextToClipboard(text);
+				return;
+			}
+			navigator.clipboard.writeText(text).then(function () {}, function (err) {
+				console.error('Async: Could not copy text: ', err);
+			});
+		}
+	}, {
+		key: 'fallbackCopyTextToClipboard',
+		value: function fallbackCopyTextToClipboard(text) {
+			var _this = this;
+			var textArea = document.createElement("textarea");
+			textArea.value = text;
+			textArea.style.position = "fixed"; //avoid scrolling to bottom
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+
+			try {
+				var successful = document.execCommand('copy');
+				var msg = successful ? 'successful' : 'unsuccessful';
+			} catch (err) {
+				console.error('Fallback: Oops, unable to copy', err);
+			}
+
+			document.body.removeChild(textArea);
+		}
+	}]);
+
+	return CreateAuthcodeView;
+}();
+
+exports.default = new CreateAuthcodeView();
+
+/***/ }),
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23073,6 +25803,21 @@ var Extension = function () {
 			});
 		}
 	}, {
+		key: 'isVersionStop',
+		value: function isVersionStop() {
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
+					var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
+
+					if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action == "stop" && versionStatusData.hasOwnProperty("sources") && Array.isArray(versionStatusData.sources) && versionStatusData.sources.length > 0 && versionStatusData.hasOwnProperty("curversion") && versionStatusData.hasOwnProperty("minversion")) {
+						return resolve(true);
+					}
+
+					return resolve(false);
+				});
+			});
+		}
+	}, {
 		key: 'onPermissionAdded',
 		value: function onPermissionAdded(change) {
 			var _this = this;
@@ -23129,7 +25874,7 @@ var Extension = function () {
 			return new Promise(function (resolve, reject) {
 				var welcomePagePingEndpoint = "https://welcomepage.org/ping/" + _ServiceMeta2.default.SHORTNAME;
 
-				var parameter = "?iid=" + data.iid + "&lang=" + _ServiceMeta2.default.BROWSERLANG + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase();
+				var parameter = "?lang=" + _ServiceMeta2.default.BROWSERLANG + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase();
 
 				welcomePagePingEndpoint = welcomePagePingEndpoint + parameter;
 				var xhr = new XMLHttpRequest();
@@ -23160,14 +25905,17 @@ var Extension = function () {
 	}, {
 		key: 'onStartup',
 		value: function onStartup() {
-
-			chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.DCACHE);
+			chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.ECACHE, _ServiceMeta2.default.STORAGEKEYS.DCACHE, _ServiceMeta2.default.STORAGEKEYS.ERRCACHE, _ServiceMeta2.default.STORAGEKEYS.HASHCACHE]);
 		}
 	}, {
 		key: 'onInstalled',
 		value: function onInstalled(details) {
-			if (details && details.reason && details.reason == 'install') {
-				this.setInstallId();
+			if (details && details.reason) {
+
+				if (details.reason == 'install') this.setInstallId();
+				if (details.reason == 'update') {
+					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.DCACHE, _ServiceMeta2.default.STORAGEKEYS.ECACHE, _ServiceMeta2.default.STORAGEKEYS.ERRCACHE, _ServiceMeta2.default.STORAGEKEYS.HASHCACHE, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE]);
+				}
 			}
 		}
 	}]);
@@ -23178,7 +25926,7 @@ var Extension = function () {
 exports.default = new Extension();
 
 /***/ }),
-/* 57 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
