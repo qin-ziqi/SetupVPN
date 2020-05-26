@@ -792,7 +792,7 @@ body {
     	text-align: left;
     	display: block;
 	    padding: 10px 20px;
-	    position: relative;	    
+	    position: relative;
     }
 
 .server-item__server__server-flag {
@@ -815,6 +815,9 @@ body {
 		    	padding-top: 8px;
 			    font-size: 16px;
 			    font-weight: 300;
+					max-width: 180px;
+					text-overflow: ellipsis;
+					overflow: hidden;
 		    }
 
 .server-item__server i {
@@ -1909,6 +1912,10 @@ body {
 .upgrade-view__payment-container div input {
 				position: absolute;
 			}
+
+.upgrade-view__payment-image{
+		cursor: pointer;
+	}
 
 .upgrade-view__payment-button-container {
 		height: 50px;
@@ -3857,3 +3864,64 @@ background: linear-gradient(to right, #a8e063, #56ab2f);
 #email-login-view {
   display: none;
 }
+
+.maintenance-mode {
+  background-color: #f0f8ff;
+  width: 300px;
+  height: 558px;
+	max-height: 558px;
+	overflow: hidden;
+	position: relative;
+  display: none;
+}
+
+.maintenance-mode__close {
+    position: absolute;
+    right: 2px;
+    top: 5px;
+    cursor: pointer;
+    color: #000;
+  }
+
+.maintenance-mode__container {
+    text-align: center;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+  }
+
+.maintenance-mode__icon i{
+      font-size: 50px;
+    }
+
+.maintenance-mode__message {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+.emailwarning {
+  background: #0F2027;  /* fallback for old browsers */  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-gradient(linear, left top, left bottom, from(#2C5364), color-stop(#203A43), to(#0F2027));
+  background: linear-gradient(to bottom, #2C5364, #203A43, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+  max-height: 558px;
+  overflow: auto;
+  color: #fff;
+  height: 557px;
+}
+
+.emailwarning__title {
+    font-size: 16px;
+    text-decoration: underline;
+  }
+
+.emailwarning__container {
+    text-align: center;
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+  }

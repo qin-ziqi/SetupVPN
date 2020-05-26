@@ -163,7 +163,11 @@ exports.default = {
 		TEASERNEXT: 'teaserNext',
 		VERSIONSTATUSNEXTUPDATE: 'versionStatusNextTime',
 		VERSIONSTATUS: 'versionStatus',
-		LOGINTYPE: 'logintype'
+		LOGINTYPE: 'logintype',
+		LSER: 'localeLser',
+		COUNTRYLOCALE: 'countryLocale',
+		CONFIGHARDTTL: 'configHardTTL',
+		LASTLOGOUTREASON: 'lastLogoutReason'
 	},
 	STATUS: {
 		BLOCKED: "BLOCKED",
@@ -198,11 +202,616 @@ exports.default = {
 	VIEWS: './views',
 	ASSETS: './assets',
 	FLAGS: './images/flags',
-	IMAGES: './images'
+	IMAGES: './images',
+	LOCALE: './locale'
 };
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _constants = __webpack_require__(33);
+
+var _constants2 = _interopRequireDefault(_constants);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Utils = function () {
+	function Utils() {
+		_classCallCheck(this, Utils);
+	}
+
+	_createClass(Utils, [{
+		key: 'isEmpty',
+		value: function isEmpty(obj) {
+
+			for (var prop in obj) {
+				if (obj.hasOwnProperty(prop)) return false;
+			}
+
+			return true;
+		}
+	}, {
+		key: 'shuffleArray',
+		value: function shuffleArray(o) {
+			for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x) {}
+			return o;
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(html, locale) {
+			var template = html;
+			var htmlKeys = html.match(/(?:\{)[^\{\}]*?(?:\})/g);
+
+			if (!htmlKeys) return template;
+
+			htmlKeys.forEach(function (htmlKey) {
+				var localeKey = htmlKey.replace("{", "").replace("}", "");
+
+				if (locale[localeKey]) template = template.replace(htmlKey, locale[localeKey]);
+			});
+
+			return template;
+		}
+	}, {
+		key: 'loadTemplateWithFallback',
+		value: function loadTemplateWithFallback(html, locale, fallbacks) {
+			var template = html;
+			template = this.loadTemplate(html, locale);
+			template = this.loadTemplate(template, fallbacks);
+			return template;
+		}
+	}, {
+		key: 'isObject',
+		value: function isObject(obj) {
+			return (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && obj !== null;
+		}
+	}, {
+		key: 'isString',
+		value: function isString(x) {
+			return Object.prototype.toString.call(x) === "[object String]";
+		}
+	}, {
+		key: 'getFallbackLocale',
+		value: function getFallbackLocale(key, locale, fallback) {
+			if (this.isObject(locale) && locale.hasOwnProperty(key) && this.isString(locale[key])) return locale[key];
+			if (this.isObject(fallback) && fallback.hasOwnProperty(key) && this.isString(fallback[key])) return fallback[key];
+			return "Undefined locale";
+		}
+	}, {
+		key: 'getConfigTTL',
+		value: function getConfigTTL(config_interval, default_interval) {
+			var min = 5;
+			var max = 120;
+			var interval = default_interval;
+			if (config_interval && Number.isInteger(config_interval)) {
+				interval = Math.min(Math.max(min, config_interval), max);
+			}
+			return Math.floor(Date.now() / 1000) + interval * 60;
+		}
+	}, {
+		key: 'getLocaleInStorage',
+		value: function getLocaleInStorage() {
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.LOCALE, function (storage) {
+					if (storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]) return resolve(storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]);
+
+					reject();
+				});
+			});
+		}
+	}, {
+		key: 'isUserPremium',
+		value: function isUserPremium(serverData) {
+			if (serverData["user_premium"] == 0) {
+				return false;
+			} else {
+				if (!Date.now) {
+					Date.now = function () {
+						return new Date().getTime();
+					};
+				}
+
+				var datenow = Math.floor(Date.now() / 1000);
+				//console.log("UTC TIME" + datenow);
+				var expiredate = serverData["user_premium"];
+
+				if (expiredate > datenow) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}, {
+		key: 'getUserExpirationData',
+		value: function getUserExpirationData(timestamp) {
+			var a = new Date(timestamp * 1000);
+			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			var year = a.getFullYear();
+			var month = months[a.getMonth()];
+			var date = a.getDate();
+
+			return date + ". " + month + " " + year;
+		}
+	}, {
+		key: 'getRandomInt',
+		value: function getRandomInt(min, max) {
+			min = Math.ceil(min);
+			max = Math.floor(max);
+			return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+		}
+	}, {
+		key: 'getRandomRange',
+		value: function getRandomRange() {
+			var randomRange = {
+				s: 100000,
+				e: 100000000000
+			};
+
+			try {
+				var length = this.getRandomInt(6, 12);
+				var start = parseInt("1".padEnd(length, "0"));
+				var end = parseInt("9".padEnd(length, "9"));
+
+				randomRange.s = start;
+				randomRange.e = end;
+				return randomRange;
+			} catch (e) {
+				return randomRange;
+			}
+			return randomRange;
+		}
+	}, {
+		key: 'generateIdentifierDomain',
+		value: function generateIdentifierDomain() {
+			var randomRange = this.getRandomRange();
+			var it = this.getRandomInt(randomRange.s, randomRange.e);
+			return "test" + it + ".io";
+		}
+	}, {
+		key: 'getDateNow',
+		value: function getDateNow() {
+			return Math.floor(Date.now() / 1000);
+		}
+	}, {
+		key: 'getDateMid',
+		value: function getDateMid() {
+			return Math.floor(new Date().setUTCHours(0, 0, 0, 0) / 1000);
+		}
+	}, {
+		key: 'openNewTab',
+		value: function openNewTab(url) {
+			chrome.tabs.create({ "url": url });
+		}
+	}, {
+		key: 'setProxyStatusIcon',
+		value: function setProxyStatusIcon(isProxyOn) {
+			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
+			chrome.browserAction.setIcon({ path: { 38: icon } });
+		}
+	}, {
+		key: 'setPermissionIcon',
+		value: function setPermissionIcon(isValid) {
+			var icon = isValid ? _ServiceMeta2.default.IMAGES.OFFICON : _ServiceMeta2.default.IMAGES.PERMERRORICON;
+			chrome.browserAction.setIcon({ path: { 38: icon } });
+		}
+	}, {
+		key: 'showConnectionNotification',
+		value: function showConnectionNotification(title, message, isProxyOn) {
+			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
+			var options = {
+				type: "basic",
+				title: title,
+				message: message,
+				iconUrl: icon
+			};
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+
+				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+				var uid = configData && configData.uid ? configData.uid : "";
+				var inAppNoti = storage[_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF];
+
+				var condition = inAppNoti && inAppNoti[uid] === false ? true : false;
+
+				if (!condition) chrome.notifications.create(options);
+			});
+		}
+	}, {
+		key: 'showNotification',
+		value: function showNotification(title, message) {
+			var options = {
+				type: "basic",
+				title: title,
+				message: message,
+				iconUrl: _ServiceMeta2.default.IMAGES.ONICON
+			};
+
+			chrome.notifications.create(options);
+		}
+	}, {
+		key: 'removePort',
+		value: function removePort(hostnameWithPort) {
+
+			if (hostnameWithPort && hostnameWithPort.indexOf(":") > -1) {
+
+				return hostnameWithPort.substring(0, hostnameWithPort.indexOf(":"));
+			}
+
+			return hostnameWithPort;
+		}
+	}, {
+		key: 'escapeParamsOfUrl',
+		value: function escapeParamsOfUrl(url) {
+			var esurl = "" + url;
+			if (esurl.indexOf("?") > -1) {
+				esurl = esurl.substr(0, esurl.indexOf("?"));
+			}
+			return esurl;
+		}
+	}, {
+		key: 'addMetaParameter',
+		value: function addMetaParameter(parameter) {
+			return parameter = parameter + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM;
+		}
+	}, {
+		key: 'getRemainingTime',
+		value: function getRemainingTime(blockTime, locales) {
+			if (blockTime > 1) {
+				var timeNow = Math.floor(Date.now() / 1000);
+				var remaining = blockTime - timeNow;
+				var timeleft = "";
+				if (remaining < 3600) {
+					timeleft = Math.floor(remaining / 60) + " " + locales.tempBlockMinutes;
+				} else {
+					timeleft = Math.floor(remaining / 3600) + " " + locales.tempBlockHours;
+				}
+				return timeleft;
+			}
+			return 0;
+		}
+	}, {
+		key: 'hideElement',
+		value: function hideElement(element) {
+			if (element && element.css) element.css('display', 'none');
+		}
+	}, {
+		key: 'showElement',
+		value: function showElement(element) {
+			if (element && element.css) element.css('display', 'block');
+		}
+	}, {
+		key: 'stripProtocol',
+		value: function stripProtocol(url) {
+			return url.replace("http://", "").replace("https://", "");
+		}
+	}, {
+		key: 'sortObject',
+		value: function sortObject(o) {
+			return Object.keys(o).sort().reduce(function (r, k) {
+				return r[k] = o[k], r;
+			}, {});
+		}
+	}, {
+		key: 'getTabIdByServerType',
+		value: function getTabIdByServerType(serverType) {
+			if (!serverType) return 0;
+
+			switch (serverType) {
+				case 0:
+					return 0;
+					break;
+				case 1:
+					return 1;
+					break;
+				case 2:
+					return 2;
+					break;
+			}
+		}
+	}, {
+		key: 'openPlatformLink',
+		value: function openPlatformLink(platform) {
+			if (platform === "desktop") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.DESKTOP);
+			if (platform === "android") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.ANDROID);
+		}
+	}, {
+		key: 'createUniqueId',
+		value: function createUniqueId() {
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+				var r = Math.random() * 16 | 0,
+				    v = c == 'x' ? r : r & 0x3 | 0x8;
+				return v.toString(16);
+			});
+		}
+	}, {
+		key: 'setInstallId',
+		value: function setInstallId() {
+			var _this2 = this;
+
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
+					if (!storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID]) {
+						var installid = _this2.createUniqueId();
+						chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.INSTALLID, installid), function () {
+							resolve(installid);
+						});
+					} else {
+						reject();
+					}
+				});
+			});
+		}
+	}, {
+		key: 'isInt',
+		value: function isInt(value) {
+			return !isNaN(value) && function (x) {
+				return (x | 0) === x;
+			}(parseFloat(value));
+		}
+	}, {
+		key: 'hex_encode',
+		value: function hex_encode(s) {
+			s = unescape(encodeURIComponent(s));
+			var h = '';
+			for (var i = 0; i < s.length; i++) {
+				h += s.charCodeAt(i).toString(16);
+			}return h;
+		}
+	}, {
+		key: 'xor_string',
+		value: function xor_string(string, key) {
+			string = string.split('');
+			key = key.split('');
+			var str_len = string.length;
+			var key_len = key.length;
+			var String_fromCharCode = String.fromCharCode;
+
+			for (var i = 0; i < str_len; i++) {
+				string[i] = String_fromCharCode(string[i].charCodeAt(0) ^ key[i % key_len].charCodeAt(0));
+			}
+
+			return string.join('');
+		}
+	}, {
+		key: 'randomString',
+		value: function randomString() {
+			var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
+			var charSet = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+			var text = "";
+			for (var i = 0; i < length; i++) {
+				text += charSet.charAt(Math.floor(Math.random() * charSet.length));
+			}return text;
+		}
+	}, {
+		key: 'toqs',
+		value: function toqs(obj) {
+			var str = [];
+			for (var p in obj) {
+				if (obj.hasOwnProperty(p)) {
+					str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+				}
+			}return str.join("&");
+		}
+	}, {
+		key: 'getTimeoutSettings',
+		value: function getTimeoutSettings(serversJson) {
+			var _this = this;
+			var timeouts = {
+				"mainbase_search_timeout": _constants2.default["mainbase_search_timeout"],
+				"tierbase_search_timeout": _constants2.default["tierbase_search_timeout"],
+				"mainbase_api_timeout": _constants2.default["mainbase_api_timeout"],
+				"tierbase_api_timeout": _constants2.default["tierbase_api_timeout"],
+				"proxy_search_timeout": _constants2.default["proxy_search_timeout"]
+			};
+			try {
+				if (serversJson && typeof serversJson["settings"] !== 'undefined') {
+
+					if (serversJson["settings"].hasOwnProperty("mainbase_search_timeout") && this.isInt(serversJson["settings"]["mainbase_search_timeout"]) && serversJson["settings"]["mainbase_search_timeout"] >= 10000 && serversJson["settings"]["mainbase_search_timeout"] < 40000) {
+						timeouts["mainbase_search_timeout"] = parseInt(serversJson["settings"]["mainbase_search_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("tierbase_search_timeout") && this.isInt(serversJson["settings"]["tierbase_search_timeout"]) && serversJson["settings"]["tierbase_search_timeout"] >= 10000 && serversJson["settings"]["tierbase_search_timeout"] < 40000) {
+						timeouts["tierbase_search_timeout"] = parseInt(serversJson["settings"]["tierbase_search_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("mainbase_api_timeout") && this.isInt(serversJson["settings"]["mainbase_api_timeout"]) && serversJson["settings"]["mainbase_api_timeout"] >= 10000 && serversJson["settings"]["mainbase_api_timeout"] < 40000) {
+						timeouts["mainbase_api_timeout"] = parseInt(serversJson["settings"]["mainbase_api_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("tierbase_api_timeout") && this.isInt(serversJson["settings"]["tierbase_api_timeout"]) && serversJson["settings"]["tierbase_api_timeout"] >= 10000 && serversJson["settings"]["tierbase_api_timeout"] < 40000) {
+						timeouts["tierbase_api_timeout"] = parseInt(serversJson["settings"]["tierbase_api_timeout"]);
+					}
+
+					if (serversJson["settings"].hasOwnProperty("proxy_search_timeout") && this.isInt(serversJson["settings"]["proxy_search_timeout"]) && serversJson["settings"]["proxy_search_timeout"] >= 10000 && serversJson["settings"]["proxy_search_timeout"] < 40000) {
+						timeouts["proxy_search_timeout"] = parseInt(serversJson["settings"]["proxy_search_timeout"]);
+					}
+				}
+			} catch (e) {
+				return timeouts;
+			}
+			return timeouts;
+		}
+	}, {
+		key: 'isTimeoutSettingValid',
+		value: function isTimeoutSettingValid(timeoutSettings) {
+			if (timeoutSettings && this.isInt(timeoutSettings) && timeoutSettings >= 10000 && timeoutSettings < 60000) {
+				return true;
+			}
+
+			return false;
+		}
+	}, {
+		key: 'isTrialAvailable',
+		value: function isTrialAvailable(configData) {
+			return configData && configData.hasOwnProperty("trial") && this.isInt(configData.trial) && configData.trial > 0 ? configData.trial : false;
+		}
+	}, {
+		key: 'getUpdateHtml',
+		value: function getUpdateHtml(yourVersion, curVersion) {
+			var updateAvalHtml = '\n\t\t\t\t<div class="update-available" id="update-app">\n\t\t\t\t\t<div class="update-available__title"><span class="update-available__notification">1</span> NEW UPDATE AVAILABLE</div>\n\t\t\t\t\t<div class="update-available__content">\n\t\t\t\t\t\t<div class="update-available__content__app">\n\t\t\t\t\t\t\t<div class="update-available__content__app__icon">\n\t\t\t\t\t\t\t\t<img src="images/symbol25.png">\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__version-info">\n\t\t\t\t\t\t\t\t<div style="color: red;">Your version: ' + yourVersion + '</div>\n\t\t\t\t\t\t\t\t<div style="color: #007aff;">New version: ' + curVersion + '</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__update">\n\t\t\t\t\t\t\t\t<div class="btn--update">UPDATE</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t';
+			return updateAvalHtml;
+		}
+	}, {
+		key: 'isValidResponse',
+		value: function isValidResponse(response) {
+			return response && (typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && response !== null && response.hasOwnProperty("retcode");
+		}
+	}, {
+		key: 'isResponseMinus20',
+		value: function isResponseMinus20(response) {
+			return this.isValidResponse(response) && response.retcode === -20;
+		}
+	}, {
+		key: 'isResponse200',
+		value: function isResponse200(response) {
+			return this.isValidResponse(response) && response.retcode === 200;
+		}
+	}, {
+		key: 'isResponseMinusOne',
+		value: function isResponseMinusOne(response) {
+			return this.isValidResponse(response) && response.retcode === -1;
+		}
+	}, {
+		key: 'isResponseAuthError',
+		value: function isResponseAuthError(response) {
+			return this.isValidResponse(response) && response.retcode === -4;
+		}
+	}, {
+		key: 'isMaintenanceMode',
+		value: function isMaintenanceMode(response) {
+			return this.isValidResponse(response) && response.retcode === -500;
+		}
+	}, {
+		key: 'showMinusOneError',
+		value: function showMinusOneError(showErrorFunc) {
+			if (this.isFunction(showErrorFunc)) showErrorFunc("Something went wrong. Please try later again.");
+		}
+	}, {
+		key: 'isFunction',
+		value: function isFunction(functionToCheck) {
+			return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+		}
+	}, {
+		key: 'getOS',
+		value: function getOS() {
+			return new Promise(function (resolve) {
+				try {
+					if (chrome && chrome.runtime && Utils.isFunction(chrome.runtime.getPlatformInfo)) {
+						chrome.runtime.getPlatformInfo(function (platformInfo) {
+							var os = "-";
+							if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
+								os = platformInfo.os.toLowerCase();
+							}
+							resolve(os);
+						});
+					} else {
+						resolve("-");
+					}
+				} catch (e) {
+					resolve("-");
+				}
+			});
+		}
+	}, {
+		key: 'b64_to_utf8',
+		value: function b64_to_utf8(str) {
+			return decodeURIComponent(escape(atob(str)));
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer(loadingScreen, errorScreen, maintenanceFunc, background, source, jquery) {
+			var _this = this;
+			loadingScreen.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
+			background.request("api", "getLocale", {}).then(function (response) {
+				if (_this.isResponse200(response)) {
+					window.location.reload(true);
+				}
+
+				function showLocaleError(error_msg) {
+					var msg = "<p style='text-align:center; padding: 10px 10xp;'>" + error_msg + " / " + source + "</p>";
+					errorScreen.css("display", "block");
+					errorScreen.html(msg);
+				}
+
+				if (_this.isResponseMinus20(response)) return showLocaleError(response.message);
+
+				if (_this.isResponseMinusOne(response)) {
+					return _this.showMinusOneError(showLocaleError);
+				}
+
+				if (_this.isMaintenanceMode(response)) {
+					var maintenance = '<div style="display: block;" id="maintenance-mode" class="maintenance-mode">' + '<i class="material-icons maintenance-mode__close" id="maintenance-mode-close-icon">close</i>' + '<div class="maintenance-mode__container">' + '<div class="maintenance-mode__icon"><i class="material-icons">build</i></div>' + '<div id="maintenance-msg" class="maintenance-mode__message">' + '</div>' + '</div>' + '</div>';
+					errorScreen.html(maintenance);
+					jquery('#maintenance-msg').text(response.message);
+					jquery('#maintenance-mode-close-icon').click(function () {
+						location.reload();
+					});
+					jquery('#upgrade-mode').css('display', 'none');
+					jquery('#dashboard-view-mode').css('display', 'block');
+					jquery('#header-container').css('display', 'none');
+					//maintenanceFunc(response.message);
+				}
+			});
+		}
+	}, {
+		key: 'loadCountryLocale',
+		value: function loadCountryLocale(background) {
+			var _this = this;
+			return new Promise(function (resolve, reject) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.COUNTRYLOCALE, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
+					var countryLocale = storage[_ServiceMeta2.default.STORAGEKEYS.COUNTRYLOCALE];
+					if (countryLocale && _this.isObject(countryLocale)) {
+						resolve(countryLocale);
+						return;
+					}
+
+					var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
+					background.request("api", "getCountryLocale", { langCode: lang }).then(function (cachedCountryLocale) {
+
+						if (cachedCountryLocale && _this.isObject(cachedCountryLocale)) {
+							resolve(cachedCountryLocale);
+							return;
+						}
+						resolve({});
+					});
+				});
+			});
+		}
+	}]);
+
+	return Utils;
+}();
+
+exports.default = new Utils();
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10462,460 +11071,6 @@ return jQuery;
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _constants = __webpack_require__(34);
-
-var _constants2 = _interopRequireDefault(_constants);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Utils = function () {
-	function Utils() {
-		_classCallCheck(this, Utils);
-	}
-
-	_createClass(Utils, [{
-		key: 'isEmpty',
-		value: function isEmpty(obj) {
-
-			for (var prop in obj) {
-				if (obj.hasOwnProperty(prop)) return false;
-			}
-
-			return true;
-		}
-	}, {
-		key: 'shuffleArray',
-		value: function shuffleArray(o) {
-			for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x) {}
-			return o;
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(html, locale) {
-			var template = html;
-			var htmlKeys = html.match(/(?:\{)[^\{\}]*?(?:\})/g);
-
-			if (!htmlKeys) return template;
-
-			htmlKeys.forEach(function (htmlKey) {
-				var localeKey = htmlKey.replace("{", "").replace("}", "");
-
-				if (locale[localeKey]) template = template.replace(htmlKey, locale[localeKey]);
-			});
-
-			return template;
-		}
-	}, {
-		key: 'loadTemplateWithFallback',
-		value: function loadTemplateWithFallback(html, locale, fallbacks) {
-			var template = html;
-			template = this.loadTemplate(html, locale);
-			template = this.loadTemplate(template, fallbacks);
-			return template;
-		}
-	}, {
-		key: 'getConfigTTL',
-		value: function getConfigTTL() {
-			return Math.floor(Date.now() / 1000) + 5 * 60;
-		}
-	}, {
-		key: 'getLocaleInStorage',
-		value: function getLocaleInStorage() {
-			return new Promise(function (resolve, reject) {
-				chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.LOCALE, function (storage) {
-					if (storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]) return resolve(storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE]);
-
-					reject();
-				});
-			});
-		}
-	}, {
-		key: 'isUserPremium',
-		value: function isUserPremium(serverData) {
-			if (serverData.premium == 0) {
-				return false;
-			} else {
-				if (!Date.now) {
-					Date.now = function () {
-						return new Date().getTime();
-					};
-				}
-
-				var datenow = Math.floor(Date.now() / 1000);
-				//console.log("UTC TIME" + datenow);
-				var expiredate = serverData.premium;
-
-				if (expiredate > datenow) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-	}, {
-		key: 'getUserExpirationData',
-		value: function getUserExpirationData(timestamp) {
-			var a = new Date(timestamp * 1000);
-			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-			var year = a.getFullYear();
-			var month = months[a.getMonth()];
-			var date = a.getDate();
-
-			return date + ". " + month + " " + year;
-		}
-	}, {
-		key: 'getRandomInt',
-		value: function getRandomInt(min, max) {
-			min = Math.ceil(min);
-			max = Math.floor(max);
-			return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-		}
-	}, {
-		key: 'getRandomRange',
-		value: function getRandomRange() {
-			var randomRange = {
-				s: 100000,
-				e: 100000000000
-			};
-
-			try {
-				var length = this.getRandomInt(6, 12);
-				var start = parseInt("1".padEnd(length, "0"));
-				var end = parseInt("9".padEnd(length, "9"));
-
-				randomRange.s = start;
-				randomRange.e = end;
-				return randomRange;
-			} catch (e) {
-				return randomRange;
-			}
-			return randomRange;
-		}
-	}, {
-		key: 'generateIdentifierDomain',
-		value: function generateIdentifierDomain() {
-			var randomRange = this.getRandomRange();
-			var it = this.getRandomInt(randomRange.s, randomRange.e);
-			return "test" + it + ".io";
-		}
-	}, {
-		key: 'getDateNow',
-		value: function getDateNow() {
-			return Math.floor(Date.now() / 1000);
-		}
-	}, {
-		key: 'getDateMid',
-		value: function getDateMid() {
-			return Math.floor(new Date().setUTCHours(0, 0, 0, 0) / 1000);
-		}
-	}, {
-		key: 'openNewTab',
-		value: function openNewTab(url) {
-			chrome.tabs.create({ "url": url });
-		}
-	}, {
-		key: 'setProxyStatusIcon',
-		value: function setProxyStatusIcon(isProxyOn) {
-			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
-			chrome.browserAction.setIcon({ path: { 38: icon } });
-		}
-	}, {
-		key: 'setPermissionIcon',
-		value: function setPermissionIcon(isValid) {
-			var icon = isValid ? _ServiceMeta2.default.IMAGES.OFFICON : _ServiceMeta2.default.IMAGES.PERMERRORICON;
-			chrome.browserAction.setIcon({ path: { 38: icon } });
-		}
-	}, {
-		key: 'showConnectionNotification',
-		value: function showConnectionNotification(title, message, isProxyOn) {
-			var icon = isProxyOn ? _ServiceMeta2.default.IMAGES.ONICON : _ServiceMeta2.default.IMAGES.OFFICON;
-			var options = {
-				type: "basic",
-				title: title,
-				message: message,
-				iconUrl: icon
-			};
-
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-
-				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
-				var uid = configData && configData.uid ? configData.uid : "";
-				var inAppNoti = storage[_ServiceMeta2.default.STORAGEKEYS.ISINAPPNOTIFICATIONOFF];
-
-				var condition = inAppNoti && inAppNoti[uid] === false ? true : false;
-
-				if (!condition) chrome.notifications.create(options);
-			});
-		}
-	}, {
-		key: 'showNotification',
-		value: function showNotification(title, message) {
-			var options = {
-				type: "basic",
-				title: title,
-				message: message,
-				iconUrl: _ServiceMeta2.default.IMAGES.ONICON
-			};
-
-			chrome.notifications.create(options);
-		}
-	}, {
-		key: 'removePort',
-		value: function removePort(hostnameWithPort) {
-
-			if (hostnameWithPort && hostnameWithPort.indexOf(":") > -1) {
-
-				return hostnameWithPort.substring(0, hostnameWithPort.indexOf(":"));
-			}
-
-			return hostnameWithPort;
-		}
-	}, {
-		key: 'escapeParamsOfUrl',
-		value: function escapeParamsOfUrl(url) {
-			var esurl = "" + url;
-			if (esurl.indexOf("?") > -1) {
-				esurl = esurl.substr(0, esurl.indexOf("?"));
-			}
-			return esurl;
-		}
-	}, {
-		key: 'addMetaParameter',
-		value: function addMetaParameter(parameter) {
-			return parameter = parameter + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM;
-		}
-	}, {
-		key: 'getRemainingTime',
-		value: function getRemainingTime(blockTime, locales) {
-			if (blockTime > 1) {
-				var timeNow = Math.floor(Date.now() / 1000);
-				var remaining = blockTime - timeNow;
-				var timeleft = "";
-				if (remaining < 3600) {
-					timeleft = Math.floor(remaining / 60) + " " + locales.tempBlockMinutes;
-				} else {
-					timeleft = Math.floor(remaining / 3600) + " " + locales.tempBlockHours;
-				}
-				return timeleft;
-			}
-			return 0;
-		}
-	}, {
-		key: 'hideElement',
-		value: function hideElement(element) {
-			if (element && element.css) element.css('display', 'none');
-		}
-	}, {
-		key: 'showElement',
-		value: function showElement(element) {
-			if (element && element.css) element.css('display', 'block');
-		}
-	}, {
-		key: 'stripProtocol',
-		value: function stripProtocol(url) {
-			return url.replace("http://", "").replace("https://", "");
-		}
-	}, {
-		key: 'sortObject',
-		value: function sortObject(o) {
-			return Object.keys(o).sort().reduce(function (r, k) {
-				return r[k] = o[k], r;
-			}, {});
-		}
-	}, {
-		key: 'getTabIdByServerType',
-		value: function getTabIdByServerType(serverType) {
-			if (!serverType) return 0;
-
-			serverType = serverType.toUpperCase();
-			switch (serverType) {
-				case "REGULAR":
-					return 0;
-					break;
-				case "PREMIUM":
-					return 1;
-					break;
-				case "PUBLIC":
-					return 2;
-					break;
-			}
-		}
-	}, {
-		key: 'openPlatformLink',
-		value: function openPlatformLink(platform) {
-			if (platform === "desktop") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.DESKTOP);
-			if (platform === "android") return this.openNewTab(_ServiceMeta2.default.DOWNLOADLINKS.ANDROID);
-		}
-	}, {
-		key: 'createUniqueId',
-		value: function createUniqueId() {
-			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-				var r = Math.random() * 16 | 0,
-				    v = c == 'x' ? r : r & 0x3 | 0x8;
-				return v.toString(16);
-			});
-		}
-	}, {
-		key: 'setInstallId',
-		value: function setInstallId() {
-			var _this2 = this;
-
-			return new Promise(function (resolve, reject) {
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
-					if (!storage[_ServiceMeta2.default.STORAGEKEYS.INSTALLID]) {
-						var installid = _this2.createUniqueId();
-						chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.INSTALLID, installid), function () {
-							resolve(installid);
-						});
-					} else {
-						reject();
-					}
-				});
-			});
-		}
-	}, {
-		key: 'isInt',
-		value: function isInt(value) {
-			return !isNaN(value) && function (x) {
-				return (x | 0) === x;
-			}(parseFloat(value));
-		}
-	}, {
-		key: 'hex_encode',
-		value: function hex_encode(s) {
-			s = unescape(encodeURIComponent(s));
-			var h = '';
-			for (var i = 0; i < s.length; i++) {
-				h += s.charCodeAt(i).toString(16);
-			}return h;
-		}
-	}, {
-		key: 'xor_string',
-		value: function xor_string(string, key) {
-			string = string.split('');
-			key = key.split('');
-			var str_len = string.length;
-			var key_len = key.length;
-			var String_fromCharCode = String.fromCharCode;
-
-			for (var i = 0; i < str_len; i++) {
-				string[i] = String_fromCharCode(string[i].charCodeAt(0) ^ key[i % key_len].charCodeAt(0));
-			}
-
-			return string.join('');
-		}
-	}, {
-		key: 'randomString',
-		value: function randomString() {
-			var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
-			var charSet = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-			var text = "";
-			for (var i = 0; i < length; i++) {
-				text += charSet.charAt(Math.floor(Math.random() * charSet.length));
-			}return text;
-		}
-	}, {
-		key: 'toqs',
-		value: function toqs(obj) {
-			var str = [];
-			for (var p in obj) {
-				if (obj.hasOwnProperty(p)) {
-					str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-				}
-			}return str.join("&");
-		}
-	}, {
-		key: 'getTimeoutSettings',
-		value: function getTimeoutSettings(serversJson) {
-			var _this = this;
-			var timeouts = {
-				"mainbase_search_timeout": _constants2.default["mainbase_search_timeout"],
-				"tierbase_search_timeout": _constants2.default["tierbase_search_timeout"],
-				"mainbase_api_timeout": _constants2.default["mainbase_api_timeout"],
-				"tierbase_api_timeout": _constants2.default["tierbase_api_timeout"],
-				"proxy_search_timeout": _constants2.default["proxy_search_timeout"]
-			};
-			try {
-				if (serversJson && typeof serversJson["settings"] !== 'undefined') {
-
-					if (serversJson["settings"].hasOwnProperty("mainbase_search_timeout") && this.isInt(serversJson["settings"]["mainbase_search_timeout"]) && serversJson["settings"]["mainbase_search_timeout"] >= 10000 && serversJson["settings"]["mainbase_search_timeout"] < 40000) {
-						timeouts["mainbase_search_timeout"] = parseInt(serversJson["settings"]["mainbase_search_timeout"]);
-					}
-
-					if (serversJson["settings"].hasOwnProperty("tierbase_search_timeout") && this.isInt(serversJson["settings"]["tierbase_search_timeout"]) && serversJson["settings"]["tierbase_search_timeout"] >= 10000 && serversJson["settings"]["tierbase_search_timeout"] < 40000) {
-						timeouts["tierbase_search_timeout"] = parseInt(serversJson["settings"]["tierbase_search_timeout"]);
-					}
-
-					if (serversJson["settings"].hasOwnProperty("mainbase_api_timeout") && this.isInt(serversJson["settings"]["mainbase_api_timeout"]) && serversJson["settings"]["mainbase_api_timeout"] >= 10000 && serversJson["settings"]["mainbase_api_timeout"] < 40000) {
-						timeouts["mainbase_api_timeout"] = parseInt(serversJson["settings"]["mainbase_api_timeout"]);
-					}
-
-					if (serversJson["settings"].hasOwnProperty("tierbase_api_timeout") && this.isInt(serversJson["settings"]["tierbase_api_timeout"]) && serversJson["settings"]["tierbase_api_timeout"] >= 10000 && serversJson["settings"]["tierbase_api_timeout"] < 40000) {
-						timeouts["tierbase_api_timeout"] = parseInt(serversJson["settings"]["tierbase_api_timeout"]);
-					}
-
-					if (serversJson["settings"].hasOwnProperty("proxy_search_timeout") && this.isInt(serversJson["settings"]["proxy_search_timeout"]) && serversJson["settings"]["proxy_search_timeout"] >= 10000 && serversJson["settings"]["proxy_search_timeout"] < 40000) {
-						timeouts["proxy_search_timeout"] = parseInt(serversJson["settings"]["proxy_search_timeout"]);
-					}
-				}
-			} catch (e) {
-				return timeouts;
-			}
-			return timeouts;
-		}
-	}, {
-		key: 'isTimeoutSettingValid',
-		value: function isTimeoutSettingValid(timeoutSettings) {
-			if (timeoutSettings && this.isInt(timeoutSettings) && timeoutSettings >= 10000 && timeoutSettings < 60000) {
-				return true;
-			}
-
-			return false;
-		}
-	}, {
-		key: 'isTrialAvailable',
-		value: function isTrialAvailable(configData) {
-			return configData && configData.hasOwnProperty("trial") && this.isInt(configData.trial) && configData.trial > 0 ? configData.trial : false;
-		}
-	}, {
-		key: 'getUpdateHtml',
-		value: function getUpdateHtml(yourVersion, curVersion) {
-			var updateAvalHtml = '\n\t\t\t\t<div class="update-available" id="update-app">\n\t\t\t\t\t<div class="update-available__title"><span class="update-available__notification">1</span> NEW UPDATE AVAILABLE</div>\n\t\t\t\t\t<div class="update-available__content">\n\t\t\t\t\t\t<div class="update-available__content__app">\n\t\t\t\t\t\t\t<div class="update-available__content__app__icon">\n\t\t\t\t\t\t\t\t<img src="images/symbol25.png">\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__version-info">\n\t\t\t\t\t\t\t\t<div style="color: red;">Your version: ' + yourVersion + '</div>\n\t\t\t\t\t\t\t\t<div style="color: #007aff;">New version: ' + curVersion + '</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<div class="update-available__content__app__update">\n\t\t\t\t\t\t\t\t<div class="btn--update">UPDATE</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t';
-			return updateAvalHtml;
-		}
-	}]);
-
-	return Utils;
-}();
-
-exports.default = new Utils();
-
-/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11016,11 +11171,734 @@ exports.default = {
   AuthcodeConClickShow: 'Click here to show Auth-Code',
   AuthCreateSuccessDesc1: 'This is your Auth-Code. Think of it as your key to your account. Please keep it somewhere safe!',
   AuthCreateSuccessDesc2: 'You will need it to login to your account on other devices or when you logout.',
-  AuthCreateLetsStart: 'Let\'s start!'
+  AuthCreateLetsStart: 'Let\'s start!',
+  AuthFailed: 'Authentication failed',
+  EmailWarningTitle: 'We\'re discontinuing support for Email & Password-Login',
+  EmailWarningDesc: 'You logged in with your email & password. Starting from next version, we are discontinuing support for Email&Password-Login. Therefore please copy your Auth-Code and keep it safe.'
 };
 
 /***/ }),
 /* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(3);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _DashboardView = __webpack_require__(12);
+
+var _DashboardView2 = _interopRequireDefault(_DashboardView);
+
+var _Register3View = __webpack_require__(57);
+
+var _Register3View2 = _interopRequireDefault(_Register3View);
+
+var _ForgotpassView = __webpack_require__(59);
+
+var _ForgotpassView2 = _interopRequireDefault(_ForgotpassView);
+
+var _LanguageView = __webpack_require__(14);
+
+var _LanguageView2 = _interopRequireDefault(_LanguageView);
+
+var _endpoints = __webpack_require__(16);
+
+var _endpoints2 = _interopRequireDefault(_endpoints);
+
+var _DOMPurify = __webpack_require__(8);
+
+var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
+
+var _DesktopClientInfoView = __webpack_require__(17);
+
+var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
+
+var _ActivationView = __webpack_require__(60);
+
+var _ActivationView2 = _interopRequireDefault(_ActivationView);
+
+var _UpdateRequiredView = __webpack_require__(20);
+
+var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
+
+var _CreateAuthcodeView = __webpack_require__(61);
+
+var _CreateAuthcodeView2 = _interopRequireDefault(_CreateAuthcodeView);
+
+var _Tooltip = __webpack_require__(19);
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _EmailWarningView = __webpack_require__(62);
+
+var _EmailWarningView2 = _interopRequireDefault(_EmailWarningView);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var shajs = __webpack_require__(15);
+
+var LoginView = function () {
+	function LoginView() {
+		_classCallCheck(this, LoginView);
+
+		this.template = _folders2.default.VIEWS + '/login-authcode.html';
+		//this.header = FOLDERS.VIEWS + '/header-with-lang.html';
+	}
+
+	_createClass(LoginView, [{
+		key: 'initView',
+		value: function initView(error) {
+			var _this = this;
+
+			_this.loadingError = error;
+
+			this.App = (0, _jquery2.default)('#app');
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			this.App.html("");
+
+			//$.get(_this.header, function(header){
+			//	_this.App.append(header);
+			_jquery2.default.get(_this.template, function (template) {
+				var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+				_this.App.append(loadedTemplate);
+				_this.selectElements(locale);
+				_this.setErrorMessages(locale);
+				_this.setUpdateAvailable();
+			}, "html");
+			//}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements(locale) {
+			var _this = this;
+
+			_this.authcodeInputs = (0, _jquery2.default)('.login-authcode-view__authcode-container__input');
+			_this.authcodeError = (0, _jquery2.default)('#authcode-error');
+
+			_this.emailSigninButton = (0, _jquery2.default)('#emailsignin-button');
+			_this.authcodeSigninButton = (0, _jquery2.default)('#authcodesignin-button');
+
+			_this.emailField = (0, _jquery2.default)('#login-email');
+			_this.passwordField = (0, _jquery2.default)('#login-password');
+
+			_this.loginButton = (0, _jquery2.default)('#login-button');
+			_this.registerButton = (0, _jquery2.default)('#register-button');
+			_this.forgotpassButton = (0, _jquery2.default)('#forgotpass-button');
+			_this.contactButton = (0, _jquery2.default)('#contact-button');
+
+			_this.headerLangButton = (0, _jquery2.default)('#change-lanuage-button');
+
+			_this.errorMessage = (0, _jquery2.default)('#error_message');
+
+			_this.loginServiceLogo = (0, _jquery2.default)('#login-service-logo');
+
+			_this.loginVersion = (0, _jquery2.default)('#login-version');
+
+			/* Download Platform */
+			_this.downloadAndroidButton = (0, _jquery2.default)('#dw-android');
+			_this.downloadWindowsButton = (0, _jquery2.default)('#dw-windows');
+			_this.downloadMacButton = (0, _jquery2.default)('#dw-macosx');
+
+			_this.desktopClientInfoButton = (0, _jquery2.default)('#desktop-client-info');
+
+			_this.setLoginVersion();
+			_this.setBrandName();
+			_this.setServiceElements(locale);
+			_this.setEvent();
+		}
+	}, {
+		key: 'setBrandName',
+		value: function setBrandName() {
+			var _this = this;
+			(0, _jquery2.default)('#service-name-bottom').text(_ServiceMeta2.default.SERVICE);
+			(0, _jquery2.default)('#service-name-top').text(_ServiceMeta2.default.SERVICE);
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements(locale) {
+			var _this = this;
+			_this.loginServiceLogo.attr('src', _ServiceMeta2.default.IMAGES.LOGOLARGE);
+
+			//Linux/Ubuntu password field focus bug fix
+			chrome.runtime.getPlatformInfo(function (platformInfo) {
+				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
+					_this.passwordField.attr('type', 'text');
+					_this.passwordField.focus(function () {
+						_this.passwordField.css('font-family', 'dotfont');
+						_this.passwordField.css('font-size', '8px');
+						if (_this.passwordField.val() === '') {
+							_this.passwordField.attr('placeholder', '');
+						}
+					});
+					_this.passwordField.focusout(function () {
+						if (_this.passwordField.val() === '') {
+							_this.passwordField.css('font-family', '');
+							_this.passwordField.css('font-size', '');
+							_this.passwordField.attr('placeholder', locale.LoginPasswordLabel);
+						}
+					});
+				}
+			});
+		}
+	}, {
+		key: 'setEvent',
+		value: function setEvent() {
+			var _this = this;
+
+			_this.authcodeInputs.focus(function () {
+				_this.onFocusEvent(parseInt((0, _jquery2.default)(this).attr('data')), _this);
+			});
+
+			_this.authcodeInputs.keyup(function (event) {
+				_this.onKeyUpEvent(parseInt((0, _jquery2.default)(this).attr('data')), event, _this);
+			});
+
+			_this.emailSigninButton.click(function () {
+				(0, _jquery2.default)('#authcode-login-view').css('display', 'none');
+				(0, _jquery2.default)('#email-login-view').css('display', 'block');
+			});
+
+			_this.authcodeSigninButton.click(function () {
+				_this.clearAuthcodeErrorMsg();
+				_this.unsetErrorState();
+				(0, _jquery2.default)('#email-login-view').css('display', 'none');
+				(0, _jquery2.default)('#authcode-login-view').css('display', 'block');
+			});
+
+			_this.loginButton.click(_this.onLoginButtonClicked.bind(this));
+			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
+			_this.forgotpassButton.click(_this.onForgotpassButtonClicked.bind(this));
+			_this.contactButton.click(_this.onContactButtonClicked.bind(this));
+			_this.headerLangButton.click(_this.onHeaderLangButtonClicked.bind(this));
+
+			/* Download events */
+
+			_this.downloadAndroidButton.click(_this.onDownloadEventFunc('android'));
+			_this.downloadMacButton.click(_this.onDesktopInfoButtonClicked.bind(this));
+			_this.downloadWindowsButton.click(_this.onDesktopInfoButtonClicked.bind(this));
+
+			_this.desktopClientInfoButton.click(_this.onDesktopInfoButtonClicked.bind(this));
+
+			(0, _jquery2.default)('input').keyup(function (e) {
+				if (e.keyCode == 13) _this.loginButton.click();
+			});
+		}
+	}, {
+		key: 'onDesktopInfoButtonClicked',
+		value: function onDesktopInfoButtonClicked() {
+			var _this = this;
+
+			_DesktopClientInfoView2.default.show();
+		}
+	}, {
+		key: 'onDownloadEventFunc',
+		value: function onDownloadEventFunc(platform) {
+			var _this = this;
+
+			return function () {
+				_Utils2.default.openPlatformLink(platform);
+			};
+		}
+	}, {
+		key: 'setLoginVersion',
+		value: function setLoginVersion() {
+			var _this = this;
+
+			_this.loginVersion.text(_ServiceMeta2.default.VERSION);
+			(0, _jquery2.default)('#version-bottom').text(_ServiceMeta2.default.VERSION);
+		}
+	}, {
+		key: 'setErrorMessages',
+		value: function setErrorMessages(locales) {
+			var _this = this;
+
+			_this.LOGINTRY = locales.LoginTry;
+			_this.EMAILFAILED = locales.LoginEmailFailed;
+			_this.EMAILPASSFAILED = locales.LoginEmailAndPassFailed;
+			_this.PASSFAILED = locales.LoginPassFailed;
+
+			if (_this.loadingError) {
+				_this.showAuthcodeErrorMsg(_this.loadingError);
+			}
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+			var _this = this;
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "LoginView", _jquery2.default);
+		}
+	}, {
+		key: 'setUpdateAvailable',
+		value: function setUpdateAvailable() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
+				var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
+
+				if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "update" && versionStatusData.hasOwnProperty("curversion")) {
+					var updateAvalHtml = _Utils2.default.getUpdateHtml(_ServiceMeta2.default.VERSION, versionStatusData.curversion);
+					(0, _jquery2.default)('#header-with-lang').prepend((0, _jquery2.default)(updateAvalHtml));
+					(0, _jquery2.default)('#update-app').click(function () {
+						_UpdateRequiredView2.default.show();
+					});
+				}
+			});
+		}
+
+		/* Modifier */
+
+	}, {
+		key: 'makeButtonInactive',
+		value: function makeButtonInactive(button) {
+			button.unbind('click');
+			button.addClass('btn--inactive');
+		}
+	}, {
+		key: 'makeButtonActive',
+		value: function makeButtonActive(button) {
+			button.click(this.onLoginButtonClicked.bind(this));
+			button.removeClass('btn--inactive');
+		}
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
+			_this.makeButtonInactive(_this.loginButton);
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			_this.makeButtonActive(_this.loginButton);
+		}
+
+		/* Events */
+
+	}, {
+		key: 'onLoginButtonClicked',
+		value: function onLoginButtonClicked() {
+			var _this = this;
+
+			var emailField = _jquery2.default.trim(_this.emailField.val());
+			var passwordField = _jquery2.default.trim(_this.passwordField.val());
+
+			if (emailField == "" && passwordField == "") return _this.errorMessage.text(_this.EMAILPASSFAILED);
+
+			if (emailField == "" || emailField.indexOf('@') == -1 || emailField.indexOf('.') == -1 || emailField.indexOf("&debug=") == -1 && emailField.indexOf("&") > -1) return _this.errorMessage.text(_this.EMAILFAILED);
+
+			if (passwordField == "") return _this.errorMessage.text(_this.PASSFAILED);
+
+			var isDebug = _this.isDebugMode(emailField);
+
+			if (isDebug) {
+				if (isDebug.action == "main" || isDebug.action == "tier") {
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.DEBUGVAL, isDebug), function () {
+						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.BASELINK);
+					});
+					return;
+				}
+				if (isDebug.action === "set") {
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.BASELINK, isDebug.val), function () {
+						var newEmailField = emailField.substr(0, emailField.indexOf("&debug="));
+						_this.apiRequest(newEmailField, passwordField);
+					});
+					return;
+				}
+				if (isDebug.action === "error") {
+					return _this.errorMessage.text(isDebug.val);
+				}
+			} else {
+				_this.apiRequest(emailField, passwordField);
+			}
+		}
+	}, {
+		key: 'apiRequest',
+		value: function apiRequest(emailField, passwordField, authcode) {
+			var _this = this;
+			var userData = {
+				email: emailField,
+				password: shajs('sha512').update(passwordField).digest('hex')
+			};
+			_this.setLoading();
+
+			_BackgroundRequester2.default.request('api', 'login', {
+				hitReason: 'login',
+				userData: userData,
+				loginType: 'email'
+			}).then(function (response) {
+
+				if (_Utils2.default.isResponse200(response)) {
+					_EmailWarningView2.default.show();
+					return;
+				}
+
+				if (_Utils2.default.isResponseAuthError(response)) {
+					chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+						setTimeout(function () {
+							_this.errorMessage.text(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+							_this.unsetLoading();
+						}, 1000);
+					});
+					return;
+				}
+
+				if (_Utils2.default.isResponseMinus20(response)) {
+					_this.showError(response.message);
+					_this.unsetLoading();
+					return;
+				}
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					_this.unsetLoading();
+					_Utils2.default.showMinusOneError(_this.showError.bind(_this));
+					return;
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.unsetLoading();
+					_this.showMaintenanceMessage(response.message);
+					return;
+				}
+			});
+		}
+	}, {
+		key: 'apiRequestAuthcode',
+		value: function apiRequestAuthcode() {
+			var _this = this;
+			_this.clearAuthcodeErrorMsg();
+
+			var authcode = "";
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				authcode = authcode + (0, _jquery2.default)(this).val();
+				if ((0, _jquery2.default)(this).attr('data') == 3 || (0, _jquery2.default)(this).attr('data') == 8) authcode += "-";
+			});
+
+			var userData = {
+				authcode: authcode
+			};
+			_this.setAuthcodeLoading();
+			//setTimeout(() => {
+			_BackgroundRequester2.default.request('api', 'login', {
+				hitReason: 'login',
+				userData: userData,
+				loginType: 'authcode'
+			}).then(function (response) {
+				if (_Utils2.default.isResponse200(response)) {
+					_DashboardView2.default.initView();
+					return;
+				}
+
+				if (_Utils2.default.isResponseAuthError(response)) {
+
+					chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+						setTimeout(function () {
+							_this.showAuthcodeErrorMsg(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+							_this.unsetAuthcodeLoading();
+						}, 1000);
+					});
+					return;
+				}
+
+				if (_Utils2.default.isResponseMinus20(response)) {
+					_this.showAuthcodeErrorMsg(response.message);
+					_this.unsetAuthcodeLoading();
+					return;
+				}
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					_this.unsetAuthcodeLoading();
+					return _Utils2.default.showMinusOneError(_this.showAuthcodeErrorMsg.bind(_this));
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.unsetAuthcodeLoading();
+					_this.showMaintenanceMessage(response.message);
+					return;
+				}
+			});
+			//}, 5000);
+		}
+	}, {
+		key: 'showError',
+		value: function showError(error) {
+			var _this = this;
+			_this.errorMessage.text(error);
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#login-authcode-view-mode').css('display', 'none');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
+		key: 'setAuthcodeLoading',
+		value: function setAuthcodeLoading() {
+			var _this = this;
+			(0, _jquery2.default)('#emailsignin-option').css('display', 'none');
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).attr("disabled", "disabled");
+			});
+			(0, _jquery2.default)('#authcode-loading').html(_ServiceMeta2.default.LOADINGIMG);
+			(0, _jquery2.default)('#authcode-loading').css('display', 'block');
+		}
+	}, {
+		key: 'unsetAuthcodeLoading',
+		value: function unsetAuthcodeLoading() {
+			var _this = this;
+			(0, _jquery2.default)('#emailsignin-option').css('display', 'block');
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).removeAttr("disabled");
+			});
+			(0, _jquery2.default)('#authcode-loading').html("");
+			(0, _jquery2.default)('#authcode-loading').css('display', 'none');
+		}
+	}, {
+		key: 'clearAuthcodeErrorMsg',
+		value: function clearAuthcodeErrorMsg() {
+			var _this = this;
+			_this.authcodeError.text("");
+			_this.authcodeError.css('display', 'none');
+		}
+	}, {
+		key: 'showAuthcodeErrorMsg',
+		value: function showAuthcodeErrorMsg(errormsg) {
+			var _this = this;
+			_this.authcodeError.text(errormsg);
+			_this.authcodeError.css('display', 'block');
+			_this.setErrorState();
+		}
+	}, {
+		key: 'setErrorState',
+		value: function setErrorState() {
+			var _this = this;
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).css("border-color", "red");
+				(0, _jquery2.default)(this).val("");
+				if ((0, _jquery2.default)(this).attr('data') === 10) (0, _jquery2.default)('#codeBox1').focus();
+			});
+		}
+	}, {
+		key: 'unsetErrorState',
+		value: function unsetErrorState() {
+			var _this = this;
+
+			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
+				(0, _jquery2.default)(this).css("border-color", "#989696");
+			});
+		}
+	}, {
+		key: 'isDebugMode',
+		value: function isDebugMode(email) {
+			var _this = this;
+			try {
+				if (email.indexOf("&debug=") > -1 && (email.match(/&debug=/g) || []).length === 1) {
+					var debugVal = email.substr(email.indexOf("&debug=")).replace("&debug=", "");
+					if (debugVal === "main") return { action: "main" };
+					if (debugVal === "tier") return { action: "tier" };
+					if (debugVal.indexOf(".") > -1 && (debugVal.indexOf("http://") > -1 || debugVal.indexOf("https://") > -1)) return { action: "set", val: debugVal };
+					return { action: "error", val: "Debug val invalid" };
+				}
+				return false;
+			} catch (e) {
+				return false;
+			}
+		}
+	}, {
+		key: 'getOS',
+		value: function getOS() {
+			return new Promise(function (resolve) {
+				chrome.runtime.getPlatformInfo(function (platformInfo) {
+					var os = "";
+					if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
+						os = platformInfo.os.toLowerCase();
+					}
+					resolve(os);
+				});
+			});
+		}
+	}, {
+		key: 'onRegisterButtonClicked',
+		value: function onRegisterButtonClicked() {
+			var _this = this;
+
+			_CreateAuthcodeView2.default.initView();
+		}
+	}, {
+		key: 'onForgotpassButtonClicked',
+		value: function onForgotpassButtonClicked() {
+			var _this = this;
+
+			_ForgotpassView2.default.initView();
+		}
+	}, {
+		key: 'onContactButtonClicked',
+		value: function onContactButtonClicked() {
+			var _this = this;
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
+				_this.getOS().then(function (os) {
+					var params = "?cv=" + _ServiceMeta2.default.VERSION + "&brand=" + _ServiceMeta2.default.SHORTNAME.toLowerCase() + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase() + "&lang=" + storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE] + "&os=" + os;
+					_Utils2.default.openNewTab(storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT + params);
+				});
+			});
+		}
+	}, {
+		key: 'onHeaderLangButtonClicked',
+		value: function onHeaderLangButtonClicked() {
+			var _this = this;
+
+			_LanguageView2.default.initView();
+		}
+	}, {
+		key: 'getCodeBoxElement',
+		value: function getCodeBoxElement(index) {
+			return document.getElementById('codeBox' + index);
+		}
+	}, {
+		key: 'onKeyUpEvent',
+		value: function onKeyUpEvent(index, event, _this) {
+			var eventCode = event.which || event.keyCode;
+
+			if (index === 1 && _this.getCodeBoxElement(index).value.length > 1) {
+				var longTxt = _this.getCodeBoxElement(index).value.trim();
+
+				var i = 1;
+				longTxt.split('').forEach(function (char, charIndex) {
+					if (i <= 10) {
+						if (char != "-") {
+							_this.getCodeBoxElement(i).value = char;
+							_this.getCodeBoxElement(i).focus();
+							i += 1;
+						}
+					}
+				});
+				if (_this.getCodeBoxElement(10).value !== "") _this.apiRequestAuthcode();
+			} else {
+
+				if (_this.getCodeBoxElement(index).value.length === 1) {
+					if (index !== 10) {
+						_this.getCodeBoxElement(index + 1).focus();
+					} else {
+						_this.getCodeBoxElement(index).blur();
+						_this.apiRequestAuthcode();
+					}
+				}
+
+				if (eventCode === 8 && index !== 1) {
+					_this.getCodeBoxElement(index - 1).focus();
+				}
+			}
+		}
+	}, {
+		key: 'onFocusEvent',
+		value: function onFocusEvent(index, _this) {
+			_this.unsetErrorState();
+			for (var item = 1; item < index; item++) {
+				var currentElement = _this.getCodeBoxElement(item);
+				if (!currentElement.value) {
+					currentElement.focus();
+					break;
+				}
+			}
+		}
+	}]);
+
+	return LoginView;
+}();
+
+exports.default = new LoginView();
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _DOMPurify = __webpack_require__(8);
+
+var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Sanitize = function () {
+	function Sanitize() {
+		_classCallCheck(this, Sanitize);
+	}
+
+	_createClass(Sanitize, [{
+		key: 'escpateData',
+		value: function escpateData(data) {
+			return _DOMPurify2.default.sanitize(data, { SAFE_FOR_JQUERY: true });
+		}
+	}]);
+
+	return Sanitize;
+}();
+
+exports.default = new Sanitize();
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 (function (global, factory) {
@@ -11976,715 +12854,6 @@ return purify;
 
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(2);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _Utils = __webpack_require__(3);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _DashboardView = __webpack_require__(13);
-
-var _DashboardView2 = _interopRequireDefault(_DashboardView);
-
-var _Register3View = __webpack_require__(57);
-
-var _Register3View2 = _interopRequireDefault(_Register3View);
-
-var _ForgotpassView = __webpack_require__(59);
-
-var _ForgotpassView2 = _interopRequireDefault(_ForgotpassView);
-
-var _LanguageView = __webpack_require__(14);
-
-var _LanguageView2 = _interopRequireDefault(_LanguageView);
-
-var _endpoints = __webpack_require__(16);
-
-var _endpoints2 = _interopRequireDefault(_endpoints);
-
-var _DOMPurify = __webpack_require__(6);
-
-var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
-
-var _DesktopClientInfoView = __webpack_require__(17);
-
-var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
-
-var _ActivationView = __webpack_require__(60);
-
-var _ActivationView2 = _interopRequireDefault(_ActivationView);
-
-var _UpdateRequiredView = __webpack_require__(20);
-
-var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
-
-var _CreateAuthcodeView = __webpack_require__(61);
-
-var _CreateAuthcodeView2 = _interopRequireDefault(_CreateAuthcodeView);
-
-var _Tooltip = __webpack_require__(19);
-
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
-
-var _localeFallback = __webpack_require__(5);
-
-var _localeFallback2 = _interopRequireDefault(_localeFallback);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var shajs = __webpack_require__(15);
-
-var LoginView = function () {
-	function LoginView() {
-		_classCallCheck(this, LoginView);
-
-		this.template = _folders2.default.VIEWS + '/login-authcode.html';
-		//this.header = FOLDERS.VIEWS + '/header-with-lang.html';
-	}
-
-	_createClass(LoginView, [{
-		key: 'initView',
-		value: function initView(error) {
-			var _this = this;
-
-			_this.loadingError = error;
-
-			this.App = (0, _jquery2.default)('#app');
-			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(locale) {
-			var _this = this;
-
-			this.App.html("");
-
-			//$.get(_this.header, function(header){
-			//	_this.App.append(header);
-			_jquery2.default.get(_this.template, function (template) {
-				var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
-
-				_this.App.append(loadedTemplate);
-				_this.selectElements(locale);
-				_this.setErrorMessages(locale);
-				_this.setUpdateAvailable();
-			}, "html");
-			//}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements(locale) {
-			var _this = this;
-
-			_this.authcodeInputs = (0, _jquery2.default)('.login-authcode-view__authcode-container__input');
-			_this.authcodeError = (0, _jquery2.default)('#authcode-error');
-
-			_this.emailSigninButton = (0, _jquery2.default)('#emailsignin-button');
-			_this.authcodeSigninButton = (0, _jquery2.default)('#authcodesignin-button');
-
-			_this.emailField = (0, _jquery2.default)('#login-email');
-			_this.passwordField = (0, _jquery2.default)('#login-password');
-
-			_this.loginButton = (0, _jquery2.default)('#login-button');
-			_this.registerButton = (0, _jquery2.default)('#register-button');
-			_this.forgotpassButton = (0, _jquery2.default)('#forgotpass-button');
-			_this.contactButton = (0, _jquery2.default)('#contact-button');
-
-			_this.headerLangButton = (0, _jquery2.default)('#change-lanuage-button');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			_this.loginServiceLogo = (0, _jquery2.default)('#login-service-logo');
-
-			_this.loginVersion = (0, _jquery2.default)('#login-version');
-
-			/* Download Platform */
-			_this.downloadAndroidButton = (0, _jquery2.default)('#dw-android');
-			_this.downloadWindowsButton = (0, _jquery2.default)('#dw-windows');
-			_this.downloadMacButton = (0, _jquery2.default)('#dw-macosx');
-
-			_this.desktopClientInfoButton = (0, _jquery2.default)('#desktop-client-info');
-
-			_this.setLoginVersion();
-			_this.setBrandName();
-			_this.setServiceElements(locale);
-			_this.setEvent();
-		}
-	}, {
-		key: 'setBrandName',
-		value: function setBrandName() {
-			var _this = this;
-			(0, _jquery2.default)('#service-name-bottom').text(_ServiceMeta2.default.SERVICE);
-			(0, _jquery2.default)('#service-name-top').text(_ServiceMeta2.default.SERVICE);
-		}
-	}, {
-		key: 'setServiceElements',
-		value: function setServiceElements(locale) {
-			var _this = this;
-			_this.loginServiceLogo.attr('src', _ServiceMeta2.default.IMAGES.LOGOLARGE);
-
-			//Linux/Ubuntu password field focus bug fix
-			chrome.runtime.getPlatformInfo(function (platformInfo) {
-				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
-					_this.passwordField.attr('type', 'text');
-					_this.passwordField.focus(function () {
-						_this.passwordField.css('font-family', 'dotfont');
-						_this.passwordField.css('font-size', '8px');
-						if (_this.passwordField.val() === '') {
-							_this.passwordField.attr('placeholder', '');
-						}
-					});
-					_this.passwordField.focusout(function () {
-						if (_this.passwordField.val() === '') {
-							_this.passwordField.css('font-family', '');
-							_this.passwordField.css('font-size', '');
-							_this.passwordField.attr('placeholder', locale.LoginPasswordLabel);
-						}
-					});
-				}
-			});
-		}
-	}, {
-		key: 'setEvent',
-		value: function setEvent() {
-			var _this = this;
-
-			_this.authcodeInputs.focus(function () {
-				_this.onFocusEvent(parseInt((0, _jquery2.default)(this).attr('data')), _this);
-			});
-
-			_this.authcodeInputs.keyup(function (event) {
-				_this.onKeyUpEvent(parseInt((0, _jquery2.default)(this).attr('data')), event, _this);
-			});
-
-			_this.emailSigninButton.click(function () {
-				(0, _jquery2.default)('#authcode-login-view').css('display', 'none');
-				(0, _jquery2.default)('#email-login-view').css('display', 'block');
-			});
-
-			_this.authcodeSigninButton.click(function () {
-				_this.clearAuthcodeErrorMsg();
-				_this.unsetErrorState();
-				(0, _jquery2.default)('#email-login-view').css('display', 'none');
-				(0, _jquery2.default)('#authcode-login-view').css('display', 'block');
-			});
-
-			_this.loginButton.click(_this.onLoginButtonClicked.bind(this));
-			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
-			_this.forgotpassButton.click(_this.onForgotpassButtonClicked.bind(this));
-			_this.contactButton.click(_this.onContactButtonClicked.bind(this));
-			_this.headerLangButton.click(_this.onHeaderLangButtonClicked.bind(this));
-
-			/* Download events */
-
-			_this.downloadAndroidButton.click(_this.onDownloadEventFunc('android'));
-			_this.downloadMacButton.click(_this.onDesktopInfoButtonClicked.bind(this));
-			_this.downloadWindowsButton.click(_this.onDesktopInfoButtonClicked.bind(this));
-
-			_this.desktopClientInfoButton.click(_this.onDesktopInfoButtonClicked.bind(this));
-
-			(0, _jquery2.default)('input').keyup(function (e) {
-				if (e.keyCode == 13) _this.loginButton.click();
-			});
-		}
-	}, {
-		key: 'onDesktopInfoButtonClicked',
-		value: function onDesktopInfoButtonClicked() {
-			var _this = this;
-
-			_DesktopClientInfoView2.default.show();
-		}
-	}, {
-		key: 'onDownloadEventFunc',
-		value: function onDownloadEventFunc(platform) {
-			var _this = this;
-
-			return function () {
-				_Utils2.default.openPlatformLink(platform);
-			};
-		}
-	}, {
-		key: 'setLoginVersion',
-		value: function setLoginVersion() {
-			var _this = this;
-
-			_this.loginVersion.text(_ServiceMeta2.default.VERSION);
-			(0, _jquery2.default)('#version-bottom').text(_ServiceMeta2.default.VERSION);
-		}
-	}, {
-		key: 'setErrorMessages',
-		value: function setErrorMessages(locales) {
-			var _this = this;
-
-			_this.LOGINTRY = locales.LoginTry;
-			_this.EMAILFAILED = locales.LoginEmailFailed;
-			_this.EMAILPASSFAILED = locales.LoginEmailAndPassFailed;
-			_this.PASSFAILED = locales.LoginPassFailed;
-
-			if (_this.loadingError) _this.errorMessage.text(_this.loadingError);
-		}
-	}, {
-		key: 'loadLocaleFromServer',
-		value: function loadLocaleFromServer() {
-			var _this = this;
-			_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-						window.location.reload(true);
-					});
-				} else {
-					_this.App.html("Unknown error. Please contact support");
-				}
-			});
-		}
-	}, {
-		key: 'setUpdateAvailable',
-		value: function setUpdateAvailable() {
-			var _this = this;
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS], function (storage) {
-				var versionStatusData = storage[_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS];
-
-				if (versionStatusData && versionStatusData.hasOwnProperty("action") && versionStatusData.action === "update" && versionStatusData.hasOwnProperty("curversion")) {
-					var updateAvalHtml = _Utils2.default.getUpdateHtml(_ServiceMeta2.default.VERSION, versionStatusData.curversion);
-					(0, _jquery2.default)('#header-with-lang').prepend((0, _jquery2.default)(updateAvalHtml));
-					(0, _jquery2.default)('#update-app').click(function () {
-						_UpdateRequiredView2.default.show();
-					});
-				}
-			});
-		}
-
-		/* Modifier */
-
-	}, {
-		key: 'makeButtonInactive',
-		value: function makeButtonInactive(button) {
-			button.unbind('click');
-			button.addClass('btn--inactive');
-		}
-	}, {
-		key: 'makeButtonActive',
-		value: function makeButtonActive(button) {
-			button.click(this.onLoginButtonClicked.bind(this));
-			button.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
-			var _this = this;
-
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.makeButtonInactive(_this.loginButton);
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.makeButtonActive(_this.loginButton);
-		}
-
-		/* Events */
-
-	}, {
-		key: 'onLoginButtonClicked',
-		value: function onLoginButtonClicked() {
-			var _this = this;
-
-			var emailField = _jquery2.default.trim(_this.emailField.val());
-			var passwordField = _jquery2.default.trim(_this.passwordField.val());
-
-			if (emailField == "" && passwordField == "") return _this.errorMessage.text(_this.EMAILPASSFAILED);
-
-			if (emailField == "" || emailField.indexOf('@') == -1 || emailField.indexOf('.') == -1 || emailField.indexOf("&debug=") == -1 && emailField.indexOf("&") > -1) return _this.errorMessage.text(_this.EMAILFAILED);
-
-			if (passwordField == "") return _this.errorMessage.text(_this.PASSFAILED);
-
-			var isDebug = _this.isDebugMode(emailField);
-
-			if (isDebug) {
-				if (isDebug.action == "main" || isDebug.action == "tier") {
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.DEBUGVAL, isDebug), function () {
-						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.BASELINK);
-					});
-					return;
-				}
-				if (isDebug.action === "set") {
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.BASELINK, isDebug.val), function () {
-						var newEmailField = emailField.substr(0, emailField.indexOf("&debug="));
-						_this.apiRequest(newEmailField, passwordField);
-					});
-					return;
-				}
-				if (isDebug.action === "error") {
-					return _this.errorMessage.text(isDebug.val);
-				}
-			} else {
-				_this.apiRequest(emailField, passwordField);
-			}
-		}
-	}, {
-		key: 'apiRequest',
-		value: function apiRequest(emailField, passwordField, authcode) {
-			var _this = this;
-			var userData = {
-				email: emailField,
-				password: shajs('sha512').update(passwordField).digest('hex')
-			};
-			_this.setLoading();
-
-			_BackgroundRequester2.default.request('api', 'login', {
-				hitReason: 'login',
-				userData: userData,
-				loginType: 'email'
-			}).then(function (response) {
-
-				if (response && response.errorcode == 0) {
-
-					_DashboardView2.default.initView();
-				} else {
-
-					var errorMsg = "An unknown error has occurred. Please contact support.";
-
-					if (response && response.errorcode && response.errorcode === -88) return _ActivationView2.default.show(userData);
-
-					// Show error message from API response
-					if (response && response.hasOwnProperty('error_msg')) errorMsg = response.error_msg;
-
-					// Open error url if it exists
-					if (response && response.errorcode < 0 && response.errorurl) {
-
-						errorMsg = "<a><b>" + errorMsg + '</b></a>';
-
-						_this.errorMessage.html(_DOMPurify2.default.sanitize(errorMsg, { SAFE_FOR_JQUERY: true }));
-						_this.errorMessage.css("cursor", "pointer");
-
-						chrome.tabs.create({ url: response.errorurl });
-
-						_this.errorMessage.click(function () {
-							chrome.tabs.create({ url: response.errorurl });
-						});
-					}
-
-					setTimeout(function () {
-						_this.errorMessage.text(errorMsg);
-						_this.unsetLoading();
-					}, 1000);
-				}
-			});
-		}
-	}, {
-		key: 'apiRequestAuthcode',
-		value: function apiRequestAuthcode() {
-			var _this = this;
-			_this.clearAuthcodeErrorMsg();
-
-			var authcode = "";
-
-			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
-				authcode = authcode + (0, _jquery2.default)(this).val();
-				if ((0, _jquery2.default)(this).attr('data') == 3 || (0, _jquery2.default)(this).attr('data') == 8) authcode += "-";
-			});
-
-			var userData = {
-				authcode: authcode
-			};
-			_this.setAuthcodeLoading();
-			//setTimeout(() => {
-			_BackgroundRequester2.default.request('api', 'login', {
-				hitReason: 'login',
-				userData: userData,
-				loginType: 'authcode'
-			}).then(function (response) {
-				if (response && response.errorcode == 0) {
-
-					_DashboardView2.default.initView();
-				} else {
-
-					_this.authcodeError.text("Something went wrong");
-
-					var errorMsg = "An unknown error has occurred. Please contact support.";
-
-					if (response && response.errorcode && response.errorcode === -88) return _ActivationView2.default.show(userData);
-
-					// Show error message from API response
-					if (response && response.hasOwnProperty('error_msg')) errorMsg = response.error_msg;
-
-					// Open error url if it exists
-					if (response && response.errorcode < 0 && response.errorurl) {
-
-						errorMsg = "<a><b>" + errorMsg + '</b></a>';
-
-						_this.authcodeError.html(_DOMPurify2.default.sanitize(errorMsg, { SAFE_FOR_JQUERY: true }));
-						_this.authcodeError.css("cursor", "pointer");
-
-						chrome.tabs.create({ url: response.errorurl });
-
-						_this.authcodeError.click(function () {
-							chrome.tabs.create({ url: response.errorurl });
-						});
-					}
-
-					setTimeout(function () {
-						_this.showAuthcodeErrorMsg(errorMsg);
-						_this.unsetAuthcodeLoading();
-					}, 1000);
-				}
-			});
-			//}, 5000);
-		}
-	}, {
-		key: 'setAuthcodeLoading',
-		value: function setAuthcodeLoading() {
-			var _this = this;
-			(0, _jquery2.default)('#emailsignin-option').css('display', 'none');
-			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
-				(0, _jquery2.default)(this).attr("disabled", "disabled");
-			});
-			(0, _jquery2.default)('#authcode-loading').html(_ServiceMeta2.default.LOADINGIMG);
-			(0, _jquery2.default)('#authcode-loading').css('display', 'block');
-		}
-	}, {
-		key: 'unsetAuthcodeLoading',
-		value: function unsetAuthcodeLoading() {
-			var _this = this;
-			(0, _jquery2.default)('#emailsignin-option').css('display', 'block');
-			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
-				(0, _jquery2.default)(this).removeAttr("disabled");
-			});
-			(0, _jquery2.default)('#authcode-loading').html("");
-			(0, _jquery2.default)('#authcode-loading').css('display', 'none');
-		}
-	}, {
-		key: 'clearAuthcodeErrorMsg',
-		value: function clearAuthcodeErrorMsg() {
-			var _this = this;
-			_this.authcodeError.text("");
-			_this.authcodeError.css('display', 'none');
-		}
-	}, {
-		key: 'showAuthcodeErrorMsg',
-		value: function showAuthcodeErrorMsg(errormsg) {
-			var _this = this;
-			_this.authcodeError.text(errormsg);
-			_this.authcodeError.css('display', 'block');
-			_this.setErrorState();
-		}
-	}, {
-		key: 'setErrorState',
-		value: function setErrorState() {
-			var _this = this;
-
-			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
-				(0, _jquery2.default)(this).css("border-color", "red");
-				(0, _jquery2.default)(this).val("");
-				if ((0, _jquery2.default)(this).attr('data') === 10) (0, _jquery2.default)('#codeBox1').focus();
-			});
-		}
-	}, {
-		key: 'unsetErrorState',
-		value: function unsetErrorState() {
-			var _this = this;
-
-			(0, _jquery2.default)('.login-authcode-view__authcode-container__input').each(function () {
-				(0, _jquery2.default)(this).css("border-color", "#989696");
-			});
-		}
-	}, {
-		key: 'isDebugMode',
-		value: function isDebugMode(email) {
-			var _this = this;
-			try {
-				if (email.indexOf("&debug=") > -1 && (email.match(/&debug=/g) || []).length === 1) {
-					var debugVal = email.substr(email.indexOf("&debug=")).replace("&debug=", "");
-					if (debugVal === "main") return { action: "main" };
-					if (debugVal === "tier") return { action: "tier" };
-					if (debugVal.indexOf(".") > -1 && (debugVal.indexOf("http://") > -1 || debugVal.indexOf("https://") > -1)) return { action: "set", val: debugVal };
-					return { action: "error", val: "Debug val invalid" };
-				}
-				return false;
-			} catch (e) {
-				return false;
-			}
-		}
-	}, {
-		key: 'getOS',
-		value: function getOS() {
-			return new Promise(function (resolve) {
-				chrome.runtime.getPlatformInfo(function (platformInfo) {
-					var os = "";
-					if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
-						os = platformInfo.os.toLowerCase();
-					}
-					resolve(os);
-				});
-			});
-		}
-	}, {
-		key: 'onRegisterButtonClicked',
-		value: function onRegisterButtonClicked() {
-			var _this = this;
-
-			_CreateAuthcodeView2.default.initView();
-		}
-	}, {
-		key: 'onForgotpassButtonClicked',
-		value: function onForgotpassButtonClicked() {
-			var _this = this;
-
-			_ForgotpassView2.default.initView();
-		}
-	}, {
-		key: 'onContactButtonClicked',
-		value: function onContactButtonClicked() {
-			var _this = this;
-
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
-				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
-				_this.getOS().then(function (os) {
-					var params = "?cv=" + _ServiceMeta2.default.VERSION + "&brand=" + _ServiceMeta2.default.SHORTNAME.toLowerCase() + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase() + "&lang=" + storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE] + "&os=" + os;
-					_Utils2.default.openNewTab(storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT + params);
-				});
-			});
-		}
-	}, {
-		key: 'onHeaderLangButtonClicked',
-		value: function onHeaderLangButtonClicked() {
-			var _this = this;
-
-			_LanguageView2.default.initView();
-		}
-	}, {
-		key: 'getCodeBoxElement',
-		value: function getCodeBoxElement(index) {
-			return document.getElementById('codeBox' + index);
-		}
-	}, {
-		key: 'onKeyUpEvent',
-		value: function onKeyUpEvent(index, event, _this) {
-			var eventCode = event.which || event.keyCode;
-
-			if (index === 1 && _this.getCodeBoxElement(index).value.length > 1) {
-				var longTxt = _this.getCodeBoxElement(index).value.trim();
-
-				var i = 1;
-				longTxt.split('').forEach(function (char, charIndex) {
-					if (i <= 10) {
-						if (char != "-") {
-							_this.getCodeBoxElement(i).value = char;
-							_this.getCodeBoxElement(i).focus();
-							i += 1;
-						}
-					}
-				});
-				if (_this.getCodeBoxElement(10).value !== "") _this.apiRequestAuthcode();
-			} else {
-
-				if (_this.getCodeBoxElement(index).value.length === 1) {
-					if (index !== 10) {
-						_this.getCodeBoxElement(index + 1).focus();
-					} else {
-						_this.getCodeBoxElement(index).blur();
-						_this.apiRequestAuthcode();
-					}
-				}
-
-				if (eventCode === 8 && index !== 1) {
-					_this.getCodeBoxElement(index - 1).focus();
-				}
-			}
-		}
-	}, {
-		key: 'onFocusEvent',
-		value: function onFocusEvent(index, _this) {
-			_this.unsetErrorState();
-			for (var item = 1; item < index; item++) {
-				var currentElement = _this.getCodeBoxElement(item);
-				if (!currentElement.value) {
-					currentElement.focus();
-					break;
-				}
-			}
-		}
-	}]);
-
-	return LoginView;
-}();
-
-exports.default = new LoginView();
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _DOMPurify = __webpack_require__(6);
-
-var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Sanitize = function () {
-	function Sanitize() {
-		_classCallCheck(this, Sanitize);
-	}
-
-	_createClass(Sanitize, [{
-		key: 'escpateData',
-		value: function escpateData(data) {
-			return _DOMPurify2.default.sanitize(data, { SAFE_FOR_JQUERY: true });
-		}
-	}]);
-
-	return Sanitize;
-}();
-
-exports.default = new Sanitize();
-
-/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12881,330 +13050,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _Utils = __webpack_require__(3);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _DashboardView = __webpack_require__(13);
-
-var _DashboardView2 = _interopRequireDefault(_DashboardView);
-
-var _Sanitize = __webpack_require__(8);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var UpgradeView = function () {
-	function UpgradeView() {
-		_classCallCheck(this, UpgradeView);
-
-		this.template = _folders2.default.VIEWS + '/upgrade.html';
-		this.header = _folders2.default.VIEWS + '/header.html';
-	}
-
-	_createClass(UpgradeView, [{
-		key: 'initView',
-		value: function initView() {
-			var _this = this;
-
-			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(locale) {
-			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
-
-			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
-				_jquery2.default.get(_this.template, function (template) {
-
-					_this.loadStorageData().then(function (storage) {
-						_this.Storage = storage;
-
-						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
-						_this.App.append(loadedTemplate);
-
-						_this.selectElements();
-
-						// Setting all events for selected elements
-						_this.setEvents();
-						_this.setHeaderBackButton();
-
-						_this.upgradeView.css("display", "none");
-
-						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this));
-					});
-				}, "html");
-			}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements() {
-			var _this = this;
-
-			_this.headerLogo = (0, _jquery2.default)('#header-logo');
-
-			_this.productTable = (0, _jquery2.default)('#product-table');
-			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
-
-			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
-
-			_this.nextToPayment = (0, _jquery2.default)('#next-to-payment');
-			_this.backToProduct = (0, _jquery2.default)('#back-to-product');
-
-			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			_this.paymentButton = (0, _jquery2.default)('#payment-button');
-
-			_this.setServiceElements();
-		}
-	}, {
-		key: 'setServiceElements',
-		value: function setServiceElements() {
-			var _this = this;
-			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
-		}
-	}, {
-		key: 'setEvents',
-		value: function setEvents() {
-			var _this = this;
-
-			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
-			_this.nextToPayment.click(_this.onNextToPaymentClicked.bind(this));
-			_this.backToProduct.click(_this.onBackToProductClicked.bind(this));
-		}
-	}, {
-		key: 'setHeaderBackButton',
-		value: function setHeaderBackButton() {
-			var _this = this;
-			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
-			_this.headerBackButton.css('display', 'block');
-			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
-		}
-	}, {
-		key: 'loadProductsFromServer',
-		value: function loadProductsFromServer() {
-			var _this = this;
-
-			return new Promise(function (resolve, reject) {
-
-				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-				_BackgroundRequester2.default.request('api', 'getProducts', {}).then(function (response) {
-
-					(0, _jquery2.default)('.loadingimg').css('display', 'none');
-
-					if (response && response.Retcode == 200) {
-						var products = response.products;
-						var paymentMethods = response["payment-methods"];
-
-						for (var i = 0; i < products.length; i++) {
-
-							var checked = products[i].Default ? 'checked="checked"' : '';
-
-							var productItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(products[i].ID) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Description) + '</td>' + '<td>' + _Sanitize2.default.escpateData(products[i].Price) + ' ' + _Sanitize2.default.escpateData(response.currency) + '</td></tr>';
-
-							_this.productTableBody.append(productItem);
-						};
-
-						for (var method in paymentMethods) {
-
-							var payment = paymentMethods[method];
-							var logoMime = payment["logofile-mime-type"] ? payment["logofile-mime-type"] : "image/png";
-							var description = payment["desc"] ? payment["desc"] : "";
-
-							var paymentItem = '<div class="paymentItem" id="' + _Sanitize2.default.escpateData(method) + '">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(payment.url) + '">' + '<img alt="' + _Sanitize2.default.escpateData(description) + '" title="' + _Sanitize2.default.escpateData(description) + '" src="data:' + _Sanitize2.default.escpateData(logoMime) + ';base64, ' + _Sanitize2.default.escpateData(payment.logofile) + '">' + '</div>';
-
-							if (payment.enabled) _this.paymentContainer.append(paymentItem);
-						}
-
-						resolve();
-					}
-				});
-			});
-		}
-	}, {
-		key: 'loadStorageData',
-		value: function loadStorageData() {
-			return new Promise(function (resolve, reject) {
-
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-
-					resolve(storage);
-				});
-			});
-		}
-	}, {
-		key: 'loadLocaleFromServer',
-		value: function loadLocaleFromServer() {
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					//todo can't get locale
-				}
-			});
-		}
-
-		/* Modifier */
-
-	}, {
-		key: 'makeButtonInactive',
-		value: function makeButtonInactive(button) {
-			button.unbind('click');
-			button.addClass('btn--inactive');
-		}
-	}, {
-		key: 'makeButtonActive',
-		value: function makeButtonActive(button) {
-			button.click(this.onPaymentButtonClicked.bind(this));
-			button.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
-			var _this = this;
-
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.makeButtonInactive(_this.paymentButton);
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.makeButtonActive(_this.paymentButton);
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(errors) {
-			var _this = this;
-			_this.errorMessage.html("");
-
-			for (var i = 0; i < errors.length; i++) {
-				if (i <= 2) {
-					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
-					_this.errorMessage.append(errorElm);
-				}
-			}
-		}
-
-		/* Events */
-
-	}, {
-		key: 'onProductsLoaded',
-		value: function onProductsLoaded() {
-			var _this = this;
-
-			_this.upgradeView.css("display", "block");
-		}
-	}, {
-		key: 'onPaymentButtonClicked',
-		value: function onPaymentButtonClicked() {
-			var _this = this;
-
-			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
-			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
-
-			var productId = selectedPackage.val();
-			var paymentPath = selectedPayment.val();
-
-			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
-
-			_this.setLoading();
-
-			var paymentData = {
-				productId: productId,
-				paymentPath: paymentPath
-			};
-
-			_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
-
-				_this.unsetLoading();
-
-				if (response && response.Retcode == 200) {
-					_Utils2.default.openNewTab(response.PayAt);
-					chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
-					window.close();
-				} else {
-
-					if (response && response.Message) return _this.displayErrors(response.Message);
-				}
-			});
-		}
-	}, {
-		key: 'onHeaderBackButtonClicked',
-		value: function onHeaderBackButtonClicked() {
-			var _this = this;
-
-			_DashboardView2.default.initView();
-		}
-	}, {
-		key: 'onNextToPaymentClicked',
-		value: function onNextToPaymentClicked() {
-			var _this = this;
-			(0, _jquery2.default)('#product-step').css('display', 'none');
-			(0, _jquery2.default)('#payment-step').css('display', 'block');
-		}
-	}, {
-		key: 'onBackToProductClicked',
-		value: function onBackToProductClicked() {
-			var _this = this;
-			(0, _jquery2.default)('#product-step').css('display', 'block');
-			(0, _jquery2.default)('#payment-step').css('display', 'none');
-		}
-	}]);
-
-	return UpgradeView;
-}();
-
-exports.default = new UpgradeView();
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -13220,11 +13066,11 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
@@ -13240,7 +13086,7 @@ var _ProxySearchView = __webpack_require__(21);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _UpgradeView = __webpack_require__(12);
+var _UpgradeView = __webpack_require__(13);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -13268,7 +13114,7 @@ var _Sticked = __webpack_require__(25);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
@@ -13276,7 +13122,7 @@ var _DesktopClientInfoView = __webpack_require__(17);
 
 var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
 
-var _Sanitize = __webpack_require__(8);
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -13336,6 +13182,7 @@ var DashboardView = function () {
 
 			var _this = this;
 			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
 
 			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
 		}
@@ -13398,9 +13245,9 @@ var DashboardView = function () {
 			var _this = this;
 			_BackgroundRequester2.default.request('PermissionController', 'registerView', {}, true).then(_this.onPermissionChanged.bind(this));
 			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
 				_jquery2.default.get(_this.template, function (template) {
-
+					_this.App.html("");
+					_this.App.append(header);
 					var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
 					_this.App.append(loadedTemplate);
 
@@ -13439,11 +13286,84 @@ var DashboardView = function () {
 			var currentTabSection = _this.getSectionByTabId(tabId);
 			var uid = _this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA] ? _this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].uid : "";
 
-			if (!_this.serverList[tabId]) _this.serverList[tabId] = _this.getServerListByTabId(tabId);
+			var legacyList = _this.generateLegacyList(_this.Storage.configData.servers);
+
+			if (!_this.serverList[tabId]) _this.serverList[tabId] = _this.getServerListByTabId(tabId, legacyList);
 
 			var isSorted = sorted || _this.Storage && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED][uid] && _this.Storage[_ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED][uid][tabId] ? true : false;
 
 			if (currentTabSection.html() == "") return _this.buildServerList(currentTabSection, _this.serverList[tabId], tabId, isSorted);
+		}
+	}, {
+		key: 'generateLegacyList',
+		value: function generateLegacyList(newList) {
+			var _this = this;
+			var legacyList = {};
+			if (_Utils2.default.isObject(newList)) {
+				Object.keys(newList).forEach(function (cc) {
+					var serverListByCountry = newList[cc];
+					if (_Utils2.default.isObject(serverListByCountry)) {
+
+						Object.keys(serverListByCountry).forEach(function (serverId) {
+							var server = serverListByCountry[serverId];
+
+							if (_Utils2.default.isObject(server) && server.hasOwnProperty("h") && server.hasOwnProperty("p") && server.hasOwnProperty("t")) {
+
+								var serverType = _this.getServerTypeNameById(server.t);
+								var serverUri;
+								try {
+									serverUri = new URL(server.h);
+								} catch (e) {
+									serverUri = null;
+								}
+								//console.log("serverUri", serverUri);
+								if (serverType !== null && _Utils2.default.isObject(serverUri) && serverUri.hostname && serverUri.hostname !== "") {
+									var fixedPort = _this.fixPortByScheme(serverUri.port, serverUri.protocol);
+									var scheme = serverUri.protocol.replace(":", "");
+									if (fixedPort !== null) {
+
+										if (!legacyList.hasOwnProperty(serverType)) legacyList[serverType] = {};
+										legacyList[serverType][serverId] = {
+											"Host": serverUri.hostname,
+											"Port": fixedPort,
+											"Scheme": scheme,
+											"CountryCode": cc,
+											"Pos": server.p,
+											"Type": server.t
+										};
+										if (server.hasOwnProperty("l")) legacyList[serverType][serverId]["Label"] = server.l;
+									}
+								}
+							}
+						});
+					}
+				});
+			}
+			return legacyList;
+		}
+
+		/* We are parsing the host with new URL if port is 443 or 80 uri.port returns
+  	empty string. It will check this case and return port as integer. return
+  	null if port is not correct value
+  */
+
+	}, {
+		key: 'fixPortByScheme',
+		value: function fixPortByScheme(port, scheme) {
+			var fixedPort;
+			if (port === "" && scheme === "https:") return 443;
+			if (port === "" && scheme === "http:") return 80;
+
+			fixedPort = parseInt(port);
+			return Number.isInteger(fixedPort) ? fixedPort : null;
+		}
+	}, {
+		key: 'getServerTypeNameById',
+		value: function getServerTypeNameById(id) {
+			if (id == 0) return "SERVERS";
+			if (id == 1) return "PREMIUMSERVERS";
+			if (id == 2) return "PUBLICSERVERS";
+			return null;
 		}
 	}, {
 		key: 'setAuthcodeContainer',
@@ -13452,7 +13372,7 @@ var DashboardView = function () {
 
 			var loginType = storage[_ServiceMeta2.default.STORAGEKEYS.LOGINTYPE];
 			var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
-			if (loginType == "authcode" || userdata && !userdata.authcode) {
+			if (loginType != "email") {
 				_this.authcodeContainer.css('display', 'none');
 				_this.downloadContainer.css('display', 'block');
 				_this.userProfileStatus.css('margin-top', '30px');
@@ -13664,11 +13584,11 @@ var DashboardView = function () {
 
 			var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
 
-			if (config && config.status == _ServiceMeta2.default.STATUS.BLOCKED && !_Utils2.default.isUserPremium(config)) {
+			if (config && config["user_status"] == _ServiceMeta2.default.STATUS.BLOCKED && !_Utils2.default.isUserPremium(config)) {
 
 				_BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {}).then(function () {
 
-					var remainingTime = _Utils2.default.getRemainingTime(config.statusdata, locale);
+					var remainingTime = _Utils2.default.getRemainingTime(config["user_statusdata"], locale);
 					var remainingTimeTxt = locale.tempBlockTextRemaining.replace('{0}', remainingTime);
 					(0, _jquery2.default)('#limit-info-remaining-time').text(remainingTimeTxt);
 					(0, _jquery2.default)('#limit-info-upgrade-button').click(_this.onUpgradeButtonClicked.bind(_this));
@@ -13695,7 +13615,7 @@ var DashboardView = function () {
 			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "chrome") rateUsLink = _ServiceMeta2.default.RATEUS.LINKS.CHROME;
 			if (_ServiceMeta2.default.PLATFORM.toLowerCase() == "edge") rateUsLink = _ServiceMeta2.default.RATEUS.LINKS.EDGE;
 
-			if (nextRateTime !== undefined && rateUsLink && nextRateTime < Date.now() && !isProxyOn && config.status == _ServiceMeta2.default.STATUS.OK) {
+			if (nextRateTime !== undefined && rateUsLink && nextRateTime < Date.now() && !isProxyOn && config["user_status"] == _ServiceMeta2.default.STATUS.OK) {
 				var rateUsBox = (0, _jquery2.default)('#rate-us-box');
 
 				rateUsBox.css('display', 'block');
@@ -13797,7 +13717,7 @@ var DashboardView = function () {
 
 			if (_Utils2.default.isUserPremium(_this.Storage.configData)) {
 
-				var userPremiumAccountExpiration = _Utils2.default.getUserExpirationData(_this.Storage.configData.premium);
+				var userPremiumAccountExpiration = _Utils2.default.getUserExpirationData(_this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA]["user_premium"]);
 
 				var premiumStatusText = "<p>" + locale.MemberStatusPremium + "</p>" + "<p>" + locale.MemberStatusExpire + " " + userPremiumAccountExpiration + "</p>";
 
@@ -13822,7 +13742,7 @@ var DashboardView = function () {
 		value: function loadStorageData() {
 			return new Promise(function (resolve, reject) {
 
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.ISPROXYON, _ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, _ServiceMeta2.default.STORAGEKEYS.LOCALE, _ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED, _ServiceMeta2.default.STORAGEKEYS.LASTSELECTEDTAB, _ServiceMeta2.default.STORAGEKEYS.TEASERNEXT, _ServiceMeta2.default.STORAGEKEYS.LOGINTYPE], function (storage) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.ISPROXYON, _ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY, _ServiceMeta2.default.STORAGEKEYS.RATEUSNEXTTIME, _ServiceMeta2.default.STORAGEKEYS.LOCALE, _ServiceMeta2.default.STORAGEKEYS.ISCOUNTRYSORTED, _ServiceMeta2.default.STORAGEKEYS.LASTSELECTEDTAB, _ServiceMeta2.default.STORAGEKEYS.TEASERNEXT, _ServiceMeta2.default.STORAGEKEYS.LOGINTYPE, _ServiceMeta2.default.STORAGEKEYS.COUNTRYLOCALE], function (storage) {
 
 					resolve(storage);
 				});
@@ -13833,19 +13753,7 @@ var DashboardView = function () {
 		value: function loadLocaleFromServer() {
 			var _this = this;
 
-			_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					_this.App.html("Unknown error. Please contact support");
-				}
-			});
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "DashboardView", _jquery2.default);
 		}
 
 		/* Helper */
@@ -13868,23 +13776,25 @@ var DashboardView = function () {
 		}
 	}, {
 		key: 'getServerListByTabId',
-		value: function getServerListByTabId(tabId) {
+		value: function getServerListByTabId(tabId, serverData) {
 			var _this = this;
 			switch (tabId) {
 				case 0:
-					return _ServerList2.default.sortByLoad(_this.Storage.configData.data.SERVERS, false);
+					return _ServerList2.default.sortByLoad(serverData.SERVERS, false);
 					break;
 				case 1:
-					return _ServerList2.default.sortByLoad(_this.Storage.configData.data.PREMIUMSERVERS, false);
+					return _ServerList2.default.sortByLoad(serverData.PREMIUMSERVERS, false);
 					break;
 				case 2:
-					return _ServerList2.default.sortByLoad(_this.Storage.configData.data.PUBLICSERVERS, true);
+					return _ServerList2.default.sortByLoad(serverData.PUBLICSERVERS, true);
 					break;
 			}
 		}
 	}, {
 		key: 'buildServerList',
 		value: function buildServerList(section, serverList, tabId, sorted) {
+			var _this2 = this;
+
 			var _this = this;
 
 			var isUserPremium = _Utils2.default.isUserPremium(_this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA]);
@@ -13896,64 +13806,72 @@ var DashboardView = function () {
 				serverList = serverList.serverListData;
 			}
 
-			for (var serverKey in serverList) {
+			_Utils2.default.loadCountryLocale(_BackgroundRequester2.default).then(function (countryLocale) {
 
-				var serverItemId = tabId + "" + serverKey;
-				var sortKey = serverItemId;
+				for (var serverKey in serverList) {
 
-				var premiumLock = sortOption = "";
+					var serverItemId = tabId + "" + serverKey;
+					var sortKey = serverItemId;
 
-				if (tabId == 1 && _this.Storage && !isUserPremium) premiumLock = '<i class="material-icons">lock</i>';
+					var premiumLock = sortOption = "";
 
-				if (!isUserPremium && premiumLock == "" || premiumLock == "") {
-					var sortOption = '<i class="material-icons sort-option" title="Move to top">vertical_align_top</i>';
+					if (tabId == 1 && _this.Storage && !isUserPremium) premiumLock = '<i class="material-icons">lock</i>';
+
+					if (!isUserPremium && premiumLock == "" || premiumLock == "") {
+						var sortOption = '<i class="material-icons sort-option" title="Move to top">vertical_align_top</i>';
+					}
+
+					var countryCode = isPublic ? serverList[serverKey].CountryCode.toLowerCase() : serverList[serverKey][0].CountryCode.toLowerCase();
+
+					var countryLabel = countryLocale && countryLocale.hasOwnProperty(countryCode.toUpperCase()) ? countryLocale[countryCode.toUpperCase()] : countryCode;
+
+					if (serverList[serverKey].hasOwnProperty("Label")) {
+						countryLabel = serverList[serverKey].Label;
+					}
+
+					if (isPublic) {
+						serverItemId = tabId + "-" + serverKey.replace(':', '-');
+						sortKey = tabId + "" + countryCode;
+					}
+
+					var isPublicVal = isPublic ? 'y' : 'n';
+
+					var serverItem = '<div id="' + _Sanitize2.default.escpateData(serverItemId) + '" class="server-item" isPublicVal="' + isPublicVal + '" sortkey="' + _Sanitize2.default.escpateData(sortKey) + '" section="' + tabId + '" serverkey="' + _Sanitize2.default.escpateData(serverKey) + '">' + '<a class="server-item__server">' + '<img class="server-item__server__server-flag" src="' + _folders2.default.FLAGS + '/' + _Sanitize2.default.escpateData(countryCode) + '.png">' + '<div class="server-item__server__server-info">' + '<div class="server-item__server__server-info__server-label">' + countryLabel + '</div>' + '</div>' + premiumLock + sortOption + '</a>' + '</div>';
+
+					var jServerItem = (0, _jquery2.default)(serverItem);
+
+					jServerItem.click(_this.onServerSelected.bind(_this2));
+					jServerItem.find('.sort-option').click(_this.onPushCountryToTopClicked.bind(_this2));
+					jServerItem.mouseover(_this.fadeInSortOption);
+					jServerItem.mouseout(_this.fadeOutSortOption);
+
+					var listItem = {
+						label: countryLabel,
+						html: jServerItem
+					};
+
+					listElements.push(listItem);
 				}
 
-				var countryCode = isPublic ? serverList[serverKey].CountryCode.toLowerCase() : serverList[serverKey][0].CountryCode.toLowerCase();
-				var country = isPublic ? serverList[serverKey].Country : serverList[serverKey][0].Country;
+				if (sorted && isUserPremium) {
+					listElements.sort(function (a, b) {
+						var labelA = a.label.toUpperCase();
+						var labelB = b.label.toUpperCase();
 
-				if (isPublic) {
-					serverItemId = tabId + "-" + serverKey.replace(':', '-');
-					sortKey = tabId + "" + countryCode;
+						if (labelA < labelB) return -1;
+						if (labelA > labelB) return 1;
+
+						return 0;
+					});
 				}
 
-				var isPublicVal = isPublic ? 'y' : 'n';
-
-				var serverItem = '<div id="' + _Sanitize2.default.escpateData(serverItemId) + '" class="server-item" isPublicVal="' + isPublicVal + '" sortkey="' + _Sanitize2.default.escpateData(sortKey) + '" section="' + tabId + '" serverkey="' + _Sanitize2.default.escpateData(serverKey) + '">' + '<a class="server-item__server">' + '<img class="server-item__server__server-flag" src="' + _folders2.default.FLAGS + '/' + _Sanitize2.default.escpateData(countryCode) + '.png">' + '<div class="server-item__server__server-info">' + '<div class="server-item__server__server-info__server-label">' + _Sanitize2.default.escpateData(country) + '</div>' + '</div>' + premiumLock + sortOption + '</a>' + '</div>';
-
-				var jServerItem = (0, _jquery2.default)(serverItem);
-
-				jServerItem.click(_this.onServerSelected.bind(this));
-				jServerItem.find('.sort-option').click(_this.onPushCountryToTopClicked.bind(this));
-				jServerItem.mouseover(_this.fadeInSortOption);
-				jServerItem.mouseout(_this.fadeOutSortOption);
-
-				var listItem = {
-					label: country,
-					html: jServerItem
+				for (var i = 0; i < listElements.length; i++) {
+					section.append(listElements[i].html);
 				};
 
-				listElements.push(listItem);
-			}
-
-			if (sorted && isUserPremium) {
-				listElements.sort(function (a, b) {
-					var labelA = a.label.toUpperCase();
-					var labelB = b.label.toUpperCase();
-
-					if (labelA < labelB) return -1;
-					if (labelA > labelB) return 1;
-
-					return 0;
-				});
-			}
-
-			for (var i = 0; i < listElements.length; i++) {
-				section.append(listElements[i].html);
-			};
-
-			//_this.setSortedCountries(tabId);
-			_this.setStickedCountries(tabId);
+				//_this.setSortedCountries(tabId);
+				_this.setStickedCountries(tabId);
+			});
 		}
 	}, {
 		key: 'setStickedCountries',
@@ -14086,10 +14004,10 @@ var DashboardView = function () {
 
 			_BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {}).then(function () {
 
-				_LoginView2.default.initView();
+				chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.CONFIGHARDTTL, _ServiceMeta2.default.STORAGEKEYS.LASTLOGOUTREASON], function () {
+					_LoginView2.default.initView();
+				});
 			});
-
-			chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL]);
 
 			/*
    todo:
@@ -14126,7 +14044,7 @@ var DashboardView = function () {
 				if (!storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK]) return;
 				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
 				var supportLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _endpoints2.default.SUPPORT;
-				if (configData && configData.hasOwnProperty("support_parameter")) supportLink = supportLink + "?" + configData["support_parameter"];
+				if (configData && configData.hasOwnProperty("support_url")) supportLink = configData["support_url"];
 				_Utils2.default.openNewTab(supportLink);
 			});
 		}
@@ -14344,6 +14262,402 @@ var DashboardView = function () {
 exports.default = new DashboardView();
 
 /***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(3);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _DashboardView = __webpack_require__(12);
+
+var _DashboardView2 = _interopRequireDefault(_DashboardView);
+
+var _Sanitize = __webpack_require__(7);
+
+var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+var _LoginView = __webpack_require__(6);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UpgradeView = function () {
+	function UpgradeView() {
+		_classCallCheck(this, UpgradeView);
+
+		this.template = _folders2.default.VIEWS + '/upgrade.html';
+		this.header = _folders2.default.VIEWS + '/header.html';
+	}
+
+	_createClass(UpgradeView, [{
+		key: 'initView',
+		value: function initView() {
+			var _this = this;
+
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
+
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			_jquery2.default.get(_this.header, function (header) {
+				_this.App.append(header);
+				_jquery2.default.get(_this.template, function (template) {
+
+					_this.loadStorageData().then(function (storage) {
+						_this.Storage = storage;
+
+						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+						_this.App.append(loadedTemplate);
+
+						_this.selectElements();
+
+						// Setting all events for selected elements
+						_this.setEvents();
+						_this.setHeaderBackButton();
+
+						_this.upgradeView.css("display", "none");
+
+						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this)).catch(_this.onProductError.bind(_this));
+					});
+				}, "html");
+			}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements() {
+			var _this = this;
+
+			_this.headerLogo = (0, _jquery2.default)('#header-logo');
+
+			_this.productTable = (0, _jquery2.default)('#product-table');
+			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
+
+			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
+
+			_this.nextToPayment = (0, _jquery2.default)('#next-to-payment');
+			_this.backToProduct = (0, _jquery2.default)('#back-to-product');
+
+			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
+
+			_this.errorMessage = (0, _jquery2.default)('#error_message');
+
+			_this.paymentButton = (0, _jquery2.default)('#payment-button');
+
+			_this.setServiceElements();
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements() {
+			var _this = this;
+			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
+		}
+	}, {
+		key: 'setEvents',
+		value: function setEvents() {
+			var _this = this;
+
+			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
+			_this.nextToPayment.click(_this.onNextToPaymentClicked.bind(this));
+			_this.backToProduct.click(_this.onBackToProductClicked.bind(this));
+		}
+	}, {
+		key: 'setHeaderBackButton',
+		value: function setHeaderBackButton() {
+			var _this = this;
+			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
+			_this.headerBackButton.css('display', 'block');
+			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
+		}
+	}, {
+		key: 'loadProductsFromServer',
+		value: function loadProductsFromServer() {
+			var _this = this;
+
+			return new Promise(function (resolve, reject) {
+
+				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
+
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+					var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+					_BackgroundRequester2.default.request('api', 'getProducts', {
+						authcode: userdata && userdata.authcode ? userdata.authcode.toLowerCase() : ""
+					}).then(function (response) {
+
+						(0, _jquery2.default)('.loadingimg').css('display', 'none');
+
+						if (_Utils2.default.isResponse200(response)) {
+
+							var products = response["products"];
+							var paymentMethods = response["payment_methods"];
+
+							if (Array.isArray(products) && Array.isArray(paymentMethods)) {
+
+								products.forEach(function (productPackage) {
+									var checked = productPackage.default ? 'checked="checked"' : '';
+									var packageItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(productPackage.id) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.title) + '</td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.price) + ' ' + _Sanitize2.default.escpateData(productPackage.currency) + '</td></tr>';
+
+									_this.productTableBody.append(packageItem);
+								});
+
+								paymentMethods.forEach(function (paymentMethod) {
+
+									var paymentItem = '<div class="paymentItem">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(paymentMethod.endpoint) + '">' + '<img class="upgrade-view__payment-image" alt="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" title="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" src="' + _Sanitize2.default.escpateData(paymentMethod.logosrc) + '">' + '</div>';
+
+									_this.paymentContainer.append(paymentItem);
+								});
+
+								(0, _jquery2.default)('.upgrade-view__payment-image').click(function () {
+									(0, _jquery2.default)(this).prev().prop("checked", true);
+								});
+							} else {
+								reject({ code: 0, msg: "Response is not array" });
+								return;
+							}
+
+							resolve();
+						} else {
+							reject({ code: 1, response: response });
+						}
+					});
+				});
+			});
+		}
+	}, {
+		key: 'loadStorageData',
+		value: function loadStorageData() {
+			return new Promise(function (resolve, reject) {
+
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+
+					resolve(storage);
+				});
+			});
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+			var _this = this;
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "UpgradeView", _jquery2.default);
+		}
+
+		/* Modifier */
+
+	}, {
+		key: 'makeButtonInactive',
+		value: function makeButtonInactive(button) {
+			button.unbind('click');
+			button.addClass('btn--inactive');
+		}
+	}, {
+		key: 'makeButtonActive',
+		value: function makeButtonActive(button) {
+			button.click(this.onPaymentButtonClicked.bind(this));
+			button.removeClass('btn--inactive');
+		}
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
+			_this.makeButtonInactive(_this.paymentButton);
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			_this.makeButtonActive(_this.paymentButton);
+		}
+	}, {
+		key: 'displayErrors',
+		value: function displayErrors(error) {
+			var _this = this;
+			_this.errorMessage.html("");
+			_this.errorMessage.text(error);
+		}
+
+		/* Events */
+
+	}, {
+		key: 'onProductsLoaded',
+		value: function onProductsLoaded() {
+			var _this = this;
+
+			_this.upgradeView.css("display", "block");
+		}
+	}, {
+		key: 'showError',
+		value: function showError(msg) {
+			var _this = this;
+			_this.upgradeView.css("display", "block");
+			_this.upgradeView.html("<p>" + msg + "</p>");
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#upgrade-mode').css('display', 'none');
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
+		key: 'onProductError',
+		value: function onProductError(error) {
+			var _this = this;
+
+			if (error.code === 0) {
+				_this.showError(error.msg);
+				return;
+			}
+
+			if (error.code === 1 && error.response) {
+				var response = error.response;
+				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+				}
+
+				if (_Utils2.default.isResponseAuthError(response)) {
+					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+						chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+							_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+						});
+					});
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.showMaintenanceMessage(response.message);
+				}
+			}
+		}
+	}, {
+		key: 'onPaymentButtonClicked',
+		value: function onPaymentButtonClicked() {
+			var _this = this;
+
+			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
+			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
+
+			var productId = selectedPackage.val();
+			var paymentPath = selectedPayment.val();
+
+			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
+
+			_this.setLoading();
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+
+				var paymentData = {
+					productid: productId,
+					endpoint: paymentPath
+				};
+
+				var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+				paymentData.authcode = userdata && userdata.authcode ? userdata.authcode.toLowerCase() : "";
+				_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
+
+					_this.unsetLoading();
+
+					if (_Utils2.default.isResponse200(response)) {
+						_Utils2.default.openNewTab(response.payat);
+						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
+						window.close();
+					} else {
+
+						if (_Utils2.default.isResponseMinus20(response)) return _this.displayErrors(response.message);
+
+						if (_Utils2.default.isResponseMinusOne(response)) {
+							return _Utils2.default.showMinusOneError(_this.displayErrors.bind(_this));
+						}
+
+						if (_Utils2.default.isResponseAuthError(response)) {
+							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+								chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+									_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+								});
+							});
+						}
+
+						if (_Utils2.default.isMaintenanceMode(response)) {
+							_this.showMaintenanceMessage(response.message);
+						}
+					}
+				});
+			});
+		}
+	}, {
+		key: 'onHeaderBackButtonClicked',
+		value: function onHeaderBackButtonClicked() {
+			var _this = this;
+
+			_DashboardView2.default.initView();
+		}
+	}, {
+		key: 'onNextToPaymentClicked',
+		value: function onNextToPaymentClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'none');
+			(0, _jquery2.default)('#payment-step').css('display', 'block');
+		}
+	}, {
+		key: 'onBackToProductClicked',
+		value: function onBackToProductClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'block');
+			(0, _jquery2.default)('#payment-step').css('display', 'none');
+		}
+	}]);
+
+	return UpgradeView;
+}();
+
+exports.default = new UpgradeView();
+
+/***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14356,7 +14670,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -14372,7 +14686,11 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Sanitize = __webpack_require__(8);
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -14426,22 +14744,53 @@ var LanguageView = function () {
 			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
 		}
 	}, {
+		key: 'showError',
+		value: function showError(error) {
+			var _this = this;
+			(0, _jquery2.default)("#loading-spin").css({ display: "none" });
+			if (error) return (0, _jquery2.default)('#lang-list-error').text(error);
+			(0, _jquery2.default)('#lang-list-error').text("Unknow error, contact support");
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)("#loading-spin").css({ display: "none" });
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#language-mode').css('display', 'none');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
 		key: 'loadLanguageList',
 		value: function loadLanguageList() {
 			var _this = this;
-			_BackgroundRequester2.default.request("api", "getLanguage", {}).then(function (languageList) {
+			_BackgroundRequester2.default.request("api", "getLanguage", {}).then(function (response) {
 
-				if (languageList && languageList.Retcode == 200) {
+				if (_Utils2.default.isResponse200(response)) {
 
 					(0, _jquery2.default)("#loading-spin").css({ display: "none" });
 
-					for (var lang in languageList.languages) {
-						var langItem = languageList.languages[lang];
-						(0, _jquery2.default)(".lang-list ul").append('<li data="' + _Sanitize2.default.escpateData(langItem.id) + '"><a href="#"">' + _Sanitize2.default.escpateData(langItem.translation) + '</a></li>');
+					for (var lang in response.languages) {
+						var langItem = response.languages[lang];
+						(0, _jquery2.default)(".lang-list ul").append('<li data="' + _Sanitize2.default.escpateData(langItem.id) + '"><a href="#"">' + _Sanitize2.default.escpateData(langItem.native) + '</a></li>');
 					}
 
 					var languageItems = (0, _jquery2.default)(".lang-list li");
 					languageItems.click(_this.onLangSelected);
+				}
+
+				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.showMaintenanceMessage(response.message);
 				}
 			});
 		}
@@ -14495,27 +14844,28 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.default = {
-	PING: '/api/p',
+	PING: '/api2/p',
 	TIER: '/api2/t/u',
-	LANGUAGELIST: '/api/l/l',
-	GETLOCALE: '/api/l/get',
+	LANGUAGELIST: '/api2/l/l',
+	GETLOCALE: '/api2/l/g',
 	CONFIG: '/api/c/e',
 	TICKETTOKEN: '/api/misc/persist',
 	REST: '/api',
-	REGISTER: '/api/u/r4',
+	REST2: '/api2',
 	FORGOTPASS: '/api/user/forgotpassword',
-	PRODUCTS: '/api/i/p',
+	PRODUCTS: '/api2/i/p',
 	PROFILE: '/api/user/profile',
 	AUTOPROXY: '/debug',
-	FEEDBACK: '/api/misc/feedback',
+	FEEDBACK: '/api2/m/feedback',
 	NOTIFICATION: '/api/user/profile/notification',
 	SUPPORT: '/support',
 	DISCONNECTS: '/api/misc/disconnects',
 	RESENDACTIVATION: '/api/user/activation/resend',
-	CLOSEACCOUNT: '/api/user/closeaccount',
-	TRIAL: '/api/user/trial',
+	CLOSEACCOUNT: '/api2/user/closeaccount',
+	TRIAL: '/api2/user/trial',
 	CLIENTUPDATES: '/api2/cu',
-	CREATEAUTHCODE: '/api/u/r5'
+	CREATEAUTHCODE: '/api2/r6',
+	LOGINAUTHCODE: '/api2/c/1'
 };
 
 /***/ }),
@@ -14531,7 +14881,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -14539,11 +14889,11 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
@@ -14624,7 +14974,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -14640,7 +14990,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -15328,7 +15678,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -15340,7 +15690,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -15473,7 +15823,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -15481,7 +15831,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -15489,9 +15839,11 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _BackgroundRequester = __webpack_require__(4);
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -15507,6 +15859,8 @@ var ProxySearchView = function () {
 		key: 'initView',
 		value: function initView(searchData) {
 			var _this = this;
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
 
 			if (searchData) _this.SearchData = searchData;
 
@@ -15516,9 +15870,6 @@ var ProxySearchView = function () {
 		key: 'loadTemplate',
 		value: function loadTemplate(locale) {
 			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
 
 			_this.loadStorageData().then(function (storage) {
 				_this.Storage = storage;
@@ -15585,18 +15936,8 @@ var ProxySearchView = function () {
 	}, {
 		key: 'loadLocaleFromServer',
 		value: function loadLocaleFromServer() {
-
-			Background.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					//todo can't get locale
-				}
-			});
+			var _this = this;
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "ProxySearchView", _jquery2.default);
 		}
 
 		/* Actions */
@@ -15725,7 +16066,14 @@ var ProxySearchView = function () {
 
 			_this.updateProgressBar(data.count, data.total);
 
-			if (data && data.server && data.server.Country) _this.searchCountry.text(data.server.Country);
+			if (data && data.server && data.server.CountryCode) {
+				_Utils2.default.loadCountryLocale(_BackgroundRequester2.default).then(function (countryLocale) {
+					var countryCode = data.server.CountryCode;
+					var countryLabel = countryLocale && countryLocale.hasOwnProperty(countryCode.toUpperCase()) ? countryLocale[countryCode.toUpperCase()] : countryCode;
+
+					_this.searchCountry.text(countryLabel);
+				});
+			}
 		}
 	}, {
 		key: 'onSearchFailed',
@@ -16195,7 +16543,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -16329,7 +16677,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -16341,7 +16689,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -16449,7 +16797,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -16461,7 +16809,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -16473,7 +16821,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(12);
+var _UpgradeView = __webpack_require__(13);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -16553,7 +16901,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -16565,7 +16913,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -16576,6 +16924,10 @@ var _localeFallback2 = _interopRequireDefault(_localeFallback);
 var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _LoginView = __webpack_require__(6);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -16656,22 +17008,41 @@ var TrialView = function () {
         data = {
           authcode: _this.userData.authcode
         };
-      } else {
-        data = {
-          email: _this.userData.email,
-          hpassword: _this.userData.password
-        };
       }
       _BackgroundRequester2.default.request('api', 'getTrial', data).then(function (response) {
 
         _this.unsetLoading();
 
-        if (response && response.Retcode === 200) return _this.trialSuccess(response);
+        if (_Utils2.default.isResponse200(response)) return _this.trialSuccess(response);
 
-        if (response && response.Retcode < 0) return _this.trialError(response.Message);
+        if (_Utils2.default.isResponseMinus20(response)) return _this.trialError(response.message);
 
-        _this.trialError(["No Retcode, Unknow error"]);
+        if (_Utils2.default.isResponseMinusOne(response)) return _Utils2.default.showMinusOneError(_this.trialError.bind(_this));
+
+        if (_Utils2.default.isResponseAuthError(response)) {
+          chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+              _LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+            });
+          });
+        }
+
+        if (_Utils2.default.isMaintenanceMode(response)) {
+          _this.showMaintenanceMessage(response.message);
+        }
       });
+    }
+  }, {
+    key: 'showMaintenanceMessage',
+    value: function showMaintenanceMessage(message) {
+      var _this = this;
+      (0, _jquery2.default)('#maintenance-msg').text(message);
+      (0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+        location.reload();
+      });
+      (0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+      (0, _jquery2.default)('#trial-mode').css('display', 'none');
+      (0, _jquery2.default)('#header-container').css('display', 'none');
     }
   }, {
     key: 'trialSuccess',
@@ -16679,7 +17050,7 @@ var TrialView = function () {
       var _this = this;
       _this.successDiv.css('display', 'block');
       (0, _jquery2.default)('#success-con').css('display', 'block');
-      if (response.Message) (0, _jquery2.default)('#success-title').text(response.Message);
+      if (response.message) (0, _jquery2.default)('#success-title').text(response.message);
       (0, _jquery2.default)('#expiration-date').text(_Utils2.default.getUserExpirationData(response.expiration));
     }
   }, {
@@ -16687,8 +17058,8 @@ var TrialView = function () {
     value: function trialError(error) {
       var _this = this;
       (0, _jquery2.default)('#fail-con').css('display', 'block');
-      if (Array.isArray(error) && error.length > 0) return _this.errorDiv.text(error[0]);
-      _this.errorDiv.text("Unknow error, contact support");
+      if (error) return _this.errorDiv.text(error);
+      _this.errorDiv.text("No error message, contact support");
     }
   }, {
     key: 'setLoading',
@@ -16720,7 +17091,7 @@ exports.default = new TrialView();
 "use strict";
 
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -16728,7 +17099,7 @@ var _Main = __webpack_require__(30);
 
 var _Main2 = _interopRequireDefault(_Main);
 
-var _browserTabs = __webpack_require__(63);
+var _browserTabs = __webpack_require__(64);
 
 var _browserTabs2 = _interopRequireDefault(_browserTabs);
 
@@ -16767,7 +17138,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -16775,15 +17146,15 @@ var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _BaseSearchView = __webpack_require__(33);
+var _BaseSearchView = __webpack_require__(34);
 
 var _BaseSearchView2 = _interopRequireDefault(_BaseSearchView);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _DashboardView = __webpack_require__(13);
+var _DashboardView = __webpack_require__(12);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -16791,7 +17162,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -16807,7 +17178,7 @@ var _ProxySearchView = __webpack_require__(21);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _Extension = __webpack_require__(62);
+var _Extension = __webpack_require__(63);
 
 var _Extension2 = _interopRequireDefault(_Extension);
 
@@ -16819,6 +17190,14 @@ var _UpdateRequiredView = __webpack_require__(20);
 
 var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
 
+var _Sanitize = __webpack_require__(7);
+
+var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -16828,6 +17207,10 @@ var Main = function () {
 		_classCallCheck(this, Main);
 
 		this.header = _folders2.default.VIEWS + '/header.html';
+		this.maintenance = _folders2.default.VIEWS + '/maintenance-mode.html';
+
+		this.showMaintenanceMessage = this.showMaintenanceMessage.bind(this);
+		this.showError = this.showError.bind(this);
 	}
 
 	_createClass(Main, [{
@@ -16867,7 +17250,7 @@ var Main = function () {
 		key: 'run',
 		value: function run() {
 			var _this = this;
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK], function (storage) {
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK, _ServiceMeta2.default.STORAGEKEYS.CONFIGHARDTTL], function (storage) {
 
 				chrome.storage.onChanged.addListener(_this.onSettingsChanged.bind(_this));
 
@@ -16886,11 +17269,37 @@ var Main = function () {
 			var _this = this;
 			var changedItems = Object.keys(changes);
 
-			if (changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.BASELINK) === -1) return;
+			if (changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.BASELINK) > -1) {
+				var isBaselinkDeleted = changes[_ServiceMeta2.default.STORAGEKEYS.BASELINK].newValue === undefined ? true : false;
 
-			var isBaselinkDeleted = changes[_ServiceMeta2.default.STORAGEKEYS.BASELINK].newValue === undefined ? true : false;
+				if (isBaselinkDeleted) _BaseSearchView2.default.initView();
+			}
 
-			if (isBaselinkDeleted) _BaseSearchView2.default.initView();
+			if (changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA) > -1 && changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.USERDATA) > -1) {
+				var isUserDeleted = changes[_ServiceMeta2.default.STORAGEKEYS.USERDATA].newValue === undefined ? true : false;
+				var isConfigDeteled = changes[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].newValue === undefined ? true : false;
+
+				if (isUserDeleted && isConfigDeteled) {
+					_BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {}).then(function () {
+						chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LASTLOGOUTREASON], function (storage) {
+							chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.LASTLOGOUTREASON, function () {
+								var lasterror = storage[_ServiceMeta2.default.STORAGEKEYS.LASTLOGOUTREASON];
+								_LoginView2.default.initView(lasterror);
+							});
+						});
+					});
+				}
+			}
+
+			if (changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA) > -1) {
+				var oldConfig = changes[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].oldValue;
+				var newConfig = changes[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].newValue;
+				if (newConfig && _Utils2.default.isObject(newConfig) && newConfig.hasOwnProperty("user_status") && newConfig["user_status"] == _ServiceMeta2.default.STATUS.BLOCKED && oldConfig && _Utils2.default.isObject(oldConfig) && oldConfig.hasOwnProperty("user_status") && oldConfig["user_status"] == _ServiceMeta2.default.STATUS.OK) {
+					_BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {}).then(function () {
+						_DashboardView2.default.initView();
+					});
+				}
+			}
 		}
 
 		/* Actions */
@@ -16900,13 +17309,23 @@ var Main = function () {
 		value: function userIsLoggedIn(storage) {
 			var _this = this;
 
-			if (!storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA] || storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL] < _Utils2.default.getDateNow()) return _this.getFreshConfig(storage);
+			_this.clearOldConfig(storage).then(function (oldConfigRemoved) {
+				if (!storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA] || oldConfigRemoved || storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA]["user_status"] == _ServiceMeta2.default.STATUS.BLOCKED || storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGHARDTTL] < _Utils2.default.getDateNow()) {
+					return _this.getFreshConfig(storage);
+				}
 
-			if (storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].status == _ServiceMeta2.default.STATUS.BLOCKED) return _this.getFreshConfig(storage);
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK]) return _ProxySearchView2.default.initView();
 
-			if (storage[_ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK]) return _ProxySearchView2.default.initView();
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL] < _Utils2.default.getDateNow()) {
 
-			_DashboardView2.default.initView();
+					_BackgroundRequester2.default.request('ConfigUpdater', 'setRefreshList').then(function () {
+						_DashboardView2.default.initView();
+					});
+					return;
+				}
+
+				_DashboardView2.default.initView();
+			});
 		}
 	}, {
 		key: 'getFreshConfig',
@@ -16925,23 +17344,74 @@ var Main = function () {
 
 				_BackgroundRequester2.default.request('api', 'login', loginData).then(function (response) {
 
-					if (response && response.errorcode == 0) {
+					if (_Utils2.default.isResponse200(response)) {
 
 						_DashboardView2.default.initView();
 					} else {
-
 						_BackgroundRequester2.default.request('ProxySetting', 'clearSettings', {});
-
-						var error = "An unknown error has occurred. Please contact support.";
-
-						if (response && response.hasOwnProperty("error_msg")) {
-							chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.USERDATA, function () {
-								_LoginView2.default.initView(response.error_msg);
+						// Authentication failed
+						if (_Utils2.default.isResponseAuthError(response)) {
+							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.CONFIGHARDTTL], function () {
+								chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+									_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+								});
 							});
+							return;
+						}
+
+						if (_Utils2.default.isResponseMinus20(response)) {
+							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL, _ServiceMeta2.default.STORAGEKEYS.CONFIGHARDTTL], function () {
+								_LoginView2.default.initView(response.message);
+							});
+							return;
+						}
+
+						if (_Utils2.default.isResponseMinusOne(response)) {
+							return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+						}
+
+						if (_Utils2.default.isMaintenanceMode(response)) {
+							_this.showMaintenanceMessage(response.message);
 						}
 					}
 				});
 			}, "html");
+		}
+	}, {
+		key: 'clearOldConfig',
+		value: function clearOldConfig(storage) {
+			return new Promise(function (resolve, reject) {
+				var curConfig = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+				if (curConfig && _Utils2.default.isObject(curConfig) && curConfig.hasOwnProperty("data") && _Utils2.default.isObject(curConfig.data) && curConfig.data.hasOwnProperty("SERVERS")) {
+					chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, function () {
+						resolve(true);
+					});
+				} else {
+					resolve(false);
+				}
+			});
+		}
+	}, {
+		key: 'showError',
+		value: function showError(error) {
+			var _this = this;
+			(0, _jquery2.default)('#app').html('');
+			(0, _jquery2.default)('#app').append('<p style="text-align:center">' + _Sanitize2.default.escpateData(error) + '</p>');
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			_jquery2.default.get(_this.maintenance, function (maintenance) {
+				(0, _jquery2.default)('#app').html('');
+				(0, _jquery2.default)('#app').append(maintenance);
+
+				(0, _jquery2.default)('#maintenance-msg').text(message);
+				(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+					location.reload();
+				});
+				(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			});
 		}
 	}, {
 		key: 'setHeaderElements',
@@ -17001,10 +17471,28 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+exports.default = {
+	"mainbase_search_timeout": 10000,
+	"tierbase_search_timeout": 15000,
+	"mainbase_api_timeout": 20000,
+	"tierbase_api_timeout": 25000,
+	"proxy_search_timeout": 10000
+};
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -17020,7 +17508,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -17211,24 +17699,6 @@ var BaseSearchView = function () {
 }();
 
 exports.default = new BaseSearchView();
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.default = {
-	"mainbase_search_timeout": 10000,
-	"tierbase_search_timeout": 15000,
-	"mainbase_api_timeout": 20000,
-	"tierbase_api_timeout": 25000,
-	"proxy_search_timeout": 10000
-};
 
 /***/ }),
 /* 35 */
@@ -17489,7 +17959,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -17501,7 +17971,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -17509,7 +17979,7 @@ var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _DashboardView = __webpack_require__(13);
+var _DashboardView = __webpack_require__(12);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -17517,7 +17987,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _Sanitize = __webpack_require__(8);
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -17658,6 +18128,9 @@ var UserProfileView = function () {
 			_this.changeLanguageButton.click(_this.onChangeLanguageClicked.bind(this));
 
 			_this.changeBackButton.click(_this.onBackButtonClicked.bind(this));
+
+			/* In-App Notification */
+			_this.inAppNotificationCheckbox.click(_this.onInAppNotificationSwitchChanged.bind(this));
 		}
 	}, {
 		key: 'setNotificationState',
@@ -17831,7 +18304,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -17843,7 +18316,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -17854,6 +18327,10 @@ var _localeFallback2 = _interopRequireDefault(_localeFallback);
 var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _LoginView = __webpack_require__(6);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17924,17 +18401,43 @@ var CloseAccountView = function () {
       var _this = this;
       _this.setLoading();
       _BackgroundRequester2.default.request('api', 'closeAccount', {
-        email: _this.userData.email,
-        hpassword: _this.userData.password,
-        authcode: _this.userData.authcode.toLowerCase()
+        authcode: _this.userData && _this.userData.authcode ? _this.userData.authcode.toLowerCase() : ""
       }).then(function (response) {
 
         _this.unsetLoading();
 
-        if (response && response.Retcode === 200) return _this.accountClosed();
+        if (_Utils2.default.isResponse200(response)) return _this.accountClosed();
 
-        if (response && response.Retcode < 0) return _this.showError(response.Message);
+        if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+        if (_Utils2.default.isResponseMinusOne(response)) {
+          return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+        }
+
+        if (_Utils2.default.isResponseAuthError(response)) {
+          chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+              _LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+            });
+          });
+        }
+
+        if (_Utils2.default.isMaintenanceMode(response)) {
+          _this.showMaintenanceMessage(response.message);
+        }
       });
+    }
+  }, {
+    key: 'showMaintenanceMessage',
+    value: function showMaintenanceMessage(message) {
+      var _this = this;
+      (0, _jquery2.default)('#maintenance-msg').text(message);
+      (0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+        location.reload();
+      });
+      (0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+      (0, _jquery2.default)('#close-account-mode').css('display', 'none');
+      (0, _jquery2.default)('#header-container').css('display', 'none');
     }
   }, {
     key: 'onCancel',
@@ -17952,7 +18455,7 @@ var CloseAccountView = function () {
     key: 'showError',
     value: function showError(error) {
       var _this = this;
-      if (Array.isArray(error) && error.length > 0) return _this.errorDiv.text(error[0]);
+      if (error) return _this.errorDiv.text(error);
       _this.errorDiv.text("Unknow error, contact support");
     }
   }, {
@@ -20341,7 +20844,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -20349,7 +20852,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -20357,7 +20860,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(12);
+var _UpgradeView = __webpack_require__(13);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -20365,13 +20868,11 @@ var _localhosts = __webpack_require__(48);
 
 var _localhosts2 = _interopRequireDefault(_localhosts);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -20512,19 +21013,7 @@ var BypassConfigView = function () {
 		value: function loadLocaleFromServer() {
 			var _this = this;
 
-			_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					_this.App.html("Unknown error. Please contact support");
-				}
-			});
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "BypassConfigView", _jquery2.default);
 		}
 	}, {
 		key: 'showResult',
@@ -20623,7 +21112,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -20639,7 +21128,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -20647,7 +21136,7 @@ var _Sticked = __webpack_require__(25);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
@@ -20676,8 +21165,6 @@ var _Tooltip = __webpack_require__(19);
 var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -20724,8 +21211,11 @@ var ConnectedView = function () {
 					_this.tabId = _Utils2.default.getTabIdByServerType(currentProxy.Type);
 					_this.usertag = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA] ? storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].usertag : "";
 
-					_this.connectedCountry.text(currentProxy.Country);
-
+					_Utils2.default.loadCountryLocale(_BackgroundRequester2.default).then(function (countryLocale) {
+						var countryCode = currentProxy.CountryCode;
+						var countryLabel = countryLocale && countryLocale.hasOwnProperty(countryCode.toUpperCase()) ? countryLocale[countryCode.toUpperCase()] : countryCode;
+						_this.connectedCountry.text(countryLabel);
+					});
 					_this.setProxyExtensionWarning();
 					_this.setPinCountryButtonState();
 
@@ -21022,19 +21512,7 @@ var ConnectedView = function () {
 		value: function loadLocaleFromServer() {
 			var _this = this;
 
-			_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					_this.App.html("Unknown error. Please contact support");
-				}
-			});
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "ConnectedView", _jquery2.default);
 		}
 	}, {
 		key: 'onPermissionChanged',
@@ -21335,7 +21813,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -21343,7 +21821,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -21351,9 +21829,11 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _BackgroundRequester = __webpack_require__(4);
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -21462,20 +21942,7 @@ var WebRTCAddonView = function () {
 		key: 'loadLocaleFromServer',
 		value: function loadLocaleFromServer() {
 			var _this = this;
-
-			_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-			Background.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-
-						window.location.reload(true);
-					});
-				} else {
-					_this.App.html("Unknown error. Please contact support");
-				}
-			});
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "UpgradeView", _jquery2.default);
 		}
 	}]);
 
@@ -24131,7 +24598,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -24143,15 +24610,15 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _UpgradeView = __webpack_require__(12);
+var _UpgradeView = __webpack_require__(13);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
@@ -24257,7 +24724,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -24269,7 +24736,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -24281,7 +24748,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(12);
+var _UpgradeView = __webpack_require__(13);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -24397,7 +24864,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -24405,7 +24872,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -24417,15 +24884,15 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _Sanitize = __webpack_require__(8);
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -24862,7 +25329,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -24870,11 +25337,11 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -24954,7 +25421,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -24962,7 +25429,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -24974,15 +25441,15 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _DOMPurify = __webpack_require__(6);
+var _DOMPurify = __webpack_require__(8);
 
 var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
 
-var _Sanitize = __webpack_require__(8);
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -25224,7 +25691,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -25232,11 +25699,11 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -25252,7 +25719,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Sanitize = __webpack_require__(8);
+var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
@@ -25422,7 +25889,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _jquery = __webpack_require__(2);
+var _jquery = __webpack_require__(3);
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -25430,7 +25897,7 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -25442,7 +25909,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _LoginView = __webpack_require__(7);
+var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
@@ -25451,8 +25918,6 @@ var _localeFallback = __webpack_require__(5);
 var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -25472,6 +25937,8 @@ var CreateAuthcodeView = function () {
 		key: 'initView',
 		value: function initView() {
 			var _this = this;
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
 
 			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
 		}
@@ -25479,10 +25946,6 @@ var CreateAuthcodeView = function () {
 		key: 'loadTemplate',
 		value: function loadTemplate(locale) {
 			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
-
 			_jquery2.default.get(_this.header, function (header) {
 				_this.App.append(header);
 				_jquery2.default.get(_this.template, function (template) {
@@ -25556,18 +26019,8 @@ var CreateAuthcodeView = function () {
 	}, {
 		key: 'loadLocaleFromServer',
 		value: function loadLocaleFromServer() {
-
-			//todo what happen if it take to long? loading screen is showed?
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-						window.location.reload(true);
-					});
-				} else {
-					//todo can't get locale
-				}
-			});
+			var _this = this;
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "CreateAuthcodeView", _jquery2.default);
 		}
 	}, {
 		key: 'showSuccess',
@@ -25585,10 +26038,8 @@ var CreateAuthcodeView = function () {
 			_this.createAuthcodeContainer.css('display', 'none');
 			_this.errorAuthcodeContainer.css('display', 'block');
 			_this.successAuthcodeContainer.css('display', 'none');
-			if (Array.isArray(errormsg)) {
-				errormsg.forEach(function (msg) {
-					_this.autcodeError.append("<p>" + msg + "</p>");
-				});
+			if (errormsg) {
+				_this.autcodeError.append("<p>" + errormsg + "</p>");
 			}
 		}
 	}, {
@@ -25652,18 +26103,36 @@ var CreateAuthcodeView = function () {
 			if (!(0, _jquery2.default)('#eula-checkbox').prop("checked")) errors.push("You have to agree with our License Agreement");
 
 			if (errors.length > 0) return _this.showAgreementError(errors);
+
 			_this.setLoading();
+
 			_BackgroundRequester2.default.request("api", "createAuthcode", {}).then(function (response) {
 				_this.unsetLoading();
 
-				if (response && response != "" && response.Retcode === 200 && response.hasOwnProperty("Authcode")) {
-					_this.showSuccess(response.Authcode);
-				} else {
-					if (response && response != "" && response.Retcode < 0 && response.hasOwnProperty("Message")) return _this.showError(response.Message);
+				if (_Utils2.default.isResponse200(response) && response.hasOwnProperty("authcode")) return _this.showSuccess(response.authcode);
 
-					_this.showError(["Something went wrong. Please contact support."]);
+				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.showMaintenanceMessage(response.message);
 				}
 			});
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#create-authcode-mode').css('display', 'none');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
 		}
 	}, {
 		key: 'onLoginWithAuthcodeClicked',
@@ -25743,6 +26212,163 @@ exports.default = new CreateAuthcodeView();
 
 
 Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(3);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _DashboardView = __webpack_require__(12);
+
+var _DashboardView2 = _interopRequireDefault(_DashboardView);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EmailWarningView = function () {
+  function EmailWarningView() {
+    _classCallCheck(this, EmailWarningView);
+
+    this.template = _folders2.default.VIEWS + '/emailwarning.html';
+  }
+
+  _createClass(EmailWarningView, [{
+    key: 'show',
+    value: function show() {
+      var _this2 = this;
+
+      var _this = this;
+
+      _Utils2.default.getLocaleInStorage().then(function (locale) {
+        _this2.App = (0, _jquery2.default)('#app');
+        _this2.App.html("");
+
+        _jquery2.default.get(_this.template, function (template) {
+          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
+
+          _this.App.append(loadedTemplate);
+
+          _this.selectElements();
+          _this.setAuthCode();
+        }, "html");
+      });
+    }
+  }, {
+    key: 'selectElements',
+    value: function selectElements() {
+      var _this = this;
+      _this.authcodeCopied = (0, _jquery2.default)('#authcode-copied-clipboard');
+      _this.authcode = (0, _jquery2.default)('#authcode');
+      _this.authcode.click(_this.onAuthcodeClicked.bind(_this));
+
+      _this.continueButton = (0, _jquery2.default)('#continue-with-authcode');
+      _this.continueButton.click(_this.onContinueClicked.bind(this));
+    }
+  }, {
+    key: 'setAuthCode',
+    value: function setAuthCode() {
+      var _this = this;
+
+      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+        var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+
+        if (userdata && userdata.authcode) {
+          (0, _jquery2.default)('#authcode').text(userdata.authcode);
+        }
+      });
+    }
+  }, {
+    key: 'onContinueClicked',
+    value: function onContinueClicked() {
+      var _this = this;
+      _DashboardView2.default.initView();
+    }
+  }, {
+    key: 'onAuthcodeClicked',
+    value: function onAuthcodeClicked() {
+      var _this = this;
+      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+        var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+        if (userdata && userdata.authcode) {
+          _this.copyTextToClipboard(userdata.authcode);
+          _this.authcode.css('display', 'none');
+          _this.authcodeCopied.css('display', 'block');
+
+          setTimeout(function () {
+            _this.authcodeCopied.css('display', 'none');
+            _this.authcode.css('display', 'block');
+          }, 5000);
+        }
+      });
+    }
+  }, {
+    key: 'copyTextToClipboard',
+    value: function copyTextToClipboard(text) {
+      var _this = this;
+
+      if (!navigator.clipboard) {
+        _this.fallbackCopyTextToClipboard(text);
+        return;
+      }
+      navigator.clipboard.writeText(text).then(function () {}, function (err) {
+        console.error('Async: Could not copy text: ', err);
+      });
+    }
+  }, {
+    key: 'fallbackCopyTextToClipboard',
+    value: function fallbackCopyTextToClipboard(text) {
+      var _this = this;
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed"; //avoid scrolling to bottom
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        var successful = document.execCommand('copy');
+        var msg = successful ? 'successful' : 'unsuccessful';
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+
+      document.body.removeChild(textArea);
+    }
+  }]);
+
+  return EmailWarningView;
+}();
+
+exports.default = new EmailWarningView();
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
@@ -25752,7 +26378,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _Utils = __webpack_require__(3);
+var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
@@ -25926,7 +26552,7 @@ var Extension = function () {
 exports.default = new Extension();
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
