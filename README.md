@@ -1,9 +1,18 @@
-# Chrome-SetupVPN-3.7.0
+# Chrome-SetupVPN-3.9.6
 
+```
 setupvpn for chrome
+```
+
+# 官网
+
+```
+https://setupvpn.com/download/（需翻墙访问）
+```
 
 # 安装
 
+```
 1.git clone or download zip(完成后需解压);
 
 2.打开谷歌浏览器 右上角的三个点 --> 更多工具 --> 扩展程序(或者直接地址栏输入 chrome://extensions/ )
@@ -25,3 +34,4 @@ setupvpn for chrome
 6.点击该扩展程序，然后注册账号 --> 登录账号 --> 选择要连接的 vpn 就可以了
 
 ![image](https://github.com/qin-ziqi/Chrome-SetupVPN-3.7.0/blob/master/imgs/step5.png)
+```
