@@ -124,6 +124,7 @@ exports.default = {
 		ID: _platform2.default.WebRTCAddon.id
 	},
 	PROXYADDONS: _platform2.default.proxyAddons,
+	EXCEPTIONADDONS: _platform2.default.exceptionAddons,
 	STORAGEKEYS: {
 		BASELINK: "baselink",
 		LASTBASELINK: "lastBaselink",
@@ -167,7 +168,9 @@ exports.default = {
 		LSER: 'localeLser',
 		COUNTRYLOCALE: 'countryLocale',
 		CONFIGHARDTTL: 'configHardTTL',
-		LASTLOGOUTREASON: 'lastLogoutReason'
+		LASTLOGOUTREASON: 'lastLogoutReason',
+		COUNTRYSESSIONSTATE: 'countrySessionState',
+		LASTFAILEDSERVER: 'lastFailedServer'
 	},
 	STATUS: {
 		BLOCKED: "BLOCKED",
@@ -13836,7 +13839,7 @@ var DashboardView = function () {
 
 					var isPublicVal = isPublic ? 'y' : 'n';
 
-					var serverItem = '<div id="' + _Sanitize2.default.escpateData(serverItemId) + '" class="server-item" isPublicVal="' + isPublicVal + '" sortkey="' + _Sanitize2.default.escpateData(sortKey) + '" section="' + tabId + '" serverkey="' + _Sanitize2.default.escpateData(serverKey) + '">' + '<a class="server-item__server">' + '<img class="server-item__server__server-flag" src="' + _folders2.default.FLAGS + '/' + _Sanitize2.default.escpateData(countryCode) + '.png">' + '<div class="server-item__server__server-info">' + '<div class="server-item__server__server-info__server-label">' + countryLabel + '</div>' + '</div>' + premiumLock + sortOption + '</a>' + '</div>';
+					var serverItem = '<div id="' + _Sanitize2.default.escpateData(serverItemId) + '" class="server-item" isPublicVal="' + isPublicVal + '" serverLabel="' + countryLabel + '" sortkey="' + _Sanitize2.default.escpateData(sortKey) + '" section="' + tabId + '" serverkey="' + _Sanitize2.default.escpateData(serverKey) + '">' + '<a class="server-item__server">' + '<img class="server-item__server__server-flag" src="' + _folders2.default.FLAGS + '/' + _Sanitize2.default.escpateData(countryCode) + '.png">' + '<div class="server-item__server__server-info">' + '<div class="server-item__server__server-info__server-label">' + countryLabel + '</div>' + '</div>' + premiumLock + sortOption + '</a>' + '</div>';
 
 					var jServerItem = (0, _jquery2.default)(serverItem);
 
@@ -13962,6 +13965,9 @@ var DashboardView = function () {
 			var serverKey = (0, _jquery2.default)(e.currentTarget).attr('serverKey');
 			var isPublicVal = (0, _jquery2.default)(e.currentTarget).attr('isPublicVal');
 			var isPublic = isPublicVal == 'y' ? true : false;
+			var serverLabel = (0, _jquery2.default)(e.currentTarget).attr('serverLabel');
+			var sectionId = (0, _jquery2.default)(e.currentTarget).attr('section');
+			var serverType = _this.getServerTypeNameById(sectionId);
 
 			if (tabId == 1 && _this.Storage && !_Utils2.default.isUserPremium(_this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA])) return _this.freeUserClickedOnPremium();
 
@@ -13979,6 +13985,11 @@ var DashboardView = function () {
 				var bestServer = _ServerList2.default.getServerByLoad(serverList, serverKey);
 				searchData = _ServerList2.default.generateSearchData(bestServer, serverList[serverKey]);
 			}
+
+			var config = _this.Storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+			searchData.uid = config && _Utils2.default.isObject(config) && config.uid ? config.uid : false;
+			searchData.serverLabel = serverLabel;
+			searchData.serverType = serverType;
 
 			_ProxySearchView2.default.initView(searchData);
 		}
@@ -14855,7 +14866,7 @@ exports.default = {
 	FORGOTPASS: '/api/user/forgotpassword',
 	PRODUCTS: '/api2/i/p',
 	PROFILE: '/api/user/profile',
-	AUTOPROXY: '/debug',
+	AUTOPROXY: '/api2/m/debug',
 	FEEDBACK: '/api2/m/feedback',
 	NOTIFICATION: '/api/user/profile/notification',
 	SUPPORT: '/support',
@@ -14865,7 +14876,7 @@ exports.default = {
 	TRIAL: '/api2/user/trial',
 	CLIENTUPDATES: '/api2/cu',
 	CREATEAUTHCODE: '/api2/r6',
-	LOGINAUTHCODE: '/api2/c/1'
+	LOGINAUTHCODE: '/api2/c/2'
 };
 
 /***/ }),
@@ -15845,6 +15856,8 @@ var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ProxySearchView = function () {
@@ -15918,8 +15931,13 @@ var ProxySearchView = function () {
 		value: function initState() {
 			var _this = this;
 
-			if (_this.SearchData) return _this.startSearch(_this.SearchData);
-
+			if (_this.SearchData) {
+				chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LASTFAILEDSERVER, {
+					serverLabel: _this.SearchData.serverLabel,
+					serverType: _this.SearchData.serverType
+				}));
+				return _this.startSearch(_this.SearchData);
+			}
 			_this.requestUpdate();
 		}
 	}, {
@@ -16004,7 +16022,7 @@ var ProxySearchView = function () {
 		value: function updateProgressBar(current, total) {
 			var _this = this;
 
-			var progress = (total - current) / total * 100;
+			var progress = (total - (total - current)) / total * 100;
 
 			_this.progressBar.width(Math.round(progress) + "%");
 		}
@@ -16085,7 +16103,23 @@ var ProxySearchView = function () {
 
 			var _this = this;
 			var clienversion = (0, _jquery2.default)("#client-version");
+			var failedcountry = (0, _jquery2.default)('#failed-country');
+			var failedtype = (0, _jquery2.default)('#failed-servertype');
 			clienversion.text(_ServiceMeta2.default.VERSION);
+
+			if (_this.SearchData) {
+				failedcountry.text(_this.SearchData.serverLabel);
+				failedtype.text("(" + _this.SearchData.serverType + ")");
+			} else {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LASTFAILEDSERVER], function (storage) {
+					var lastFailedServer = storage[_ServiceMeta2.default.STORAGEKEYS.LASTFAILEDSERVER];
+					if (lastFailedServer && _Utils2.default.isObject(lastFailedServer)) {
+						failedcountry.text(lastFailedServer.serverLabel);
+						failedtype.text("(" + lastFailedServer.serverType + ")");
+					}
+				});
+			}
+
 			_this.proxySearchActiveView.css("display", "none");
 			_this.proxySearchFailedView.css("display", "block");
 		}
@@ -17458,7 +17492,8 @@ exports.default = {
 		id: 'bppamachkoflopbagkdoflbgfjflfnfl',
 		url: 'https://chrome.google.com/webstore/detail/webrtc-leak-shield/bppamachkoflopbagkdoflbgfjflfnfl'
 	},
-	proxyAddons: ["oofgbpoabipfcfjapgnbbjjaenockbdp", "nbcojefnccbanplpoffopkoepjmhgdgh"]
+	proxyAddons: ["oofgbpoabipfcfjapgnbbjjaenockbdp", "nbcojefnccbanplpoffopkoepjmhgdgh"],
+	exceptionAddons: ["ngpampappnmepgilojfohadhhmbhlaek"]
 };
 
 /***/ }),
@@ -21755,7 +21790,9 @@ var Management = function () {
 					var extWithProxy = [];
 
 					for (var i = 0; i < listOfExtensions.length; i++) {
-						if (_this.hasExtensionProxyPermission(listOfExtensions[i]) && chrome.runtime.id !== listOfExtensions[i].id && _ServiceMeta2.default.PROXYADDONS.indexOf(listOfExtensions[i].id) === -1 && listOfExtensions[i].enabled) extWithProxy.push(listOfExtensions[i]);
+						if (_this.hasExtensionProxyPermission(listOfExtensions[i]) && chrome.runtime.id !== listOfExtensions[i].id && _ServiceMeta2.default.PROXYADDONS.indexOf(listOfExtensions[i].id) === -1 && _ServiceMeta2.default.EXCEPTIONADDONS.indexOf(listOfExtensions[i].id) === -1 && listOfExtensions[i].enabled) {
+							extWithProxy.push(listOfExtensions[i]);
+						}
 					};
 
 					if (popupCallback) return popupCallback(extWithProxy);
