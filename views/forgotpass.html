@@ -1,3 +1,4 @@
+<div id="forgotpass-mode">
 	<div id="forgotpass-success" class="forgotpass-view forgotpass-view--success">
 		<div class="forgotpass-view__message-container">
 			<div class="wrapper">
@@ -10,20 +11,31 @@
 		<div class="wrapper">
 
 			<div class="headline">{ForgotPassTitle}</div>
-			<div>{ForgotPassText}</div>
+			<div style="margin: 10px 0px;">{ForgotPassText}</div>
 
 			<div class="register-view__input-container">
 				<div class="textinput">
 					<input class="textinput__input" id="forgotpass-email" type="email" placeholder="{ForgotPassEmail}">
-				</div>
+					<div class="textinput__errormessage">
+					  <div id="email-error" style="display: none;">{LoginEmailFailed}</div>
+					</div>
+				  </div>
 			</div>
 
-			<div id="error_message" class="textinput__errormessage">
-
-			</div>
+			<div id="error_message" class="textinput__errormessage" style="margin-top: 5px;text-align: center;"></div>
 
 			<div class="register-view__btn-container">
 				<a id="forgotpass-button" href="#" class="btn btn--flex">{ForgotPassButton}</a>
 			</div>
 		</div>
 	</div>
+</div>
+<div id="maintenance-mode" class="maintenance-mode">
+	<i class="material-icons maintenance-mode__close" id="maintenance-mode-close-icon">close</i>
+	<div class="maintenance-mode__container">
+	  <div class="maintenance-mode__icon"><i class="material-icons">build</i></div>
+	  <div id="maintenance-msg" class="maintenance-mode__message">
+  
+	  </div>
+	</div>
+  </div>

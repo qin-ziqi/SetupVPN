@@ -97,9 +97,7 @@ exports.default = {
 	TIERUPDATETTL: 86400,
 	VERSIONSTATUSTTL: 86400,
 	UNINSTALLPATH: "/html/uninstalled.php",
-	BASEDOMAIN: "diltwo.com",
-	BACKUPBASEDOMAIN: "mainbackupdomain.com",
-	TESTREQUESTREGEX: /http:\/\/test[0-9]{6,12}\.io/,
+	TESTREQUESTREGEX: /http:\/\/verify[0-9]{6,12}n[0-9]{6,12}\.com/,
 	SERVICE: "SetupVPN",
 	SERVICESHORT: "setupvpn",
 	SHORTNAME: "sv",
@@ -170,7 +168,10 @@ exports.default = {
 		CONFIGHARDTTL: 'configHardTTL',
 		LASTLOGOUTREASON: 'lastLogoutReason',
 		COUNTRYSESSIONSTATE: 'countrySessionState',
-		LASTFAILEDSERVER: 'lastFailedServer'
+		LASTFAILEDSERVER: 'lastFailedServer',
+		LASTHB: 'lastHB',
+		BYPASSHOSTS: 'bypassHosts',
+		SHOWWP: 'showWP'
 	},
 	STATUS: {
 		BLOCKED: "BLOCKED",
@@ -298,6 +299,11 @@ var Utils = function () {
 			return Math.floor(Date.now() / 1000) + interval * 60;
 		}
 	}, {
+		key: 'getCurrentTime',
+		value: function getCurrentTime() {
+			return Math.floor(Date.now() / 1000);
+		}
+	}, {
 		key: 'getLocaleInStorage',
 		value: function getLocaleInStorage() {
 			return new Promise(function (resolve, reject) {
@@ -361,8 +367,7 @@ var Utils = function () {
 				var length = this.getRandomInt(6, 12);
 				var start = parseInt("1".padEnd(length, "0"));
 				var end = parseInt("9".padEnd(length, "9"));
-				console.log("length = ", length);
-				console.log("start=" + start + "  end=" + end);
+
 				randomRange.s = start;
 				randomRange.e = end;
 				return randomRange;
@@ -376,7 +381,7 @@ var Utils = function () {
 		value: function generateIdentifierDomain() {
 			var randomRange = this.getRandomRange();
 			var it = this.getRandomInt(randomRange.s, randomRange.e);
-			return "test" + it + ".io";
+			return "test" + it;
 		}
 	}, {
 		key: 'getDateNow',
@@ -424,7 +429,6 @@ var Utils = function () {
 
 				var condition = inAppNoti && inAppNoti[uid] === false ? true : false;
 
-				console.log("condition", condition);
 				if (!condition) chrome.notifications.create(options);
 			});
 		}
@@ -709,17 +713,13 @@ var Utils = function () {
 		value: function getOS() {
 			return new Promise(function (resolve) {
 				try {
-					if (chrome && chrome.runtime && Utils.isFunction(chrome.runtime.getPlatformInfo)) {
-						chrome.runtime.getPlatformInfo(function (platformInfo) {
-							var os = "-";
-							if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
-								os = platformInfo.os.toLowerCase();
-							}
-							resolve(os);
-						});
-					} else {
-						resolve("-");
-					}
+					chrome.runtime.getPlatformInfo(function (platformInfo) {
+						var os = "-";
+						if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
+							os = platformInfo.os.toLowerCase();
+						}
+						resolve(os);
+					});
 				} catch (e) {
 					resolve("-");
 				}
@@ -780,7 +780,7 @@ var Utils = function () {
 
 					var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
 					background.request("api", "getCountryLocale", { langCode: lang }).then(function (cachedCountryLocale) {
-						console.log("cachedCountryLocale from bg", cachedCountryLocale);
+
 						if (cachedCountryLocale && _this.isObject(cachedCountryLocale)) {
 							resolve(cachedCountryLocale);
 							return;
@@ -789,6 +789,34 @@ var Utils = function () {
 					});
 				});
 			});
+		}
+	}, {
+		key: 'genBypassList',
+		value: function genBypassList(serversJson) {
+			var _this = this;
+			try {
+				if (serversJson && _this.isObject(serversJson) && serversJson.hasOwnProperty("mainbase") && Array.isArray(serversJson.mainbase)) {
+					var bypassList = [];
+					serversJson.mainbase.forEach(function (baselink) {
+						var baselinkHost = false;
+						try {
+							var parsed = new URL(baselink);
+
+							if (parsed && parsed.hostname) {
+								baselinkHost = parsed.hostname;
+							}
+						} catch (e) {}
+
+						if (baselinkHost) {
+							if (!bypassList.includes(baselinkHost)) bypassList.push(baselinkHost);
+						}
+					});
+					return bypassList;
+				}
+				return [];
+			} catch (e) {
+				return [];
+			}
 		}
 	}]);
 
@@ -903,9 +931,7 @@ var Api = function () {
 						if (_Utils2.default.isResponse200(response) && _typeof(response.translation) === 'object' && response.translation !== null) {
 							var _chrome$storage$local;
 
-							chrome.storage.local.set((_chrome$storage$local = {}, _defineProperty(_chrome$storage$local, _ServiceMeta2.default.STORAGEKEYS.LOCALE, response.translation), _defineProperty(_chrome$storage$local, _ServiceMeta2.default.STORAGEKEYS.LSER, Number.isInteger(response.serial) ? response.serial : 0), _chrome$storage$local), function () {
-								console.log("setting", response.translation);
-							});
+							chrome.storage.local.set((_chrome$storage$local = {}, _defineProperty(_chrome$storage$local, _ServiceMeta2.default.STORAGEKEYS.LOCALE, response.translation), _defineProperty(_chrome$storage$local, _ServiceMeta2.default.STORAGEKEYS.LSER, Number.isInteger(response.serial) ? response.serial : 0), _chrome$storage$local), function () {});
 							_this.getCountryLocale({ langCode: lang }, function () {
 								callback(response);
 							});
@@ -927,12 +953,46 @@ var Api = function () {
 			});
 		}
 	}, {
+		key: 'prepareLoginData',
+		value: function prepareLoginData(loginCreds) {
+			var authcode = void 0;
+			var email = void 0;
+			var hpassword = void 0;
+
+			if (loginCreds && loginCreds.authcode) {
+				authcode = loginCreds.authcode;
+			}
+
+			if (loginCreds && loginCreds.email) {
+				email = loginCreds.email;
+
+				if (loginCreds.password) hpassword = shajs('sha512').update(loginCreds.password).digest('hex');
+
+				if (loginCreds.hpassword) hpassword = loginCreds.hpassword;
+			}
+
+			if (email && hpassword) {
+				return {
+					login: email,
+					hpassword: hpassword
+				};
+			}
+
+			if (authcode) {
+				return {
+					authcode: authcode
+				};
+			}
+
+			return false;
+		}
+	}, {
 		key: 'getCountryLocale',
 		value: function getCountryLocale(data, callback) {
 			var _this = this;
 
 			_this.loadCountryLocaleJsonFile(data.langCode).then(function (countryLocale) {
-				console.log("getCountryLocale", countryLocale);
+
 				if (countryLocale) {
 					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.COUNTRYLOCALE, countryLocale), function () {
 						if (callback) callback(countryLocale);
@@ -989,20 +1049,27 @@ var Api = function () {
 
 				var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
 				var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
-				var authcode;
-				var email;
-				var hpassword;
 
-				if (data && data.userData && data.userData.authcode) {
-					authcode = data.userData.authcode;
+				if (!data || !data.userData) {
+					return callback({
+						retcode: -4
+					});
 				}
 
-				if (data && data.userData && data.userData.email && data.userData.password) {
-					email = data.userData.email;
-					hpassword = data.userData.password;
+				var loginData = _this.prepareLoginData(data.userData);
+
+				if (!loginData) {
+					return callback({
+						retcode: -4
+					});
 				}
 
-				if (!authcode && (!email || !hpassword)) {
+				var authcode = loginData.authcode,
+				    login = loginData.login,
+				    hpassword = loginData.hpassword;
+
+
+				if (!authcode && (!login || !hpassword)) {
 					return callback({
 						retcode: -4
 					});
@@ -1017,7 +1084,7 @@ var Api = function () {
 					if (authcode) {
 						parameter["authcode"] = authcode.toLowerCase();
 					} else {
-						parameter["login"] = email.toLowerCase();
+						parameter["login"] = login.toLowerCase();
 						parameter["hpassword"] = hpassword.toLowerCase();
 					}
 
@@ -1032,8 +1099,9 @@ var Api = function () {
 
 							var userdata = {};
 
-							if (email && hpassword) {
-								userdata.authcode = response.config.authcode;
+							if (login && hpassword) {
+								userdata.email = login;
+								userdata.hpassword = hpassword;
 							}
 
 							if (authcode) {
@@ -1048,6 +1116,7 @@ var Api = function () {
 							if (response.config.ipcheck_url) dataToUpdate[_ServiceMeta2.default.STORAGEKEYS.IPLOOKUPURL] = response.config.ipcheck_url;
 
 							chrome.storage.local.set(dataToUpdate, function () {
+
 								return callback(response);
 							});
 						} else {
@@ -1073,13 +1142,14 @@ var Api = function () {
 				});
 			});
 		}
+
 		// Responses: 200, -20, -1, -500
 
 	}, {
 		key: 'createAuthcode',
 		value: function createAuthcode(callback) {
 			var _this = this;
-			console.log("creating authcode");
+
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
 				var baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
 				var language = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
@@ -1100,7 +1170,7 @@ var Api = function () {
 							var userdata = {
 								authcode: response.authcode
 							};
-							console.log("setting new userdata", userdata);
+
 							chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.USERDATA, userdata), function () {
 								if (callback) callback(response);
 							});
@@ -1119,20 +1189,91 @@ var Api = function () {
 				});
 			});
 		}
+
+		// Responses: 200, -20, -1, -500
+
+	}, {
+		key: 'registerAccount',
+		value: function registerAccount(callback, data) {
+			var _this = this;
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+				var baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
+				var language = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
+
+				if (!baselink) {
+					if (callback) callback(false);
+					return;
+				}
+
+				_this.getOS().then(function (os) {
+					var hpassword = shajs('sha512').update(data.password).digest('hex');
+					var parameter = Object.assign({
+						os: os,
+						lang: language,
+						email: data.email,
+						hpassword: hpassword
+					}, _this.metaData());
+
+					_this.request(_endpoints2.default.REGISTER, 'POST', parameter, function (response) {
+						if (_Utils2.default.isResponse200(response)) {
+							var userdata = {
+								email: data.email,
+								hpassword: hpassword
+							};
+
+							chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.USERDATA, userdata), function () {
+								if (callback) callback(response);
+							});
+						} else {
+							if (_Utils2.default.isResponse200(response) || _Utils2.default.isResponseMinus20(response) || _Utils2.default.isResponseMinusOne(response) || _Utils2.default.isMaintenanceMode(response)) {
+								if (callback) callback(response);
+							} else {
+
+								chrome.storage.local.get(function (storage) {
+									var Baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
+									_this.findNewBase(Baselink);
+								});
+							}
+						}
+					}, false, true);
+				});
+			});
+		}
+
+		// Responses: 200, -20, -1, -500
+
 	}, {
 		key: 'forgotPass',
 		value: function forgotPass(callback, data) {
 			var _this = this;
 
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE], function (storage) {
+				var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
 				chrome.runtime.getPlatformInfo(function (platformInfo) {
-					var parameter = Object.assign({
-						email: data.email,
-						lang: storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE],
-						os: platformInfo && platformInfo.os ? platformInfo.os : "-"
-					}, _this.metaData());
 
-					_this.request(_endpoints2.default.FORGOTPASS, 'POST', parameter, callback);
+					var parameter = Object.assign({
+						os: platformInfo && platformInfo.os ? platformInfo.os : "-",
+						lang: lang ? lang : '-'
+					}, _this.metaData(), data);
+
+					_this.request(_endpoints2.default.FORGOTPASS, 'POST', parameter, function (response) {
+						if (_Utils2.default.isResponse200(response)) {
+							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATATTL], function () {
+								callback(response);
+							});
+						} else {
+							if (_Utils2.default.isResponse200(response) || _Utils2.default.isResponseMinus20(response) || _Utils2.default.isResponseMinusOne(response) || _Utils2.default.isResponseAuthError(response) || _Utils2.default.isMaintenanceMode(response)) {
+								if (callback) callback(response);
+							} else {
+
+								chrome.storage.local.get(function (storage) {
+									var Baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
+									_this.findNewBase(Baselink);
+								});
+							}
+						}
+					}, false, true);
 				});
 			});
 		}
@@ -1147,10 +1288,18 @@ var Api = function () {
 				var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
 				chrome.runtime.getPlatformInfo(function (platformInfo) {
 
+					var loginData = _this.prepareLoginData(data);
+
+					if (!loginData) {
+						return callback({
+							retcode: -4
+						});
+					}
+
 					var parameter = Object.assign({
 						os: platformInfo && platformInfo.os ? platformInfo.os : "-",
 						lang: lang ? lang : '-'
-					}, _this.metaData(), data);
+					}, _this.metaData(), loginData);
 
 					_this.request(_endpoints2.default.PRODUCTS, 'POST', parameter, function (response) {
 
@@ -1184,12 +1333,19 @@ var Api = function () {
 					var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
 					var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
 
+					var loginData = _this.prepareLoginData(userdata);
+
+					if (!loginData) {
+						return callback({
+							retcode: -4
+						});
+					}
+
 					var parameter = Object.assign({
 						productid: data.productid,
-						authcode: data.authcode,
 						os: platformInfo && platformInfo.os ? platformInfo.os : "-",
 						lang: lang ? lang : '-'
-					}, _this.metaData());
+					}, _this.metaData(), loginData);
 
 					var paymentEndpoint = _endpoints2.default.REST2 + data.endpoint;
 
@@ -1338,13 +1494,13 @@ var Api = function () {
 		key: 'getTier',
 		value: function getTier(callback) {
 			var _this = this;
-			console.log("getting new tiers");
+
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.SERVERSJSON, _ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.TIERNEXTUPDATE], function (storage) {
 				var baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
 				var storageServersJson = storage[_ServiceMeta2.default.STORAGEKEYS.SERVERSJSON];
 				var tierNextUpdate = storage[_ServiceMeta2.default.STORAGEKEYS.TIERNEXTUPDATE] ? storage[_ServiceMeta2.default.STORAGEKEYS.TIERNEXTUPDATE] : 0;
 				if (!baselink) {
-					console.log("no baselink, can not get tiers");
+
 					if (callback) callback(false);
 					return;
 				}
@@ -1358,14 +1514,14 @@ var Api = function () {
 						_this.request(_endpoints2.default.TIER, 'POST', parameter, function (response) {
 							var intervalInSeconds = _ServiceMeta2.default.TIERUPDATETTL;
 							if (response && response != "" && response.retcode === 200 && response.data && response.data.hasOwnProperty("mainbase") && Array.isArray(response.data.mainbase) && response.data.mainbase.length > 2 && response.data.hasOwnProperty("tierbase") && Array.isArray(response.data.tierbase) && response.data.tierbase.length > 2) {
-								var _chrome$storage$local7;
+								var _chrome$storage$local8;
 
 								if (response.hasOwnProperty("update_interval_hours") && Number.isInteger(response["update_interval_hours"]) && response["update_interval_hours"] > 1 && response["update_interval_hours"] < 168) {
 									intervalInSeconds = response["update_interval_hours"] * 60 * 60;
 								}
 								var nextUpdate = _Utils2.default.getDateNow() + intervalInSeconds;
-								response.data.mainbase.push('https://' + _ServiceMeta2.default.BACKUPBASEDOMAIN);
-								chrome.storage.local.set((_chrome$storage$local7 = {}, _defineProperty(_chrome$storage$local7, _ServiceMeta2.default.STORAGEKEYS.SERVERSJSON, response.data), _defineProperty(_chrome$storage$local7, _ServiceMeta2.default.STORAGEKEYS.TIERNEXTUPDATE, nextUpdate), _chrome$storage$local7));
+								var bypassHosts = _Utils2.default.genBypassList(response.data);
+								chrome.storage.local.set((_chrome$storage$local8 = {}, _defineProperty(_chrome$storage$local8, _ServiceMeta2.default.STORAGEKEYS.SERVERSJSON, response.data), _defineProperty(_chrome$storage$local8, _ServiceMeta2.default.STORAGEKEYS.TIERNEXTUPDATE, nextUpdate), _defineProperty(_chrome$storage$local8, _ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS, bypassHosts), _chrome$storage$local8));
 								var timeOutSettings = _Utils2.default.getTimeoutSettings(response.data);
 								chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS, timeOutSettings));
 							} else {
@@ -1384,7 +1540,7 @@ var Api = function () {
 		key: 'getClientVersionStatus',
 		value: function getClientVersionStatus(callback, data) {
 			var _this = this;
-			console.log("getting client version status");
+
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE], function (storage) {
 				var baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
 				if (!baselink) {
@@ -1401,18 +1557,17 @@ var Api = function () {
 
 						_this.request(_endpoints2.default.CLIENTUPDATES, 'POST', parameter, function (response) {
 							var intervalInSeconds = _ServiceMeta2.default.VERSIONSTATUSTTL;
-							console.log("CLIENTUPDATES", response);
+
 							if (response && response != "" && response.retcode === 200 && response.data && response.data.hasOwnProperty("action") && (response.data.action === "update" || response.data.action === "stop") && response.data.hasOwnProperty("curversion") && response.data.hasOwnProperty("minversion") && response.data.hasOwnProperty("sources") && Array.isArray(response.data.sources) && response.data.sources.length > 0) {
-								var _chrome$storage$local10;
+								var _chrome$storage$local11;
 
 								if (response.hasOwnProperty("update_interval_hours") && Number.isInteger(response["update_interval_hours"]) && response["update_interval_hours"] > 6 && response["update_interval_hours"] < 720) {
 									intervalInSeconds = response["update_interval_hours"] * 60 * 60;
 								}
 
 								var nextUpdate = _Utils2.default.getDateNow() + intervalInSeconds;
-								console.log("intervalInSeconds", intervalInSeconds);
-								console.log("nextUpdate", nextUpdate);
-								chrome.storage.local.set((_chrome$storage$local10 = {}, _defineProperty(_chrome$storage$local10, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, response.data), _defineProperty(_chrome$storage$local10, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE, nextUpdate), _chrome$storage$local10));
+
+								chrome.storage.local.set((_chrome$storage$local11 = {}, _defineProperty(_chrome$storage$local11, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, response.data), _defineProperty(_chrome$storage$local11, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE, nextUpdate), _chrome$storage$local11));
 							} else {
 								chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE], function () {
 									var nextUpdate = _Utils2.default.getDateNow() + intervalInSeconds;
@@ -1453,10 +1608,20 @@ var Api = function () {
 				var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
 				chrome.runtime.getPlatformInfo(function (platformInfo) {
 
+					var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+
+					var loginData = _this.prepareLoginData(userdata);
+
+					if (!loginData) {
+						return callback({
+							retcode: -4
+						});
+					}
+
 					var parameter = Object.assign({
 						os: platformInfo && platformInfo.os ? platformInfo.os : "-",
 						lang: lang ? lang : '-'
-					}, _this.metaData(), data);
+					}, _this.metaData(), loginData);
 
 					_this.request(_endpoints2.default.CLOSEACCOUNT, 'POST', parameter, function (response) {
 						if (_Utils2.default.isResponse200(response)) {
@@ -1514,12 +1679,39 @@ var Api = function () {
 			});
 		}
 	}, {
+		key: 'openWP',
+		value: function openWP() {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LANGUAGE, _ServiceMeta2.default.STORAGEKEYS.SHOWWP], function (storage) {
+				var welcomeStorage = storage[_ServiceMeta2.default.STORAGEKEYS.SHOWWP];
+				if (welcomeStorage !== "installed") return;
+				var lang = storage[_ServiceMeta2.default.STORAGEKEYS.LANGUAGE];
+				chrome.runtime.getPlatformInfo(function (platformInfo) {
+
+					var parameter = Object.assign({
+						os: platformInfo && platformInfo.os ? platformInfo.os : "-",
+						lang: lang ? lang : '-'
+					}, _this.metaData());
+
+					_this.request(_endpoints2.default.WP, 'POST', parameter, function (response) {
+						if (_Utils2.default.isResponse200(response)) {
+							if (response.hasOwnProperty("wp")) {
+								chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.SHOWWP, "done"), function () {
+									_Utils2.default.openNewTab(response.wp);
+								});
+							}
+						}
+					}, true, true);
+				});
+			});
+		}
+	}, {
 		key: 'request',
 		value: function request(endpoint, method, parameter, callback, ignoreFail, isApi2) {
 			var _this = this;
 
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.BASELINKTYPE, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS], function (storage) {
-
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.BASELINKTYPE, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS, _ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+				var userData = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
 				var isTier = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINKTYPE] === "tier" ? true : false;
 				var timeOutSettings = storage[_ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS];
 				var timeout = _constants2.default["mainbase_api_timeout"];
@@ -1540,6 +1732,10 @@ var Api = function () {
 
 				if (method == "POST" && parameter && !isApi2) parameter.base = Baselink;
 
+				if (userData && _Utils2.default.isObject(userData) && userData.hasOwnProperty("uid") && method == "POST") {
+					parameter.uid = userData.uid;
+				}
+
 				var secretKey = _Utils2.default.randomString(Math.round(3 + Math.random() * 61));
 
 				xhr.open(method, requestUrl, true);
@@ -1548,23 +1744,18 @@ var Api = function () {
 
 				xhr.timeout = timeout;
 
-				console.log("API REQUEST: ", requestUrl);
-				console.log("API REQUEST PARAMS: ", parameter);
-
 				var epost = btoa(_Utils2.default.xor_string(_Utils2.default.toqs(parameter), secretKey));
-				console.log("epost", epost);
-				console.log("secretKey", secretKey);
+
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState == 4) {
 						if (xhr.status == 200) {
 							var result = "";
 							try {
 								var decrypted = _Utils2.default.xor_string(_Utils2.default.b64_to_utf8(xhr.responseText), secretKey);
-								console.log("decrypted", decrypted);
+
 								result = JSON.parse(decrypted);
-								console.log("result", result);
 							} catch (e) {
-								console.log(e);
+
 								result = "";
 							}
 
@@ -1606,7 +1797,7 @@ var Api = function () {
 		value: function popupCallback(port, requestId, method) {
 
 			return function (data) {
-				console.log("popupCallback");
+
 				port.postMessage({ response: method, requestId: requestId, data: data });
 			};
 		}
@@ -1660,11 +1851,11 @@ var Api = function () {
 				case "getClientVersionStatus":
 					this.getClientVersionStatus(this.popupCallback(port, requestId, method), data);
 					break;
-				case "createAuthcode":
-					this.createAuthcode(this.popupCallback(port, requestId, method), data);
+				case "registerAccount":
+					this.registerAccount(this.popupCallback(port, requestId, method), data);
 					break;
 				default:
-					console.log("API method not handled in popupMessageHandler");
+
 					this.popupCallback(port, requestId, method)("");
 			}
 		}
@@ -1816,7 +2007,7 @@ var Extension = function () {
 		key: 'onPermissionAdded',
 		value: function onPermissionAdded(change) {
 			var _this = this;
-			console.log("permissiong added", change);
+
 			if (change && change.origins && change.origins.indexOf('<all_urls>') > -1) {
 				_this.permissionChangeSubscribers.forEach(function (changeSubscriber) {
 					changeSubscriber(true);
@@ -1828,7 +2019,7 @@ var Extension = function () {
 		key: 'onPermissionRemoved',
 		value: function onPermissionRemoved(change) {
 			var _this = this;
-			console.log("permissiong removed", change);
+
 			if (change && change.origins && change.origins.indexOf('<all_urls>') > -1) {
 				_this.permissionChangeSubscribers.forEach(function (changeSubscriber) {
 					changeSubscriber(false);
@@ -1856,47 +2047,6 @@ var Extension = function () {
 		key: 'setInstallId',
 		value: function setInstallId() {
 			var _this = this;
-			_Utils2.default.setInstallId().then(function (installid) {
-				_this.getWelcomePage({ iid: installid }).then(function (welcomePage) {
-					_Utils2.default.openNewTab(welcomePage);
-				}).catch(function (e) {
-					console.log(e);
-				});;
-			}).catch(function (e) {
-				console.log(e);
-			});;
-		}
-	}, {
-		key: 'getWelcomePage',
-		value: function getWelcomePage(data) {
-			console.log("getting welcome page");
-			return new Promise(function (resolve, reject) {
-				var welcomePagePingEndpoint = "https://welcomepage.org/ping/" + _ServiceMeta2.default.SHORTNAME;
-
-				var parameter = "?lang=" + _ServiceMeta2.default.BROWSERLANG + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase();
-
-				welcomePagePingEndpoint = welcomePagePingEndpoint + parameter;
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', welcomePagePingEndpoint, true);
-				xhr.timeout = 10000;
-				console.log('welcome url', welcomePagePingEndpoint);
-				xhr.onreadystatechange = function () {
-					if (xhr.readyState == 4) {
-						if (xhr.status == 200) {
-							var result = "";
-							try {
-								result = JSON.parse(xhr.responseText);
-							} catch (e) {}
-							console.log("result", result);
-							if (result && result != "" && result.retcode === 200 && result.msg === "pong" && result.open) return resolve(result.open);
-							return reject();
-						} else {
-							return reject();
-						}
-					}
-				};
-				xhr.send();
-			});
 		}
 
 		/* Events */
@@ -1910,7 +2060,7 @@ var Extension = function () {
 		key: 'onInstalled',
 		value: function onInstalled(details) {
 			if (details && details.reason) {
-				console.log("onInstalled", details.reason);
+
 				if (details.reason == 'install') this.setInstallId();
 				if (details.reason == 'update') {
 					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.DCACHE, _ServiceMeta2.default.STORAGEKEYS.ECACHE, _ServiceMeta2.default.STORAGEKEYS.ERRCACHE, _ServiceMeta2.default.STORAGEKEYS.HASHCACHE, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUS, _ServiceMeta2.default.STORAGEKEYS.VERSIONSTATUSNEXTUPDATE]);
@@ -2084,7 +2234,6 @@ var TokenWatcher = function () {
 
 			if (!chrome.webRequest.onBeforeSendHeaders.hasListener(_this.onBeforeSendHeaders)) {
 				chrome.webRequest.onBeforeSendHeaders.addListener(_this.onBeforeSendHeaders, { urls: ["<all_urls>"] });
-				console.log("TokenWatcher.onBeforeSendHeaders registered");
 			}
 		}
 	}, {
@@ -2092,7 +2241,6 @@ var TokenWatcher = function () {
 		value: function removeListeners() {
 			var _this = this;
 			chrome.webRequest.onBeforeSendHeaders.removeListener(_this.onBeforeSendHeaders);
-			console.log("TokenWatcher.onBeforeSendHeaders removed");
 		}
 	}, {
 		key: 'init',
@@ -2108,6 +2256,15 @@ var TokenWatcher = function () {
 			this.identifyLink = "";
 			this.nextEnteringKill = false;
 		}
+	}, {
+		key: 'generateIdentifier',
+		value: function generateIdentifier(proxy) {
+			var _this = this;
+
+			_this.identifierDomain = proxy.Host;
+			_this.identifierLink = "https://" + proxy.Host + "/" + _Utils2.default.generateIdentifierDomain() + "/";
+			if (_this.uid) _this.identifierLink = _this.identifierLink + _this.uid;
+		}
 
 		/* Actions */
 
@@ -2116,16 +2273,19 @@ var TokenWatcher = function () {
 		value: function startIdentifyRequest() {
 			var _this = this;
 
-			chrome.storage.local.get([], function (storage) {
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY], function (storage) {
 
-				var verifyLink = "http://" + _Utils2.default.generateIdentifierDomain() + "/";
+				var currentProxy = storage[_ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY];
+				if (!currentProxy || !_Utils2.default.isObject(currentProxy) || !currentProxy.Host) {
+					_this.closeAllCallbacks();
+				}
+				var verifyLink = "https://" + currentProxy.Host + "/" + _Utils2.default.generateIdentifierDomain() + "/";
 
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', verifyLink, true);
 
 				xhr.timeout = 10000;
 
-				console.log("TokenWatcher verify starting request ", verifyLink);
 				xhr.onreadystatechange = function () {
 
 					// If the request completed
@@ -2133,7 +2293,7 @@ var TokenWatcher = function () {
 						var result = xhr.responseText;
 
 						//console.log(result);
-						if (result.indexOf(verifyLink) != -1 && result.indexOf("ERR_DNS_FAIL") != -1) {
+						if (result && result.indexOf("ERR_INVALID_URL") != -1) {
 
 							_this.tokenSuccess();
 						} else {
@@ -2159,8 +2319,6 @@ var TokenWatcher = function () {
 
 				_this.setCacheUsed(true);
 
-				console.log("USE CACHED TOKEN");
-
 				resolve({
 					authCredentials: {
 						username: storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].p_login ? storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].p_login : '',
@@ -2185,8 +2343,6 @@ var TokenWatcher = function () {
 				_Api2.default.login(function (response) {
 
 					if (_Utils2.default.isResponse200(response)) {
-
-						console.log("USE NEW TOKEN", response.config.p_login, response.config.p_token);
 
 						resolve({
 							authCredentials: {
@@ -2218,8 +2374,6 @@ var TokenWatcher = function () {
 			var _this = this;
 
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-
-				console.log("TOKEN SUCCESS");
 
 				for (var i = 0; i < _this.pendingRequest.length; i++) {
 					_this.pendingRequest[i]({
@@ -2301,7 +2455,7 @@ var TokenWatcher = function () {
 		key: 'setPendingRequest',
 		value: function setPendingRequest(request) {
 			var _this = this;
-			console.log("setPendingRequest", _this.pendingRequest);
+
 			_this.pendingRequest.push(request);
 		}
 	}, {
@@ -2373,7 +2527,7 @@ var TokenWatcher = function () {
 			var _this = this;
 
 			if (_this.isRunning() && details.url.indexOf(_this.getIdentifyLink()) != -1 && _this.isIdentifyRunning()) {
-				console.log("onBeforeSendHeaders SET IDENTIFY ID");
+
 				_this.setIdentifyId(details.requestId);
 			}
 		}
@@ -2519,20 +2673,21 @@ exports.default = {
 	TICKETTOKEN: '/api/misc/persist',
 	REST: '/api',
 	REST2: '/api2',
-	FORGOTPASS: '/api/user/forgotpassword',
+	FORGOTPASS: '/api2/user/forgotpassword',
 	PRODUCTS: '/api2/i/p',
 	PROFILE: '/api/user/profile',
 	AUTOPROXY: '/api2/m/debug',
 	FEEDBACK: '/api2/m/feedback',
 	NOTIFICATION: '/api/user/profile/notification',
-	SUPPORT: '/support',
+	SUPPORT: '/api2/pub/clientsupport',
 	DISCONNECTS: '/api/misc/disconnects',
 	RESENDACTIVATION: '/api/user/activation/resend',
 	CLOSEACCOUNT: '/api2/user/closeaccount',
 	TRIAL: '/api2/user/trial',
 	CLIENTUPDATES: '/api2/cu',
-	CREATEAUTHCODE: '/api2/r6',
-	LOGINAUTHCODE: '/api2/c/2'
+	REGISTER: '/api2/r/email',
+	LOGINAUTHCODE: '/api2/c/2',
+	WP: '/api2/wp'
 };
 
 /***/ }),
@@ -2587,8 +2742,6 @@ var ProxySetting = function () {
 		key: 'clearSettings',
 		value: function clearSettings(callback) {
 
-			console.log("Clearing proxy settings");
-
 			_ConnectionWatcher2.default.stopSession();
 
 			_TokenWatcher2.default.clearTokenWatcher();
@@ -2614,7 +2767,6 @@ var ProxySetting = function () {
 			var _this = this;
 
 			var changedItems = Object.keys(changes);
-			console.log("changedItems", changedItems);
 
 			if (changedItems.indexOf(_ServiceMeta2.default.STORAGEKEYS.ISPROXYON) === -1) return;
 
@@ -2645,7 +2797,7 @@ var ProxySetting = function () {
 					this.clearSettings(this.popupCallback(port, requestId, method));
 					break;
 				default:
-					console.log("ProxySetting method not handled in popupMessageHandler");
+
 					this.popupCallback(port, requestId, method)("");
 			}
 		}
@@ -2800,13 +2952,12 @@ var Globals = function () {
   }
 
   _createClass(Globals, [{
-    key: "set",
+    key: 'set',
     value: function set(key, value) {
       this.values[key] = value;
-      console.log("bg.Globals.set", this.values);
     }
   }, {
-    key: "get",
+    key: 'get',
     value: function get(key) {
       return this.values.hasOwnProperty(key) ? this.values[key] : false;
     }
@@ -2922,11 +3073,11 @@ var BaseFinder = function () {
 		value: function validateStorageServersJson(storageServersJson) {
 			var _this = this;
 			if (storageServersJson) {
-				console.log("Servers json from STORAGE");
+
 				return storageServersJson;
 			} else {
 				//Api.getTier();
-				console.log("Servers json from FILE");
+
 				return _this.loadJsonFile();
 			}
 		}
@@ -2964,7 +3115,6 @@ var BaseFinder = function () {
 				}
 
 				_this.currentFound = storage[_ServiceMeta2.default.STORAGEKEYS.LASTBASELINK];
-				console.log("current found", _this.currentFound);
 
 				if (_this.worker.length == 0) {
 					var debugVal = storage[_ServiceMeta2.default.STORAGEKEYS.DEBUGVAL];
@@ -3007,7 +3157,6 @@ var BaseFinder = function () {
 	}, {
 		key: 'startMainSearch',
 		value: function startMainSearch() {
-			console.log("starting search");
 
 			var _this = this;
 			var n;
@@ -3117,7 +3266,6 @@ var BaseFinder = function () {
 		key: 'onTierWorkerDone',
 		value: function onTierWorkerDone(baselink, isWorking) {
 			var _this = this;
-			console.log("baselink: " + baselink + " isWorking " + isWorking);
 
 			++_this.progressCurrent;
 			_this.onProgress(_this);
@@ -3139,7 +3287,6 @@ var BaseFinder = function () {
 
 			chrome.storage.local.set(workingURLobj, function () {
 				_this.onFound(true);
-				console.log(workingURLobj);
 			});
 		}
 	}, {
@@ -3157,9 +3304,9 @@ var BaseFinder = function () {
 		key: 'onFound',
 		value: function onFound(isTier) {
 			var _this = this;
-			console.log("Baselink found", isTier);
 
 			// Get new tiers after a tier is baselink is found
+			_Api2.default.openWP();
 			_Api2.default.getTier();
 			_Api2.default.getClientVersionStatus();
 
@@ -3173,7 +3320,6 @@ var BaseFinder = function () {
 		key: 'onNotFound',
 		value: function onNotFound(isTier) {
 			var _this = this;
-			console.log("Baselink not found");
 
 			chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.BASELINKNOTFOUND, true));
 			if (_this.searchPort) _this.searchPort.postMessage({ action: 'failed' });
@@ -3188,7 +3334,6 @@ var BaseFinder = function () {
 			var _this = t;
 
 			var progress = "Progress " + _this.progressCurrent + " / " + _this.progressEnd;
-			console.log("Progress", progress);
 
 			if (_this.searchPort && _this.isSecondRunning) _this.searchPort.postMessage({ action: "progress", data: progress });
 		}
@@ -3214,9 +3359,11 @@ var BaseFinder = function () {
 						}
 
 						if (serversJson) {
-							chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.SERVERSJSON, serversJson));
+							var _chrome$storage$local2;
+
+							var bypassHosts = _Utils2.default.genBypassList(serversJson);
 							var timeOutSettings = _Utils2.default.getTimeoutSettings(_this.serversJson);
-							chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS, timeOutSettings));
+							chrome.storage.local.set((_chrome$storage$local2 = {}, _defineProperty(_chrome$storage$local2, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS, timeOutSettings), _defineProperty(_chrome$storage$local2, _ServiceMeta2.default.STORAGEKEYS.SERVERSJSON, serversJson), _defineProperty(_chrome$storage$local2, _ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS, bypassHosts), _chrome$storage$local2));
 						}
 
 						resolve(serversJson);
@@ -3242,7 +3389,7 @@ var BaseFinder = function () {
 					port.postMessage({ response: method, requestId: requestId, data: "abortAll" });
 					break;
 				default:
-					console.log("Basefinder method not handled in popupMessageHandler");
+
 					break;
 			}
 		}
@@ -3270,7 +3417,6 @@ var BaseFinder = function () {
 					if (!baselink) return;
 
 					_this.loadJsonFile().then(function (serversJson) {
-						console.log("baselink from previous version", baselink, serversJson);
 
 						if (serversJson["mainbase"].indexOf(baselink) === -1 && serversJson["tierbase"].indexOf(baselink) === -1) {
 							chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function () {
@@ -3292,6 +3438,12 @@ var BaseFinder = function () {
 				} else {
 					chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.SERVERSJSON);
 				}
+			}
+
+			if (details && details.reason && details.reason == 'install') {
+				chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.SHOWWP, "installed"), function () {
+					_this.init();
+				});
 			}
 		}
 	}]);
@@ -3776,7 +3928,7 @@ var Management = function () {
 
 					for (var i = 0; i < listOfExtensions.length; i++) {
 						if (listOfExtensions[i].enabled === true && listOfExtensions[i].id == extensionId) {
-							console.log("ext is active", listOfExtensions[i]);
+
 							return resolve(true);
 						}
 					};
@@ -3825,7 +3977,7 @@ var Management = function () {
 			return new Promise(function (resolve, reject) {
 
 				function listCallback(listOfExtensions) {
-					console.log("listOfExtensions", listOfExtensions);
+
 					var extWithProxy = [];
 
 					for (var i = 0; i < listOfExtensions.length; i++) {
@@ -3860,7 +4012,7 @@ var Management = function () {
 					_this.cacheExtWithProxyPerm(_this.popupCallback(port, requestId, method));
 					break;
 				default:
-					console.log("Notification method not handled in popupMessageHandler");
+
 					break;
 			}
 		}
@@ -3933,13 +4085,13 @@ var ProxyIdentifier = function () {
         value: function identify(identifierLink, callback) {
             var _this = this;
 
-            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS], function (storage) {
+            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS], function (storage) {
                 var timeOutSettings = storage[_ServiceMeta2.default.STORAGEKEYS.TIMEOUTSETTINGS];
-                var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+
                 var searchTimeout = timeOutSettings && _Utils2.default.isTimeoutSettingValid(timeOutSettings["proxy_search_timeout"]) ? timeOutSettings["proxy_search_timeout"] : _constants2.default["proxy_search_timeout"];
 
                 if (_this.xhr !== undefined) {
-                    console.log("aborting");
+
                     _this.xhr.abort();
                 }
 
@@ -3952,8 +4104,6 @@ var ProxyIdentifier = function () {
 
                 _this.xhr.timeout = searchTimeout;
 
-                console.log("searchtimeout", _this.xhr.timeout);
-
                 _this.xhr.onreadystatechange = function () {
 
                     // If the request completed
@@ -3962,10 +4112,11 @@ var ProxyIdentifier = function () {
                         //console.log(result);
 
 
-                        if (result && result.indexOf(_this.identifierLink) != -1 && result.indexOf("ERR_DNS_FAIL") != -1) {
+                        if (result && result.indexOf("ERR_INVALID_URL") != -1) {
                             _TokenWatcher2.default.tokenSuccess();
                             callback(true);
                         } else {
+                            _TokenWatcher2.default.init();
                             callback(false);
                         }
                     }
@@ -4127,7 +4278,7 @@ var BackgroundHandler = function () {
             switch (message.request) {
                 case "api":
                     _Api2.default.popupMessageHandler(this.port, message.requestId, message.method, message.data);
-                    console.log("API request " + message.requestId + " method: " + message.method);
+
                     break;
                 case "baseFinder":
                     _BaseFinder2.default.popupMessageHandler(this.port, message.requestId, message.method, message.data);
@@ -4151,7 +4302,7 @@ var BackgroundHandler = function () {
                     _ConfigUpdater2.default.popupMessageHandler(this.port, message.requestId, message.method, message.data, message.request, message.isEvent);
                     break;
                 default:
-                    console.log("BackgroundPagePort: Unable to process request");
+
             }
         }
     }]);
@@ -4307,17 +4458,22 @@ var Ping = function () {
 
 			var _this = this;
 			if (!this.xhr) return;
-			_Utils2.default.getOS().then(function (os) {
-				var parameter = {
-					cv: _ServiceMeta2.default.VERSION,
-					platform: _ServiceMeta2.default.PLATFORM.toLowerCase(),
-					brand: _ServiceMeta2.default.SHORTNAME.toLowerCase(),
-					os: os
-				};
-				console.log("ping params", parameter);
-				console.log("secretKey", _this.secretKey);
-				var epost = btoa(_Utils2.default.xor_string(_Utils2.default.toqs(parameter), _this.secretKey));
-				_this2.xhr.send(epost);
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+				var userData = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+				_Utils2.default.getOS().then(function (os) {
+					var parameter = {
+						cv: _ServiceMeta2.default.VERSION,
+						platform: _ServiceMeta2.default.PLATFORM.toLowerCase(),
+						brand: _ServiceMeta2.default.SHORTNAME.toLowerCase(),
+						os: os
+					};
+					if (userData && _Utils2.default.isObject(userData) && userData.uid) {
+						parameter.uid = userData.uid;
+					}
+
+					var epost = btoa(_Utils2.default.xor_string(_Utils2.default.toqs(parameter), _this.secretKey));
+					_this2.xhr.send(epost);
+				});
 			});
 		}
 	}, {
@@ -4485,11 +4641,12 @@ var ProxyApi = function () {
 
 			return new Promise(function (resolve, reject) {
 
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.BYPASSLIST, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.BYPASSLIST, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, _ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS], function (storage) {
 
 					var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
 					var uid = configData && configData.uid ? configData.uid : "";
 					var customBypassData = storage[_ServiceMeta2.default.STORAGEKEYS.BYPASSLIST];
+					var bypassHosts = storage[_ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS];
 
 					var currentBaselinkProtocolStripped = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK].replace("http://", "").replace("https://", "");
 					var currentBaselink = currentBaselinkProtocolStripped.substr(0, currentBaselinkProtocolStripped.indexOf('/'));
@@ -4506,7 +4663,11 @@ var ProxyApi = function () {
 					if (_Utils2.default.isUserPremium(configData)) customBypassList = customBypassData && customBypassData[uid] ? customBypassData[uid] : [];
 
 					byPassList = byPassList.concat(_bypasslist2.default, customBypassList);
-					console.log("this is byPassList", byPassList);
+
+					if (bypassHosts && Array.isArray(bypassHosts)) {
+						byPassList = byPassList.concat(bypassHosts);
+					}
+
 					resolve({
 						singleProxy: {
 							scheme: proxy.Scheme ? proxy.Scheme.toLowerCase() : "https",
@@ -4560,17 +4721,13 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
 var _localhosts = __webpack_require__(16);
 
 var _localhosts2 = _interopRequireDefault(_localhosts);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ["checkout.stripe.com", _ServiceMeta2.default.BASEDOMAIN, _ServiceMeta2.default.BACKUPBASEDOMAIN].concat(_localhosts2.default);
+exports.default = ["checkout.stripe.com"].concat(_localhosts2.default);
 
 /***/ }),
 /* 28 */
@@ -7035,12 +7192,10 @@ var ConnectionWatcher = function () {
 
 			if (!chrome.webRequest.onCompleted.hasListener(_this.onRequestCompleted)) {
 				chrome.webRequest.onCompleted.addListener(_this.onRequestCompleted, { urls: ["<all_urls>"] }, ["responseHeaders"]);
-				console.log("ConnectionWatcher.onCompleted registered");
 			}
 
 			if (!chrome.webRequest.onErrorOccurred.hasListener(_this.onRequestError)) {
 				chrome.webRequest.onErrorOccurred.addListener(_this.onRequestError, { urls: ["<all_urls>"] });
-				console.log("ConnectionWatcher.onRequestError registered");
 			}
 		}
 	}, {
@@ -7049,9 +7204,8 @@ var ConnectionWatcher = function () {
 			var _this = this;
 
 			chrome.webRequest.onCompleted.removeListener(_this.onRequestCompleted);
-			console.log("ConnectionWatcher.onCompleted removed");
+
 			chrome.webRequest.onErrorOccurred.removeListener(_this.onRequestError);
-			console.log("ConnectionWatcher.onRequestError removed");
 		}
 	}, {
 		key: 'init',
@@ -7077,8 +7231,6 @@ var ConnectionWatcher = function () {
 		value: function startSession(proxy) {
 			var _this = this;
 
-			console.log("ConnectionWatcher STARTED");
-
 			_this.init();
 			_this.isRunning = true;
 			_this.startTime = Date.now();
@@ -7089,7 +7241,6 @@ var ConnectionWatcher = function () {
 		value: function stopSession() {
 			var _this = this;
 
-			console.log("ConnectionWatcher STOPPED");
 			_this.abortRemainingRequests();
 			_this.init();
 		}
@@ -7103,16 +7254,14 @@ var ConnectionWatcher = function () {
 			if (_this.numberOfAllowedFails == _this.numberOfCurrentFails) {
 				_ProxySetting2.default.clearSettings();
 			}
-
-			console.log("[-] add helper request fail");
 		}
 	}, {
 		key: 'generateRescueURL',
-		value: function generateRescueURL() {
+		value: function generateRescueURL(currentProxy) {
 			var _this = this;
 
 			for (var i = 0; i < _this.numberOfAllowedFails; i++) {
-				_this.rescueURL[i] = "http://" + _Utils2.default.generateIdentifierDomain();
+				_this.rescueURL[i] = "https://" + currentProxy.Host + "/" + _Utils2.default.generateIdentifierDomain() + "/";
 			};
 		}
 	}, {
@@ -7126,10 +7275,10 @@ var ConnectionWatcher = function () {
 				if (_this.nRequest[i].readyState === 4) {
 					var result = _this.nRequest[i].responseText;
 
-					if (result.indexOf(i) != -1 && result.indexOf("ERR_DNS_FAIL") != -1) {
+					if (result && result.indexOf("ERR_INVALID_URL") != -1) {
 						window.clearInterval(intervalListener);
 						_this.abortRemainingRequests();
-						console.log("[Y] helper requests rescued us");
+
 						_this.lastError = 0;
 						_this.lastSuccess = 0;
 						_this.isPendingUnset = false;
@@ -7147,26 +7296,29 @@ var ConnectionWatcher = function () {
 		value: function startRescueRequest(currentProxy) {
 			var _this = this;
 
-			_this.numberOfCurrentFails = 0;
-			_this.rescueURL = [];
-			_this.nRequest = [];
-
-			_this.generateRescueURL();
-
-			console.log("_this.rescueURL", _this.rescueURL);
-
-			var intervalListener = setInterval(func.bind(this), 1000);
-
-			function func() {
-				console.log("INVERVAL IS RUNNING");
-				var _this = this;
-				if (_this.rescueURL.length > 0) {
-					var next = _this.rescueURL.pop();
-					_this.request(next, intervalListener, currentProxy);
-				} else {
-					window.clearInterval(intervalListener);
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY], function (storage) {
+				var currentProxy = storage[_ServiceMeta2.default.STORAGEKEYS.CURRENTPROXY];
+				if (!currentProxy || !_Utils2.default.isObject(currentProxy) || !currentProxy.Host) {
+					return;
 				}
-			};
+				_this.numberOfCurrentFails = 0;
+				_this.rescueURL = [];
+				_this.nRequest = [];
+
+				_this.generateRescueURL(currentProxy);
+
+				var intervalListener = setInterval(func.bind(this), 1000);
+
+				function func() {
+
+					if (_this.rescueURL.length > 0) {
+						var next = _this.rescueURL.pop();
+						_this.request(next, intervalListener, currentProxy);
+					} else {
+						window.clearInterval(intervalListener);
+					}
+				};
+			});
 		}
 	}, {
 		key: 'setPendingUnset',
@@ -7178,7 +7330,6 @@ var ConnectionWatcher = function () {
 			setTimeout(function () {
 
 				var isGood = _this.lastError - _this.lastSuccess < 0 ? "we are good" : "start help requests";
-				console.log("[***********************]", isGood);
 
 				if (_this.isRunning && _this.lastError > _this.lastSuccess) {
 
@@ -7298,7 +7449,7 @@ var Notification = function () {
 					port.postMessage({ response: method, requestId: requestId, data: "onPopupOpened" });
 					break;
 				default:
-					console.log("Notification method not handled in popupMessageHandler");
+
 					break;
 			}
 		}
@@ -7329,13 +7480,7 @@ var Notification = function () {
 				var isNotificationOn = _this.getNotificationStateFromConfig(config);
 				var notifications = _this.getNotificationFromConfig(config);
 
-				console.log("isNotificationOn", isNotificationOn);
-				console.log("notifications", notifications);
-				console.log("config", config);
-
 				if (!isNotificationOn || !notifications) return console.log("Not on or not available");;
-
-				console.log("Notifications are on and available");
 
 				var notificationToShow = _this.getNewNotification(notifications, cachedNotifications);
 
@@ -7552,7 +7697,7 @@ var Bypasslist = function () {
 					_this.validate(_this.popupCallback(port, requestId, method), data);
 					break;
 				default:
-					console.log("Bypasslist method not handled in popupMessageHandler");
+
 					break;
 			}
 		}
@@ -7695,7 +7840,7 @@ var PermissionController = function () {
           this.registerView(this.popupCallback(port, requestId, method, targetApi, isEvent), port);
           break;
         default:
-          console.log("PermissionController method not handled in popupMessageHandler");
+
           this.popupCallback(port, requestId, method)("");
       }
     }
@@ -7827,7 +7972,7 @@ var ConfigUpdater = function () {
           this.setRefreshList(this.popupCallback(port, requestId, method), data);
           break;
         default:
-          console.log("ProxySetting method not handled in popupMessageHandler");
+
           this.popupCallback(port, requestId, method)("");
       }
     }
@@ -7983,7 +8128,6 @@ var ProxyFinder = function () {
 		key: 'init',
 		value: function init() {
 			var _this = this;
-			console.log("ProxyFinder: INIT");
 
 			_this.isActive = false;
 			_this.serverList = [];
@@ -8016,18 +8160,17 @@ var ProxyFinder = function () {
 		value: function connectPort(Port) {
 			var _this = this;
 
-			console.log("ProxyFinder port CONNECTED");
-
 			_this.Port = Port;
 			_this.Port.onMessage.addListener(_this.onPortMessage.bind(this));
 			_this.Port.onDisconnect.addListener(_this.onPortDisconnect.bind(this));
 		}
 	}, {
 		key: 'generateIdentifier',
-		value: function generateIdentifier() {
+		value: function generateIdentifier(proxy) {
 			var _this = this;
-			_this.identifierDomain = _Utils2.default.generateIdentifierDomain();
-			_this.identifierLink = "http://" + _this.identifierDomain + "/";
+
+			_this.identifierDomain = proxy.Host;
+			_this.identifierLink = "https://" + proxy.Host + "/" + _Utils2.default.generateIdentifierDomain() + "/";
 			if (_this.uid) _this.identifierLink = _this.identifierLink + _this.uid;
 		}
 
@@ -8039,22 +8182,20 @@ var ProxyFinder = function () {
 			var _this = this;
 			chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK, true), function () {
 				_this.resetAll();
-				console.log("PROXYSEARCHLOCK is set");
-				console.log("Starting search with data", searchData);
 
 				_this.randomSelectedServer = searchData.randomSelectedServer ? searchData.randomSelectedServer : [];
 				_this.serverList = searchData.serverList ? searchData.serverList : [];
 				_this.serverListCount = _this.serverList.length + 1;
 				_this.uid = searchData.uid;
+				_this.batch_size = searchData.batch_size;
 
 				if (_this.randomSelectedServer.length > 0) {
 					_this.sessionCountry = _this.randomSelectedServer[0].CountryCode ? _this.randomSelectedServer[0].CountryCode : null;
 					_this.sessionType = _this.randomSelectedServer[0].Type;
-					console.log("search type and country", _this.sessionCountry, _this.sessionType);
 				}
 
-				if (_this.serverList.length < 9) {
-					console.log("Session: not enough servers");
+				if (_this.serverListCount < searchData.batch_size) {
+
 					_this.finishSession();
 				}
 
@@ -8065,11 +8206,10 @@ var ProxyFinder = function () {
 		key: 'getSessionPage',
 		value: function getSessionPage() {
 			var _this = this;
-
 			if (!_this.sessionRunning && _this.sessionCountry && (_this.sessionType == 0 || _this.sessionType == 1)) {
 				_this.sessionRunning = true;
-
 				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.COUNTRYSESSIONSTATE], function (storage) {
+
 					var countrySessionState = storage[_ServiceMeta2.default.STORAGEKEYS.COUNTRYSESSIONSTATE] && _Utils2.default.isObject(storage[_ServiceMeta2.default.STORAGEKEYS.COUNTRYSESSIONSTATE]) ? storage[_ServiceMeta2.default.STORAGEKEYS.COUNTRYSESSIONSTATE] : {};
 
 					var countryKey = _this.sessionCountry + ":" + _this.sessionType;
@@ -8080,8 +8220,6 @@ var ProxyFinder = function () {
 						return;
 					}
 					_this.startSessionRequest({ cc: _this.sessionCountry, type: _this.sessionType }).then(function (response) {
-
-						console.log("session page", response);
 
 						if (_Utils2.default.isResponse200(response) && _Utils2.default.isObject(response.servers)) {
 							chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
@@ -8095,33 +8233,31 @@ var ProxyFinder = function () {
 
 									servers[_this.sessionCountry] = Object.assign(servers[_this.sessionCountry], response.servers);
 
-									console.log("count of servers", _this.getValidServersLeft(response), response);
 									if (_this.isFirstSessionRequestDone == null) {
 										if (_this.getValidServersLeft(response) > 0) _this.serverListCount = _this.serverListCount + _this.getValidServersLeft(response);
 										if (Object.keys(response.servers).length > 0) _this.serverListCount = _this.serverListCount + Object.keys(response.servers).length;
-										console.log("updating server count", _this.serverListCount);
+
 										_this.isFirstSessionRequestDone = true;
 									}
 
 									if (!config.hasOwnProperty("servers")) config.servers = {};
 									config.servers = servers;
 
-									if (!response.hasOwnProperty("servers_left") || _Utils2.default.isInt(response["servers_left"]) && response["servers_left"] === 0) {
+									if (!response.hasOwnProperty("servers_left") || _Utils2.default.isInt(response["servers_left"]) && response["servers_left"] <= 0) {
 										countrySessionState[countryKey] = true;
 									}
 
 									chrome.storage.local.set((_chrome$storage$local2 = {}, _defineProperty(_chrome$storage$local2, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA, config), _defineProperty(_chrome$storage$local2, _ServiceMeta2.default.STORAGEKEYS.COUNTRYSESSIONSTATE, countrySessionState), _chrome$storage$local2), function () {
-										if (!response.hasOwnProperty("servers_left") || _Utils2.default.isInt(response["servers_left"]) && response["servers_left"] === 0) {
+										if (!response.hasOwnProperty("servers_left") || _Utils2.default.isInt(response["servers_left"]) && response["servers_left"] <= 0) {
 											_this.finishSession();
 										}
 										_this.sessionRunning = false;
-										console.log("new config", response.servers);
 										console.log("legacy format", _this.generateLegacyFormat(response.servers, _this.sessionCountry));
 										var servers = _this.generateLegacyFormat(response.servers, _this.sessionCountry);
 										var newlist = _this.serverList.concat(servers);
 										_this.serverList = newlist;
-										if (_this.isActive == true && _this.serverList.length > 0) _this.searchNext();
-										console.log("NEW serverlist length", _this.serverList);
+
+										if (_this.isActive == true) _this.searchNext();
 									});
 								} else {
 									_this.sessionRunning = false;
@@ -8165,7 +8301,7 @@ var ProxyFinder = function () {
 			var legacyList = [];
 
 			if (_Utils2.default.isObject(serverListByCountry)) {
-				console.log("serverListByCountry", serverListByCountry);
+
 				Object.keys(serverListByCountry).forEach(function (serverId) {
 					var server = serverListByCountry[serverId];
 
@@ -8182,7 +8318,6 @@ var ProxyFinder = function () {
 							var fixedPort = _this.fixPortByScheme(serverUri.port, serverUri.protocol);
 							var scheme = serverUri.protocol.replace(":", "");
 							if (fixedPort !== null) {
-								console.log("serverUri.hostname", serverUri.hostname);
 
 								var newServerItem = {
 									"Host": serverUri.hostname,
@@ -8207,7 +8342,6 @@ var ProxyFinder = function () {
 		value: function finishSession() {
 			var _this = this;
 			_this.sessionFinished = true;
-			console.log("Session finished");
 		}
 	}, {
 		key: 'stopSessionRequest',
@@ -8263,9 +8397,7 @@ var ProxyFinder = function () {
 									var result = null;
 									try {
 										var decrypted = _Utils2.default.xor_string(_Utils2.default.b64_to_utf8(_this.sessionXhr.responseText), secretKey);
-										console.log("decrypted", decrypted);
 										result = JSON.parse(decrypted);
-										console.log("result", result);
 
 										return resolve(result);
 									} catch (e) {
@@ -8291,7 +8423,7 @@ var ProxyFinder = function () {
 			_Extension2.default.isPermissionValid().then(function (isValid) {
 				if (isValid === false) {
 					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK], function () {
-						console.log("Starting next proxy but permission is not valid");
+
 						_this.resetAll();
 					});
 				} else {
@@ -8328,7 +8460,12 @@ var ProxyFinder = function () {
 							if (_this.sessionRunning) {
 								_this.isActive = true;
 							} else {
-								_this.searchFailed(_this.currentServer.Country);
+								if (!_this.sessionFinished && _this.batch_size <= 3) {
+									_this.isActive = true;
+									_this.getSessionPage();
+								} else {
+									_this.searchFailed(_this.currentServer.Country);
+								}
 							}
 						}
 					});
@@ -8342,7 +8479,7 @@ var ProxyFinder = function () {
 
 			if (!proxy) return callback(false);
 
-			_this.generateIdentifier();
+			_this.generateIdentifier(proxy);
 
 			var testPacData = {
 				proxy: proxy,
@@ -8350,7 +8487,6 @@ var ProxyFinder = function () {
 			};
 
 			_Proxy2.default.setTest(testPacData).then(function (test) {
-				console.log("TEST SET", test);
 
 				_ProxyIdentifier2.default.identify(_this.identifierLink, function (isSuccess) {
 
@@ -8362,8 +8498,6 @@ var ProxyFinder = function () {
 		key: 'searchSuccess',
 		value: function searchSuccess(proxy) {
 			var _this = this;
-
-			console.log("**SEARCH SUCCESS**");
 
 			_Extension2.default.isPermissionValid().then(function (isValid) {
 				_this.init();
@@ -8390,8 +8524,6 @@ var ProxyFinder = function () {
 
 								_Management2.default.cacheExtWithProxyPerm();
 
-								console.log("proxyset", proxySet);
-
 								if (_this.Port) _this.Port.postMessage({ action: "success" });
 							});
 						});
@@ -8407,8 +8539,6 @@ var ProxyFinder = function () {
 			var _this = this;
 
 			chrome.storage.local.set((_chrome$storage$local5 = {}, _defineProperty(_chrome$storage$local5, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHFAILED, true), _defineProperty(_chrome$storage$local5, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHFAILEDCOUNTRY, country), _defineProperty(_chrome$storage$local5, _ServiceMeta2.default.STORAGEKEYS.PROXYSEARCHLOCK, true), _chrome$storage$local5), function () {
-
-				console.log("ALL SERVERS FAILED");
 
 				_ProxySetting2.default.clearSettings();
 				_this.init();
@@ -8427,8 +8557,6 @@ var ProxyFinder = function () {
 				total: _this.serverListCount
 			};
 
-			console.log("UPDATING VIEW with data", data);
-
 			if (_this.Port) _this.Port.postMessage({ action: "update", data: data });
 		}
 	}, {
@@ -8446,7 +8574,7 @@ var ProxyFinder = function () {
 		value: function abortSearch() {
 
 			var _this = this;
-			console.log("###############ABORT################");
+
 			_this.sessionIsAbort = true;
 			_this.stopSessionRequest();
 			_this.abort = true;
@@ -8474,8 +8602,6 @@ var ProxyFinder = function () {
 		key: 'onPortDisconnect',
 		value: function onPortDisconnect() {
 			var _this = this;
-
-			console.log("ProxyFinder port DISCONNECTED");
 
 			_this.Port = false;
 		}
@@ -8621,17 +8747,14 @@ var Feedback = function () {
 
 			if (!chrome.webRequest.onErrorOccurred.hasListener(_this.onErrorOccurred)) {
 				chrome.webRequest.onErrorOccurred.addListener(_this.onErrorOccurred, { urls: ["<all_urls>"] });
-				console.log("Feedback.onErrorOccurred registered");
 			}
 
 			if (!chrome.webRequest.onSendHeaders.hasListener(_this.onSendHeaders)) {
 				chrome.webRequest.onSendHeaders.addListener(_this.onSendHeaders, { urls: ["<all_urls>"] }, ["requestHeaders"]);
-				console.log("Feedback.onSendHeaders registered");
 			}
 
 			if (!chrome.webRequest.onCompleted.hasListener(_this.onCompleted)) {
 				chrome.webRequest.onCompleted.addListener(_this.onCompleted, { urls: ["<all_urls>"] }, ["responseHeaders"]);
-				console.log("Feedback.onCompleted registered");
 			}
 		}
 	}, {
@@ -8639,11 +8762,9 @@ var Feedback = function () {
 		value: function removeListeners() {
 			var _this = this;
 			chrome.webRequest.onErrorOccurred.removeListener(_this.onErrorOccurred);
-			console.log("Feedback.onErrorOccurred removed");
 			chrome.webRequest.onSendHeaders.removeListener(_this.onSendHeaders);
-			console.log("Feedback.onSendHeaders removed");
+
 			chrome.webRequest.onCompleted.removeListener(_this.onCompleted);
-			console.log("Feedback.onCompleted removed");
 		}
 	}, {
 		key: 'onCompleted',
@@ -8713,7 +8834,6 @@ var Feedback = function () {
 				var configData = changes[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA].newValue;
 
 				if (configData && configData.hasOwnProperty('speedfeedback')) {
-					console.log("Speedfeedback set to ON");
 
 					_this.speedFeedback.isOn = true;
 
@@ -8723,7 +8843,7 @@ var Feedback = function () {
 						_this.speedFeedback.minSize = _this.DEFAULTSIZE;
 					}
 				} else {
-					console.log("Speedfeedback set to OFF");
+
 					_this.speedFeedback.isOn = false;
 				}
 			}
@@ -8745,7 +8865,7 @@ var Feedback = function () {
 			var _this = this;
 
 			if (details && details.url && details.error && details.url.match(_ServiceMeta2.default.TESTREQUESTREGEX) != null) {
-				console.log("MAPPING ERROR", details);
+
 				_this.mapError(details);
 			}
 		}
@@ -8811,8 +8931,6 @@ var Feedback = function () {
 				_this.speedBatch.current[serverId].speed.push(sVal);
 				_this.speedBatch.current[serverId].avgsize.push(sSize);
 			}
-
-			console.log("_this.speedBatch", _this.speedBatch.current);
 		}
 	}, {
 		key: 'moveCurrentSpeedBatchToPending',
@@ -8994,6 +9112,7 @@ var Feedback = function () {
 			if (_this.pendingBatches.length <= 0) return;
 
 			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
+				var _data;
 
 				var Baselink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK];
 
@@ -9006,21 +9125,18 @@ var Feedback = function () {
 
 				if (batch && batch.hasOwnProperty('speed')) paramKey = "speedfeedback";
 
-				var data = _defineProperty({}, paramKey, batchString);
+				var data = (_data = {}, _defineProperty(_data, paramKey, batchString), _defineProperty(_data, "uid", batch.uid), _data);
 
 				_Api2.default.sendFeedback(function (response) {
-					console.log("sendFeedback Response", response);
 
 					if (_Utils2.default.isResponse200(response)) {
-						console.log("Feedback success, send next batch");
+
 						_this.sendBatch();
 						return;
 					}
 
 					if (response === 0) {
 						_this.pendingBatches.push(batch);
-						console.log("current qeue", _this.pendingBatches);
-						console.log("Feedback failed, push back to qeue");
 					}
 				}, data);
 			});
@@ -9109,12 +9225,10 @@ var ProxyAuth = function () {
 			if (_ServiceMeta2.default.PLATFORM.toUpperCase() === "FIREFOX") {
 				if (!chrome.webRequest.onAuthRequired.hasListener(_this.onAuthFirefoxHandler)) {
 					chrome.webRequest.onAuthRequired.addListener(_this.onAuthFirefoxHandler, { urls: ["<all_urls>"] }, ["blocking"]);
-					console.log("ProxyAuth.onAuthFirefoxHandler registered");
 				}
 			} else {
 				if (!chrome.webRequest.onAuthRequired.hasListener(_this.onAuthChromeHandler)) {
 					chrome.webRequest.onAuthRequired.addListener(_this.onAuthChromeHandler, { urls: ["<all_urls>"] }, ["asyncBlocking"]);
-					console.log("ProxyAuth.onAuthChromeHandler registered");
 				}
 			}
 		}
@@ -9126,11 +9240,9 @@ var ProxyAuth = function () {
 			if (_ServiceMeta2.default.PLATFORM.toUpperCase() === "FIREFOX") {
 
 				chrome.webRequest.onAuthRequired.removeListener(_this.onAuthFirefoxHandler);
-				console.log("ProxyAuth.onAuthFirefoxHandler removed");
 			} else {
 
 				chrome.webRequest.onAuthRequired.removeListener(_this.onAuthChromeHandler);
-				console.log("ProxyAuth.onAuthChromeHandler removed");
 			}
 		}
 	}, {
@@ -9141,8 +9253,6 @@ var ProxyAuth = function () {
 				callback: callback
 			};
 
-			console.log("WE are using Chrome Handler for Auth", details);
-
 			// onAuth not from proxy
 			if (!details.isProxy) return callback();
 
@@ -9150,7 +9260,6 @@ var ProxyAuth = function () {
 
 				if (!_TokenWatcher2.default.isRunning()) {
 
-					console.log("init round");
 					// set request to work with
 					_TokenWatcher2.default.setRunning();
 
@@ -9216,7 +9325,6 @@ var ProxyAuth = function () {
 		key: 'onAuthFirefoxHandler',
 		value: function onAuthFirefoxHandler(request) {
 
-			console.log("WE are using Firefox Handler for Auth", request);
 			var _this = this;
 
 			if (!request.isProxy) return;
@@ -9441,7 +9549,6 @@ var AutoProxy = function () {
 
 			if (!chrome.webRequest.onErrorOccurred.hasListener(_this.onRequestError)) {
 				chrome.webRequest.onErrorOccurred.addListener(_this.onRequestError, { urls: ["<all_urls>"] });
-				console.log("AutoProxy.onErrorOccurred registered");
 			}
 		}
 	}, {
@@ -9449,7 +9556,6 @@ var AutoProxy = function () {
 		value: function removeListeners() {
 			var _this = this;
 			chrome.webRequest.onErrorOccurred.removeListener(_this.onRequestError);
-			console.log("AutoProxy.onErrorOccurred removed");
 		}
 	}, {
 		key: 'init',
@@ -9477,7 +9583,7 @@ var AutoProxy = function () {
 
 					if (_this.autoProxy.length > 1000) _this.autoProxy = [];
 					if (!_this.isEntrySizeValid(value.s)) {
-						console.log("isEntrySizeValid not valid size = " + value.s);
+
 						return;
 					}
 					_this.autoProxy.push(value);
@@ -9548,7 +9654,7 @@ var AutoProxy = function () {
 			var _this = this;
 			return new Promise(function (resolve, reject) {
 				_this.getBytesInUse(_ServiceMeta2.default.STORAGEKEYS.RCACHE).then(function (size) {
-					console.log("size", size);
+
 					chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.RCACHE, function (storage) {
 						try {
 
@@ -9690,10 +9796,12 @@ var AutoProxy = function () {
 		value: function checkIsCached(d) {
 			var _this = this;
 			return new Promise(function (resolve, reject) {
-				chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.HASHCACHE, function (storage) {
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.HASHCACHE, _ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS], function (storage) {
+					var bypassHosts = storage[_ServiceMeta2.default.STORAGEKEYS.BYPASSHOSTS];
 					try {
 						var encodedD = (0, _md2.default)(d);
-						if (d.indexOf(_ServiceMeta2.default.BASEDOMAIN) > -1 || d.indexOf(_ServiceMeta2.default.BACKUPBASEDOMAIN) > -1 || d.match(_ServiceMeta2.default.TESTREQUESTREGEX) != null) {
+						var parsedD = new URL(d);
+						if (d.match(_ServiceMeta2.default.TESTREQUESTREGEX) != null || bypassHosts && Array.isArray(bypassHosts) && bypassHosts.includes(parsedD.hostname)) {
 							return resolve(true);
 						}
 						var dCache = storage[_ServiceMeta2.default.STORAGEKEYS.HASHCACHE];
@@ -9886,7 +9994,7 @@ var AutoProxy = function () {
     
     		      var params = "batch=" + data;
     		      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    					console.log("batch", checkData);
+    
     
     		      xhr.onreadystatechange = function () {
     		          // If the request completed
@@ -10190,7 +10298,6 @@ var TierUpdater = function () {
 
       if (chrome.webRequest.onBeforeSendHeaders.hasListener(_this.stripOrigin)) chrome.webRequest.onBeforeSendHeaders.removeListener(_this.stripOrigin);
 
-      console.log("This is chrome setting origin strip listener");
       chrome.webRequest.onBeforeSendHeaders.addListener(_this.stripOrigin, { urls: ["*://*/*"] }, ["blocking", "requestHeaders", "extraHeaders"]);
     }
   }, {
@@ -10209,9 +10316,7 @@ var TierUpdater = function () {
 
           if (!(header && header.name && header.name.toLowerCase() === "origin" && header.value && header.value.toLowerCase() === origin)) {
             headers.push(header);
-          } else {
-            console.log("stripping", e, headers);
-          }
+          } else {}
         }
       } catch (err) {
         _didIteratorError = true;

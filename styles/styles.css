@@ -623,7 +623,7 @@ body {
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		line-height: 2.5;
-		max-width: 100px;
+		max-width: 150px;
 		overflow: hidden;
 	}
 
@@ -1631,7 +1631,7 @@ body {
 		}
 
 .dashboard-view__user-profile__status{
-			padding-top: 2,5px;
+			padding-top: 25px;
 		}
 
 .dashboard-view__user-profile__status p {
@@ -1704,8 +1704,8 @@ body {
 			}
 
 .dashboard-view__server-list{
-		min-height: 238px;
-		max-height: 238px;
+		min-height: 270px;
+    	max-height: 270px;
 		overflow: auto;
 	}
 
@@ -3862,8 +3862,23 @@ background: linear-gradient(to right, #a8e063, #56ab2f);
   }
 
 #email-login-view {
+  display: block;
+}
+
+#authcode-login-view {
   display: none;
 }
+
+#authcodesignin-button{
+  text-decoration: none;
+  color: #888;
+  padding: 10px 3px;
+  font-weight: 400;
+}
+
+#authcodesignin-button:hover {
+    text-decoration: underline;
+  }
 
 .maintenance-mode {
   background-color: #f0f8ff;

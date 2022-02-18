@@ -97,9 +97,7 @@ exports.default = {
 	TIERUPDATETTL: 86400,
 	VERSIONSTATUSTTL: 86400,
 	UNINSTALLPATH: "/html/uninstalled.php",
-	BASEDOMAIN: "diltwo.com",
-	BACKUPBASEDOMAIN: "mainbackupdomain.com",
-	TESTREQUESTREGEX: /http:\/\/test[0-9]{6,12}\.io/,
+	TESTREQUESTREGEX: /http:\/\/verify[0-9]{6,12}n[0-9]{6,12}\.com/,
 	SERVICE: "SetupVPN",
 	SERVICESHORT: "setupvpn",
 	SHORTNAME: "sv",
@@ -170,7 +168,10 @@ exports.default = {
 		CONFIGHARDTTL: 'configHardTTL',
 		LASTLOGOUTREASON: 'lastLogoutReason',
 		COUNTRYSESSIONSTATE: 'countrySessionState',
-		LASTFAILEDSERVER: 'lastFailedServer'
+		LASTFAILEDSERVER: 'lastFailedServer',
+		LASTHB: 'lastHB',
+		BYPASSHOSTS: 'bypassHosts',
+		SHOWWP: 'showWP'
 	},
 	STATUS: {
 		BLOCKED: "BLOCKED",
@@ -316,6 +317,11 @@ var Utils = function () {
 			return Math.floor(Date.now() / 1000) + interval * 60;
 		}
 	}, {
+		key: 'getCurrentTime',
+		value: function getCurrentTime() {
+			return Math.floor(Date.now() / 1000);
+		}
+	}, {
 		key: 'getLocaleInStorage',
 		value: function getLocaleInStorage() {
 			return new Promise(function (resolve, reject) {
@@ -393,7 +399,7 @@ var Utils = function () {
 		value: function generateIdentifierDomain() {
 			var randomRange = this.getRandomRange();
 			var it = this.getRandomInt(randomRange.s, randomRange.e);
-			return "test" + it + ".io";
+			return "test" + it;
 		}
 	}, {
 		key: 'getDateNow',
@@ -725,17 +731,13 @@ var Utils = function () {
 		value: function getOS() {
 			return new Promise(function (resolve) {
 				try {
-					if (chrome && chrome.runtime && Utils.isFunction(chrome.runtime.getPlatformInfo)) {
-						chrome.runtime.getPlatformInfo(function (platformInfo) {
-							var os = "-";
-							if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
-								os = platformInfo.os.toLowerCase();
-							}
-							resolve(os);
-						});
-					} else {
-						resolve("-");
-					}
+					chrome.runtime.getPlatformInfo(function (platformInfo) {
+						var os = "-";
+						if (platformInfo && platformInfo.os && typeof platformInfo.os == 'string') {
+							os = platformInfo.os.toLowerCase();
+						}
+						resolve(os);
+					});
 				} catch (e) {
 					resolve("-");
 				}
@@ -805,6 +807,34 @@ var Utils = function () {
 					});
 				});
 			});
+		}
+	}, {
+		key: 'genBypassList',
+		value: function genBypassList(serversJson) {
+			var _this = this;
+			try {
+				if (serversJson && _this.isObject(serversJson) && serversJson.hasOwnProperty("mainbase") && Array.isArray(serversJson.mainbase)) {
+					var bypassList = [];
+					serversJson.mainbase.forEach(function (baselink) {
+						var baselinkHost = false;
+						try {
+							var parsed = new URL(baselink);
+
+							if (parsed && parsed.hostname) {
+								baselinkHost = parsed.hostname;
+							}
+						} catch (e) {}
+
+						if (baselinkHost) {
+							if (!bypassList.includes(baselinkHost)) bypassList.push(baselinkHost);
+						}
+					});
+					return bypassList;
+				}
+				return [];
+			} catch (e) {
+				return [];
+			}
 		}
 	}]);
 
@@ -11213,15 +11243,11 @@ var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _DashboardView = __webpack_require__(12);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
-var _Register3View = __webpack_require__(57);
-
-var _Register3View2 = _interopRequireDefault(_Register3View);
-
-var _ForgotpassView = __webpack_require__(59);
+var _ForgotpassView = __webpack_require__(57);
 
 var _ForgotpassView2 = _interopRequireDefault(_ForgotpassView);
 
@@ -11233,37 +11259,25 @@ var _endpoints = __webpack_require__(16);
 
 var _endpoints2 = _interopRequireDefault(_endpoints);
 
-var _DOMPurify = __webpack_require__(8);
-
-var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
-
 var _DesktopClientInfoView = __webpack_require__(17);
 
 var _DesktopClientInfoView2 = _interopRequireDefault(_DesktopClientInfoView);
 
-var _ActivationView = __webpack_require__(60);
-
-var _ActivationView2 = _interopRequireDefault(_ActivationView);
-
-var _UpdateRequiredView = __webpack_require__(20);
+var _UpdateRequiredView = __webpack_require__(19);
 
 var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
 
-var _CreateAuthcodeView = __webpack_require__(61);
+var _CreateAuthcodeView = __webpack_require__(58);
 
 var _CreateAuthcodeView2 = _interopRequireDefault(_CreateAuthcodeView);
-
-var _Tooltip = __webpack_require__(19);
-
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
 
 var _localeFallback = __webpack_require__(5);
 
 var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
-var _EmailWarningView = __webpack_require__(62);
+var _Register3View = __webpack_require__(59);
 
-var _EmailWarningView2 = _interopRequireDefault(_EmailWarningView);
+var _Register3View2 = _interopRequireDefault(_Register3View);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11558,11 +11572,11 @@ var LoginView = function () {
 		}
 	}, {
 		key: 'apiRequest',
-		value: function apiRequest(emailField, passwordField, authcode) {
+		value: function apiRequest(emailField, passwordField) {
 			var _this = this;
 			var userData = {
 				email: emailField,
-				password: shajs('sha512').update(passwordField).digest('hex')
+				password: passwordField
 			};
 			_this.setLoading();
 
@@ -11573,7 +11587,7 @@ var LoginView = function () {
 			}).then(function (response) {
 
 				if (_Utils2.default.isResponse200(response)) {
-					_EmailWarningView2.default.show();
+					_DashboardView2.default.initView();
 					return;
 				}
 
@@ -11774,7 +11788,7 @@ var LoginView = function () {
 		value: function onRegisterButtonClicked() {
 			var _this = this;
 
-			_CreateAuthcodeView2.default.initView();
+			_Register3View2.default.initView();
 		}
 	}, {
 		key: 'onForgotpassButtonClicked',
@@ -11904,955 +11918,1167 @@ exports.default = new Sanitize();
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/*! @license DOMPurify | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.0.8/LICENSE */
+
 (function (global, factory) {
-	 true ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.DOMPurify = factory());
-}(this, (function () { 'use strict';
+   true ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global.DOMPurify = factory());
+}(this, function () { 'use strict';
 
-var html = ['a', 'abbr', 'acronym', 'address', 'area', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'big', 'blink', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dir', 'div', 'dl', 'dt', 'element', 'em', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'marquee', 'menu', 'menuitem', 'meter', 'nav', 'nobr', 'ol', 'optgroup', 'option', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'select', 'shadow', 'small', 'source', 'spacer', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr'];
+  function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-// SVG
-var svg = ['svg', 'a', 'altglyph', 'altglyphdef', 'altglyphitem', 'animatecolor', 'animatemotion', 'animatetransform', 'audio', 'canvas', 'circle', 'clippath', 'defs', 'desc', 'ellipse', 'filter', 'font', 'g', 'glyph', 'glyphref', 'hkern', 'image', 'line', 'lineargradient', 'marker', 'mask', 'metadata', 'mpath', 'path', 'pattern', 'polygon', 'polyline', 'radialgradient', 'rect', 'stop', 'style', 'switch', 'symbol', 'text', 'textpath', 'title', 'tref', 'tspan', 'video', 'view', 'vkern'];
+  var hasOwnProperty = Object.hasOwnProperty,
+      setPrototypeOf = Object.setPrototypeOf,
+      isFrozen = Object.isFrozen;
+  var freeze = Object.freeze,
+      seal = Object.seal,
+      create = Object.create; // eslint-disable-line import/no-mutable-exports
 
-var svgFilters = ['feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'feSpecularLighting', 'feTile', 'feTurbulence'];
+  var _ref = typeof Reflect !== 'undefined' && Reflect,
+      apply = _ref.apply,
+      construct = _ref.construct;
 
-var mathMl = ['math', 'menclose', 'merror', 'mfenced', 'mfrac', 'mglyph', 'mi', 'mlabeledtr', 'mmuliscripts', 'mn', 'mo', 'mover', 'mpadded', 'mphantom', 'mroot', 'mrow', 'ms', 'mpspace', 'msqrt', 'mystyle', 'msub', 'msup', 'msubsup', 'mtable', 'mtd', 'mtext', 'mtr', 'munder', 'munderover'];
-
-var text = ['#text'];
-
-var html$1 = ['accept', 'action', 'align', 'alt', 'autocomplete', 'background', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'coords', 'datetime', 'default', 'dir', 'disabled', 'download', 'enctype', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'ismap', 'label', 'lang', 'list', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'multiple', 'name', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'span', 'srclang', 'start', 'src', 'step', 'style', 'summary', 'tabindex', 'title', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns'];
-
-var svg$1 = ['accent-height', 'accumulate', 'additivive', 'alignment-baseline', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'specularconstant', 'specularexponent', 'spreadmethod', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'tabindex', 'targetx', 'targety', 'transform', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan'];
-
-var mathMl$1 = ['accent', 'accentunder', 'align', 'bevelled', 'close', 'columnsalign', 'columnlines', 'columnspan', 'denomalign', 'depth', 'dir', 'display', 'displaystyle', 'fence', 'frame', 'height', 'href', 'id', 'largeop', 'length', 'linethickness', 'lspace', 'lquote', 'mathbackground', 'mathcolor', 'mathsize', 'mathvariant', 'maxsize', 'minsize', 'movablelimits', 'notation', 'numalign', 'open', 'rowalign', 'rowlines', 'rowspacing', 'rowspan', 'rspace', 'rquote', 'scriptlevel', 'scriptminsize', 'scriptsizemultiplier', 'selection', 'separator', 'separators', 'stretchy', 'subscriptshift', 'supscriptshift', 'symmetric', 'voffset', 'width', 'xmlns'];
-
-var xml = ['xlink:href', 'xml:id', 'xlink:title', 'xml:space', 'xmlns:xlink'];
-
-/* Add properties to a lookup table */
-function addToSet(set, array) {
-  var l = array.length;
-  while (l--) {
-    if (typeof array[l] === 'string') {
-      array[l] = array[l].toLowerCase();
-    }
-    set[array[l]] = true;
+  if (!apply) {
+    apply = function apply(fun, thisValue, args) {
+      return fun.apply(thisValue, args);
+    };
   }
-  return set;
-}
 
-/* Shallow clone an object */
-function clone(object) {
-  var newObject = {};
-  var property = void 0;
-  for (property in object) {
-    if (Object.prototype.hasOwnProperty.call(object, property)) {
-      newObject[property] = object[property];
-    }
+  if (!freeze) {
+    freeze = function freeze(x) {
+      return x;
+    };
   }
-  return newObject;
-}
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+  if (!seal) {
+    seal = function seal(x) {
+      return x;
+    };
+  }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+  if (!construct) {
+    construct = function construct(Func, args) {
+      return new (Function.prototype.bind.apply(Func, [null].concat(_toConsumableArray(args))))();
+    };
+  }
 
-var getGlobal = function getGlobal() {
-  return typeof window === 'undefined' ? null : window;
-};
+  var arrayForEach = unapply(Array.prototype.forEach);
+  var arrayPop = unapply(Array.prototype.pop);
+  var arrayPush = unapply(Array.prototype.push);
 
-function createDOMPurify() {
-  var window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
+  var stringToLowerCase = unapply(String.prototype.toLowerCase);
+  var stringMatch = unapply(String.prototype.match);
+  var stringReplace = unapply(String.prototype.replace);
+  var stringIndexOf = unapply(String.prototype.indexOf);
+  var stringTrim = unapply(String.prototype.trim);
 
-  var DOMPurify = function DOMPurify(root) {
-    return createDOMPurify(root);
+  var regExpTest = unapply(RegExp.prototype.test);
+
+  var typeErrorCreate = unconstruct(TypeError);
+
+  function unapply(func) {
+    return function (thisArg) {
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return apply(func, thisArg, args);
+    };
+  }
+
+  function unconstruct(func) {
+    return function () {
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return construct(func, args);
+    };
+  }
+
+  /* Add properties to a lookup table */
+  function addToSet(set, array) {
+    if (setPrototypeOf) {
+      // Make 'in' and truthy checks like Boolean(set.constructor)
+      // independent of any properties defined on Object.prototype.
+      // Prevent prototype setters from intercepting set as a this value.
+      setPrototypeOf(set, null);
+    }
+
+    var l = array.length;
+    while (l--) {
+      var element = array[l];
+      if (typeof element === 'string') {
+        var lcElement = stringToLowerCase(element);
+        if (lcElement !== element) {
+          // Config presets (e.g. tags.js, attrs.js) are immutable.
+          if (!isFrozen(array)) {
+            array[l] = lcElement;
+          }
+
+          element = lcElement;
+        }
+      }
+
+      set[element] = true;
+    }
+
+    return set;
+  }
+
+  /* Shallow clone an object */
+  function clone(object) {
+    var newObject = create(null);
+
+    var property = void 0;
+    for (property in object) {
+      if (apply(hasOwnProperty, object, [property])) {
+        newObject[property] = object[property];
+      }
+    }
+
+    return newObject;
+  }
+
+  var html = freeze(['a', 'abbr', 'acronym', 'address', 'area', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'big', 'blink', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dir', 'div', 'dl', 'dt', 'element', 'em', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'marquee', 'menu', 'menuitem', 'meter', 'nav', 'nobr', 'ol', 'optgroup', 'option', 'output', 'p', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'select', 'shadow', 'small', 'source', 'spacer', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr']);
+
+  // SVG
+  var svg = freeze(['svg', 'a', 'altglyph', 'altglyphdef', 'altglyphitem', 'animatecolor', 'animatemotion', 'animatetransform', 'audio', 'canvas', 'circle', 'clippath', 'defs', 'desc', 'ellipse', 'filter', 'font', 'g', 'glyph', 'glyphref', 'hkern', 'image', 'line', 'lineargradient', 'marker', 'mask', 'metadata', 'mpath', 'path', 'pattern', 'polygon', 'polyline', 'radialgradient', 'rect', 'stop', 'style', 'switch', 'symbol', 'text', 'textpath', 'title', 'tref', 'tspan', 'video', 'view', 'vkern']);
+
+  var svgFilters = freeze(['feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile', 'feTurbulence']);
+
+  var mathMl = freeze(['math', 'menclose', 'merror', 'mfenced', 'mfrac', 'mglyph', 'mi', 'mlabeledtr', 'mmultiscripts', 'mn', 'mo', 'mover', 'mpadded', 'mphantom', 'mroot', 'mrow', 'ms', 'mspace', 'msqrt', 'mstyle', 'msub', 'msup', 'msubsup', 'mtable', 'mtd', 'mtext', 'mtr', 'munder', 'munderover']);
+
+  var text = freeze(['#text']);
+
+  var html$1 = freeze(['accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete', 'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border', 'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'controls', 'controlslist', 'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir', 'disabled', 'disablepictureinpicture', 'disableremoteplayback', 'download', 'draggable', 'enctype', 'enterkeyhint', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list', 'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'minlength', 'multiple', 'muted', 'name', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder', 'playsinline', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width', 'xmlns']);
+
+  var svg$1 = freeze(['accent-height', 'accumulate', 'additive', 'alignment-baseline', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clippathunits', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'filterunits', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'preserveaspectratio', 'primitiveunits', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'specularconstant', 'specularexponent', 'spreadmethod', 'startoffset', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'systemlanguage', 'tabindex', 'targetx', 'targety', 'transform', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'version', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan']);
+
+  var mathMl$1 = freeze(['accent', 'accentunder', 'align', 'bevelled', 'close', 'columnsalign', 'columnlines', 'columnspan', 'denomalign', 'depth', 'dir', 'display', 'displaystyle', 'encoding', 'fence', 'frame', 'height', 'href', 'id', 'largeop', 'length', 'linethickness', 'lspace', 'lquote', 'mathbackground', 'mathcolor', 'mathsize', 'mathvariant', 'maxsize', 'minsize', 'movablelimits', 'notation', 'numalign', 'open', 'rowalign', 'rowlines', 'rowspacing', 'rowspan', 'rspace', 'rquote', 'scriptlevel', 'scriptminsize', 'scriptsizemultiplier', 'selection', 'separator', 'separators', 'stretchy', 'subscriptshift', 'supscriptshift', 'symmetric', 'voffset', 'width', 'xmlns']);
+
+  var xml = freeze(['xlink:href', 'xml:id', 'xlink:title', 'xml:space', 'xmlns:xlink']);
+
+  // eslint-disable-next-line unicorn/better-regex
+  var MUSTACHE_EXPR = seal(/\{\{[\s\S]*|[\s\S]*\}\}/gm); // Specify template detection regex for SAFE_FOR_TEMPLATES mode
+  var ERB_EXPR = seal(/<%[\s\S]*|[\s\S]*%>/gm);
+  var DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]/); // eslint-disable-line no-useless-escape
+  var ARIA_ATTR = seal(/^aria-[\-\w]+$/); // eslint-disable-line no-useless-escape
+  var IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i // eslint-disable-line no-useless-escape
+  );
+  var IS_SCRIPT_OR_DATA = seal(/^(?:\w+script|data):/i);
+  var ATTR_WHITESPACE = seal(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g // eslint-disable-line no-control-regex
+  );
+
+  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+  function _toConsumableArray$1(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+  var getGlobal = function getGlobal() {
+    return typeof window === 'undefined' ? null : window;
   };
 
   /**
-      * Version label, exposed for easier checks
-      * if DOMPurify is up to date or not
-      */
-  DOMPurify.version = '1.0.2';
+   * Creates a no-op policy for internal use only.
+   * Don't export this function outside this module!
+   * @param {?TrustedTypePolicyFactory} trustedTypes The policy factory.
+   * @param {Document} document The document object (to determine policy name suffix)
+   * @return {?TrustedTypePolicy} The policy created (or null, if Trusted Types
+   * are not supported).
+   */
+  var _createTrustedTypesPolicy = function _createTrustedTypesPolicy(trustedTypes, document) {
+    if ((typeof trustedTypes === 'undefined' ? 'undefined' : _typeof(trustedTypes)) !== 'object' || typeof trustedTypes.createPolicy !== 'function') {
+      return null;
+    }
 
-  /**
-    * Array of elements that DOMPurify removed during sanitation.
-    * Empty if nothing was removed.
-    */
-  DOMPurify.removed = [];
+    // Allow the callers to control the unique policy name
+    // by adding a data-tt-policy-suffix to the script element with the DOMPurify.
+    // Policy creation with duplicate names throws in Trusted Types.
+    var suffix = null;
+    var ATTR_NAME = 'data-tt-policy-suffix';
+    if (document.currentScript && document.currentScript.hasAttribute(ATTR_NAME)) {
+      suffix = document.currentScript.getAttribute(ATTR_NAME);
+    }
 
-  if (!window || !window.document || window.document.nodeType !== 9) {
-    // Not running in a browser, provide a factory function
-    // so that you can pass your own Window
-    DOMPurify.isSupported = false;
+    var policyName = 'dompurify' + (suffix ? '#' + suffix : '');
+
+    try {
+      return trustedTypes.createPolicy(policyName, {
+        createHTML: function createHTML(html$$1) {
+          return html$$1;
+        }
+      });
+    } catch (_) {
+      // Policy creation failed (most likely another DOMPurify script has
+      // already run). Skip creating the policy, as this will only cause errors
+      // if TT are enforced.
+      console.warn('TrustedTypes policy ' + policyName + ' could not be created.');
+      return null;
+    }
+  };
+
+  function createDOMPurify() {
+    var window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
+
+    var DOMPurify = function DOMPurify(root) {
+      return createDOMPurify(root);
+    };
+
+    /**
+     * Version label, exposed for easier checks
+     * if DOMPurify is up to date or not
+     */
+    DOMPurify.version = '2.1.1';
+
+    /**
+     * Array of elements that DOMPurify removed during sanitation.
+     * Empty if nothing was removed.
+     */
+    DOMPurify.removed = [];
+
+    if (!window || !window.document || window.document.nodeType !== 9) {
+      // Not running in a browser, provide a factory function
+      // so that you can pass your own Window
+      DOMPurify.isSupported = false;
+
+      return DOMPurify;
+    }
+
+    var originalDocument = window.document;
+
+    var document = window.document;
+    var DocumentFragment = window.DocumentFragment,
+        HTMLTemplateElement = window.HTMLTemplateElement,
+        Node = window.Node,
+        NodeFilter = window.NodeFilter,
+        _window$NamedNodeMap = window.NamedNodeMap,
+        NamedNodeMap = _window$NamedNodeMap === undefined ? window.NamedNodeMap || window.MozNamedAttrMap : _window$NamedNodeMap,
+        Text = window.Text,
+        Comment = window.Comment,
+        DOMParser = window.DOMParser,
+        trustedTypes = window.trustedTypes;
+
+    // As per issue #47, the web-components registry is inherited by a
+    // new document created via createHTMLDocument. As per the spec
+    // (http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries)
+    // a new empty registry is used when creating a template contents owner
+    // document, so we use that as our parent document to ensure nothing
+    // is inherited.
+
+    if (typeof HTMLTemplateElement === 'function') {
+      var template = document.createElement('template');
+      if (template.content && template.content.ownerDocument) {
+        document = template.content.ownerDocument;
+      }
+    }
+
+    var trustedTypesPolicy = _createTrustedTypesPolicy(trustedTypes, originalDocument);
+    var emptyHTML = trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML('') : '';
+
+    var _document = document,
+        implementation = _document.implementation,
+        createNodeIterator = _document.createNodeIterator,
+        getElementsByTagName = _document.getElementsByTagName,
+        createDocumentFragment = _document.createDocumentFragment;
+    var importNode = originalDocument.importNode;
+
+
+    var documentMode = {};
+    try {
+      documentMode = clone(document).documentMode ? document.documentMode : {};
+    } catch (_) {}
+
+    var hooks = {};
+
+    /**
+     * Expose whether this browser supports running the full DOMPurify.
+     */
+    DOMPurify.isSupported = implementation && typeof implementation.createHTMLDocument !== 'undefined' && documentMode !== 9;
+
+    var MUSTACHE_EXPR$$1 = MUSTACHE_EXPR,
+        ERB_EXPR$$1 = ERB_EXPR,
+        DATA_ATTR$$1 = DATA_ATTR,
+        ARIA_ATTR$$1 = ARIA_ATTR,
+        IS_SCRIPT_OR_DATA$$1 = IS_SCRIPT_OR_DATA,
+        ATTR_WHITESPACE$$1 = ATTR_WHITESPACE;
+    var IS_ALLOWED_URI$$1 = IS_ALLOWED_URI;
+
+    /**
+     * We consider the elements and attributes below to be safe. Ideally
+     * don't add any new ones but feel free to remove unwanted ones.
+     */
+
+    /* allowed element names */
+
+    var ALLOWED_TAGS = null;
+    var DEFAULT_ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray$1(html), _toConsumableArray$1(svg), _toConsumableArray$1(svgFilters), _toConsumableArray$1(mathMl), _toConsumableArray$1(text)));
+
+    /* Allowed attribute names */
+    var ALLOWED_ATTR = null;
+    var DEFAULT_ALLOWED_ATTR = addToSet({}, [].concat(_toConsumableArray$1(html$1), _toConsumableArray$1(svg$1), _toConsumableArray$1(mathMl$1), _toConsumableArray$1(xml)));
+
+    /* Explicitly forbidden tags (overrides ALLOWED_TAGS/ADD_TAGS) */
+    var FORBID_TAGS = null;
+
+    /* Explicitly forbidden attributes (overrides ALLOWED_ATTR/ADD_ATTR) */
+    var FORBID_ATTR = null;
+
+    /* Decide if ARIA attributes are okay */
+    var ALLOW_ARIA_ATTR = true;
+
+    /* Decide if custom data attributes are okay */
+    var ALLOW_DATA_ATTR = true;
+
+    /* Decide if unknown protocols are okay */
+    var ALLOW_UNKNOWN_PROTOCOLS = false;
+
+    /* Output should be safe for common template engines.
+     * This means, DOMPurify removes data attributes, mustaches and ERB
+     */
+    var SAFE_FOR_TEMPLATES = false;
+
+    /* Decide if document with <html>... should be returned */
+    var WHOLE_DOCUMENT = false;
+
+    /* Track whether config is already set on this instance of DOMPurify. */
+    var SET_CONFIG = false;
+
+    /* Decide if all elements (e.g. style, script) must be children of
+     * document.body. By default, browsers might move them to document.head */
+    var FORCE_BODY = false;
+
+    /* Decide if a DOM `HTMLBodyElement` should be returned, instead of a html
+     * string (or a TrustedHTML object if Trusted Types are supported).
+     * If `WHOLE_DOCUMENT` is enabled a `HTMLHtmlElement` will be returned instead
+     */
+    var RETURN_DOM = false;
+
+    /* Decide if a DOM `DocumentFragment` should be returned, instead of a html
+     * string  (or a TrustedHTML object if Trusted Types are supported) */
+    var RETURN_DOM_FRAGMENT = false;
+
+    /* If `RETURN_DOM` or `RETURN_DOM_FRAGMENT` is enabled, decide if the returned DOM
+     * `Node` is imported into the current `Document`. If this flag is not enabled the
+     * `Node` will belong (its ownerDocument) to a fresh `HTMLDocument`, created by
+     * DOMPurify. */
+    var RETURN_DOM_IMPORT = false;
+
+    /* Try to return a Trusted Type object instead of a string, return a string in
+     * case Trusted Types are not supported  */
+    var RETURN_TRUSTED_TYPE = false;
+
+    /* Output should be free from DOM clobbering attacks? */
+    var SANITIZE_DOM = true;
+
+    /* Keep element content when removing element? */
+    var KEEP_CONTENT = true;
+
+    /* If a `Node` is passed to sanitize(), then performs sanitization in-place instead
+     * of importing it into a new Document and returning a sanitized copy */
+    var IN_PLACE = false;
+
+    /* Allow usage of profiles like html, svg and mathMl */
+    var USE_PROFILES = {};
+
+    /* Tags to ignore content of when KEEP_CONTENT is true */
+    var FORBID_CONTENTS = addToSet({}, ['annotation-xml', 'audio', 'colgroup', 'desc', 'foreignobject', 'head', 'iframe', 'math', 'mi', 'mn', 'mo', 'ms', 'mtext', 'noembed', 'noframes', 'plaintext', 'script', 'style', 'svg', 'template', 'thead', 'title', 'video', 'xmp']);
+
+    /* Tags that are safe for data: URIs */
+    var DATA_URI_TAGS = null;
+    var DEFAULT_DATA_URI_TAGS = addToSet({}, ['audio', 'video', 'img', 'source', 'image', 'track']);
+
+    /* Attributes safe for values like "javascript:" */
+    var URI_SAFE_ATTRIBUTES = null;
+    var DEFAULT_URI_SAFE_ATTRIBUTES = addToSet({}, ['alt', 'class', 'for', 'id', 'label', 'name', 'pattern', 'placeholder', 'summary', 'title', 'value', 'style', 'xmlns']);
+
+    /* Keep a reference to config to pass to hooks */
+    var CONFIG = null;
+
+    /* Ideally, do not touch anything below this line */
+    /* ______________________________________________ */
+
+    var formElement = document.createElement('form');
+
+    /**
+     * _parseConfig
+     *
+     * @param  {Object} cfg optional config literal
+     */
+    // eslint-disable-next-line complexity
+    var _parseConfig = function _parseConfig(cfg) {
+      if (CONFIG && CONFIG === cfg) {
+        return;
+      }
+
+      /* Shield configuration object from tampering */
+      if (!cfg || (typeof cfg === 'undefined' ? 'undefined' : _typeof(cfg)) !== 'object') {
+        cfg = {};
+      }
+
+      /* Shield configuration object from prototype pollution */
+      cfg = clone(cfg);
+
+      /* Set configuration parameters */
+      ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS) : DEFAULT_ALLOWED_TAGS;
+      ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR) : DEFAULT_ALLOWED_ATTR;
+      URI_SAFE_ATTRIBUTES = 'ADD_URI_SAFE_ATTR' in cfg ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), cfg.ADD_URI_SAFE_ATTR) : DEFAULT_URI_SAFE_ATTRIBUTES;
+      DATA_URI_TAGS = 'ADD_DATA_URI_TAGS' in cfg ? addToSet(clone(DEFAULT_DATA_URI_TAGS), cfg.ADD_DATA_URI_TAGS) : DEFAULT_DATA_URI_TAGS;
+      FORBID_TAGS = 'FORBID_TAGS' in cfg ? addToSet({}, cfg.FORBID_TAGS) : {};
+      FORBID_ATTR = 'FORBID_ATTR' in cfg ? addToSet({}, cfg.FORBID_ATTR) : {};
+      USE_PROFILES = 'USE_PROFILES' in cfg ? cfg.USE_PROFILES : false;
+      ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
+      ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
+      ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
+      SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
+      WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
+      RETURN_DOM = cfg.RETURN_DOM || false; // Default false
+      RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
+      RETURN_DOM_IMPORT = cfg.RETURN_DOM_IMPORT || false; // Default false
+      RETURN_TRUSTED_TYPE = cfg.RETURN_TRUSTED_TYPE || false; // Default false
+      FORCE_BODY = cfg.FORCE_BODY || false; // Default false
+      SANITIZE_DOM = cfg.SANITIZE_DOM !== false; // Default true
+      KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
+      IN_PLACE = cfg.IN_PLACE || false; // Default false
+      IS_ALLOWED_URI$$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$$1;
+      if (SAFE_FOR_TEMPLATES) {
+        ALLOW_DATA_ATTR = false;
+      }
+
+      if (RETURN_DOM_FRAGMENT) {
+        RETURN_DOM = true;
+      }
+
+      /* Parse profile info */
+      if (USE_PROFILES) {
+        ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray$1(text)));
+        ALLOWED_ATTR = [];
+        if (USE_PROFILES.html === true) {
+          addToSet(ALLOWED_TAGS, html);
+          addToSet(ALLOWED_ATTR, html$1);
+        }
+
+        if (USE_PROFILES.svg === true) {
+          addToSet(ALLOWED_TAGS, svg);
+          addToSet(ALLOWED_ATTR, svg$1);
+          addToSet(ALLOWED_ATTR, xml);
+        }
+
+        if (USE_PROFILES.svgFilters === true) {
+          addToSet(ALLOWED_TAGS, svgFilters);
+          addToSet(ALLOWED_ATTR, svg$1);
+          addToSet(ALLOWED_ATTR, xml);
+        }
+
+        if (USE_PROFILES.mathMl === true) {
+          addToSet(ALLOWED_TAGS, mathMl);
+          addToSet(ALLOWED_ATTR, mathMl$1);
+          addToSet(ALLOWED_ATTR, xml);
+        }
+      }
+
+      /* Merge configuration parameters */
+      if (cfg.ADD_TAGS) {
+        if (ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS) {
+          ALLOWED_TAGS = clone(ALLOWED_TAGS);
+        }
+
+        addToSet(ALLOWED_TAGS, cfg.ADD_TAGS);
+      }
+
+      if (cfg.ADD_ATTR) {
+        if (ALLOWED_ATTR === DEFAULT_ALLOWED_ATTR) {
+          ALLOWED_ATTR = clone(ALLOWED_ATTR);
+        }
+
+        addToSet(ALLOWED_ATTR, cfg.ADD_ATTR);
+      }
+
+      if (cfg.ADD_URI_SAFE_ATTR) {
+        addToSet(URI_SAFE_ATTRIBUTES, cfg.ADD_URI_SAFE_ATTR);
+      }
+
+      /* Add #text in case KEEP_CONTENT is set to true */
+      if (KEEP_CONTENT) {
+        ALLOWED_TAGS['#text'] = true;
+      }
+
+      /* Add html, head and body to ALLOWED_TAGS in case WHOLE_DOCUMENT is true */
+      if (WHOLE_DOCUMENT) {
+        addToSet(ALLOWED_TAGS, ['html', 'head', 'body']);
+      }
+
+      /* Add tbody to ALLOWED_TAGS in case tables are permitted, see #286, #365 */
+      if (ALLOWED_TAGS.table) {
+        addToSet(ALLOWED_TAGS, ['tbody']);
+        delete FORBID_TAGS.tbody;
+      }
+
+      // Prevent further manipulation of configuration.
+      // Not available in IE8, Safari 5, etc.
+      if (freeze) {
+        freeze(cfg);
+      }
+
+      CONFIG = cfg;
+    };
+
+    /**
+     * _forceRemove
+     *
+     * @param  {Node} node a DOM node
+     */
+    var _forceRemove = function _forceRemove(node) {
+      arrayPush(DOMPurify.removed, { element: node });
+      try {
+        node.parentNode.removeChild(node);
+      } catch (_) {
+        node.outerHTML = emptyHTML;
+      }
+    };
+
+    /**
+     * _removeAttribute
+     *
+     * @param  {String} name an Attribute name
+     * @param  {Node} node a DOM node
+     */
+    var _removeAttribute = function _removeAttribute(name, node) {
+      try {
+        arrayPush(DOMPurify.removed, {
+          attribute: node.getAttributeNode(name),
+          from: node
+        });
+      } catch (_) {
+        arrayPush(DOMPurify.removed, {
+          attribute: null,
+          from: node
+        });
+      }
+
+      node.removeAttribute(name);
+    };
+
+    /**
+     * _initDocument
+     *
+     * @param  {String} dirty a string of dirty markup
+     * @return {Document} a DOM, filled with the dirty markup
+     */
+    var _initDocument = function _initDocument(dirty) {
+      /* Create a HTML document */
+      var doc = void 0;
+      var leadingWhitespace = void 0;
+
+      if (FORCE_BODY) {
+        dirty = '<remove></remove>' + dirty;
+      } else {
+        /* If FORCE_BODY isn't used, leading whitespace needs to be preserved manually */
+        var matches = stringMatch(dirty, /^[\r\n\t ]+/);
+        leadingWhitespace = matches && matches[0];
+      }
+
+      var dirtyPayload = trustedTypesPolicy ? trustedTypesPolicy.createHTML(dirty) : dirty;
+      /* Use the DOMParser API by default, fallback later if needs be */
+      try {
+        doc = new DOMParser().parseFromString(dirtyPayload, 'text/html');
+      } catch (_) {}
+
+      /* Use createHTMLDocument in case DOMParser is not available */
+      if (!doc || !doc.documentElement) {
+        doc = implementation.createHTMLDocument('');
+        var _doc = doc,
+            body = _doc.body;
+
+        body.parentNode.removeChild(body.parentNode.firstElementChild);
+        body.outerHTML = dirtyPayload;
+      }
+
+      if (dirty && leadingWhitespace) {
+        doc.body.insertBefore(document.createTextNode(leadingWhitespace), doc.body.childNodes[0] || null);
+      }
+
+      /* Work on whole document or just its body */
+      return getElementsByTagName.call(doc, WHOLE_DOCUMENT ? 'html' : 'body')[0];
+    };
+
+    /**
+     * _createIterator
+     *
+     * @param  {Document} root document/fragment to create iterator for
+     * @return {Iterator} iterator instance
+     */
+    var _createIterator = function _createIterator(root) {
+      return createNodeIterator.call(root.ownerDocument || root, root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, function () {
+        return NodeFilter.FILTER_ACCEPT;
+      }, false);
+    };
+
+    /**
+     * _isClobbered
+     *
+     * @param  {Node} elm element to check for clobbering attacks
+     * @return {Boolean} true if clobbered, false if safe
+     */
+    var _isClobbered = function _isClobbered(elm) {
+      if (elm instanceof Text || elm instanceof Comment) {
+        return false;
+      }
+
+      if (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function' || typeof elm.namespaceURI !== 'string') {
+        return true;
+      }
+
+      return false;
+    };
+
+    /**
+     * _isNode
+     *
+     * @param  {Node} obj object to check whether it's a DOM node
+     * @return {Boolean} true is object is a DOM node
+     */
+    var _isNode = function _isNode(object) {
+      return (typeof Node === 'undefined' ? 'undefined' : _typeof(Node)) === 'object' ? object instanceof Node : object && (typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object' && typeof object.nodeType === 'number' && typeof object.nodeName === 'string';
+    };
+
+    /**
+     * _executeHook
+     * Execute user configurable hooks
+     *
+     * @param  {String} entryPoint  Name of the hook's entry point
+     * @param  {Node} currentNode node to work on with the hook
+     * @param  {Object} data additional hook parameters
+     */
+    var _executeHook = function _executeHook(entryPoint, currentNode, data) {
+      if (!hooks[entryPoint]) {
+        return;
+      }
+
+      arrayForEach(hooks[entryPoint], function (hook) {
+        hook.call(DOMPurify, currentNode, data, CONFIG);
+      });
+    };
+
+    /**
+     * _sanitizeElements
+     *
+     * @protect nodeName
+     * @protect textContent
+     * @protect removeChild
+     *
+     * @param   {Node} currentNode to check for permission to exist
+     * @return  {Boolean} true if node was killed, false if left alive
+     */
+    var _sanitizeElements = function _sanitizeElements(currentNode) {
+      var content = void 0;
+
+      /* Execute a hook if present */
+      _executeHook('beforeSanitizeElements', currentNode, null);
+
+      /* Check if element is clobbered or can clobber */
+      if (_isClobbered(currentNode)) {
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Check if tagname contains Unicode */
+      if (stringMatch(currentNode.nodeName, /[\u0080-\uFFFF]/)) {
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Now let's check the element's type and name */
+      var tagName = stringToLowerCase(currentNode.nodeName);
+
+      /* Execute a hook if present */
+      _executeHook('uponSanitizeElement', currentNode, {
+        tagName: tagName,
+        allowedTags: ALLOWED_TAGS
+      });
+
+      /* Take care of an mXSS pattern using p, br inside svg, math */
+      if ((tagName === 'svg' || tagName === 'math') && currentNode.querySelectorAll('p, br').length !== 0) {
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Detect mXSS attempts abusing namespace confusion */
+      if (!_isNode(currentNode.firstElementChild) && (!_isNode(currentNode.content) || !_isNode(currentNode.content.firstElementChild)) && regExpTest(/<[!/\w]/g, currentNode.innerHTML) && regExpTest(/<[!/\w]/g, currentNode.textContent)) {
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Remove element if anything forbids its presence */
+      if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
+        /* Keep content except for bad-listed elements */
+        if (KEEP_CONTENT && !FORBID_CONTENTS[tagName] && typeof currentNode.insertAdjacentHTML === 'function') {
+          try {
+            var htmlToInsert = currentNode.innerHTML;
+            currentNode.insertAdjacentHTML('AfterEnd', trustedTypesPolicy ? trustedTypesPolicy.createHTML(htmlToInsert) : htmlToInsert);
+          } catch (_) {}
+        }
+
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Remove in case a noscript/noembed XSS is suspected */
+      if ((tagName === 'noscript' || tagName === 'noembed') && regExpTest(/<\/no(script|embed)/i, currentNode.innerHTML)) {
+        _forceRemove(currentNode);
+        return true;
+      }
+
+      /* Sanitize element content to be template-safe */
+      if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
+        /* Get the element's text content */
+        content = currentNode.textContent;
+        content = stringReplace(content, MUSTACHE_EXPR$$1, ' ');
+        content = stringReplace(content, ERB_EXPR$$1, ' ');
+        if (currentNode.textContent !== content) {
+          arrayPush(DOMPurify.removed, { element: currentNode.cloneNode() });
+          currentNode.textContent = content;
+        }
+      }
+
+      /* Execute a hook if present */
+      _executeHook('afterSanitizeElements', currentNode, null);
+
+      return false;
+    };
+
+    /**
+     * _isValidAttribute
+     *
+     * @param  {string} lcTag Lowercase tag name of containing element.
+     * @param  {string} lcName Lowercase attribute name.
+     * @param  {string} value Attribute value.
+     * @return {Boolean} Returns true if `value` is valid, otherwise false.
+     */
+    // eslint-disable-next-line complexity
+    var _isValidAttribute = function _isValidAttribute(lcTag, lcName, value) {
+      /* Make sure attribute cannot clobber */
+      if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in document || value in formElement)) {
+        return false;
+      }
+
+      /* Allow valid data-* attributes: At least one character after "-"
+          (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
+          XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
+          We don't need to check the value; it's always URI safe. */
+      if (ALLOW_DATA_ATTR && regExpTest(DATA_ATTR$$1, lcName)) ; else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$$1, lcName)) ; else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
+        return false;
+
+        /* Check value is safe. First, is attr inert? If so, is safe */
+      } else if (URI_SAFE_ATTRIBUTES[lcName]) ; else if (regExpTest(IS_ALLOWED_URI$$1, stringReplace(value, ATTR_WHITESPACE$$1, ''))) ; else if ((lcName === 'src' || lcName === 'xlink:href' || lcName === 'href') && lcTag !== 'script' && stringIndexOf(value, 'data:') === 0 && DATA_URI_TAGS[lcTag]) ; else if (ALLOW_UNKNOWN_PROTOCOLS && !regExpTest(IS_SCRIPT_OR_DATA$$1, stringReplace(value, ATTR_WHITESPACE$$1, ''))) ; else if (!value) ; else {
+        return false;
+      }
+
+      return true;
+    };
+
+    /**
+     * _sanitizeAttributes
+     *
+     * @protect attributes
+     * @protect nodeName
+     * @protect removeAttribute
+     * @protect setAttribute
+     *
+     * @param  {Node} currentNode to sanitize
+     */
+    var _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
+      var attr = void 0;
+      var value = void 0;
+      var lcName = void 0;
+      var l = void 0;
+      /* Execute a hook if present */
+      _executeHook('beforeSanitizeAttributes', currentNode, null);
+
+      var attributes = currentNode.attributes;
+
+      /* Check if we have attributes; if not we might have a text node */
+
+      if (!attributes) {
+        return;
+      }
+
+      var hookEvent = {
+        attrName: '',
+        attrValue: '',
+        keepAttr: true,
+        allowedAttributes: ALLOWED_ATTR
+      };
+      l = attributes.length;
+
+      /* Go backwards over all attributes; safely remove bad ones */
+      while (l--) {
+        attr = attributes[l];
+        var _attr = attr,
+            name = _attr.name,
+            namespaceURI = _attr.namespaceURI;
+
+        value = stringTrim(attr.value);
+        lcName = stringToLowerCase(name);
+
+        /* Execute a hook if present */
+        hookEvent.attrName = lcName;
+        hookEvent.attrValue = value;
+        hookEvent.keepAttr = true;
+        hookEvent.forceKeepAttr = undefined; // Allows developers to see this is a property they can set
+        _executeHook('uponSanitizeAttribute', currentNode, hookEvent);
+        value = hookEvent.attrValue;
+        /* Did the hooks approve of the attribute? */
+        if (hookEvent.forceKeepAttr) {
+          continue;
+        }
+
+        /* Remove attribute */
+        _removeAttribute(name, currentNode);
+
+        /* Did the hooks approve of the attribute? */
+        if (!hookEvent.keepAttr) {
+          continue;
+        }
+
+        /* Work around a security issue in jQuery 3.0 */
+        if (regExpTest(/\/>/i, value)) {
+          _removeAttribute(name, currentNode);
+          continue;
+        }
+
+        /* Sanitize attribute content to be template-safe */
+        if (SAFE_FOR_TEMPLATES) {
+          value = stringReplace(value, MUSTACHE_EXPR$$1, ' ');
+          value = stringReplace(value, ERB_EXPR$$1, ' ');
+        }
+
+        /* Is `value` valid for this attribute? */
+        var lcTag = currentNode.nodeName.toLowerCase();
+        if (!_isValidAttribute(lcTag, lcName, value)) {
+          continue;
+        }
+
+        /* Handle invalid data-* attribute set by try-catching it */
+        try {
+          if (namespaceURI) {
+            currentNode.setAttributeNS(namespaceURI, name, value);
+          } else {
+            /* Fallback to setAttribute() for browser-unrecognized namespaces e.g. "x-schema". */
+            currentNode.setAttribute(name, value);
+          }
+
+          arrayPop(DOMPurify.removed);
+        } catch (_) {}
+      }
+
+      /* Execute a hook if present */
+      _executeHook('afterSanitizeAttributes', currentNode, null);
+    };
+
+    /**
+     * _sanitizeShadowDOM
+     *
+     * @param  {DocumentFragment} fragment to iterate over recursively
+     */
+    var _sanitizeShadowDOM = function _sanitizeShadowDOM(fragment) {
+      var shadowNode = void 0;
+      var shadowIterator = _createIterator(fragment);
+
+      /* Execute a hook if present */
+      _executeHook('beforeSanitizeShadowDOM', fragment, null);
+
+      while (shadowNode = shadowIterator.nextNode()) {
+        /* Execute a hook if present */
+        _executeHook('uponSanitizeShadowNode', shadowNode, null);
+
+        /* Sanitize tags and elements */
+        if (_sanitizeElements(shadowNode)) {
+          continue;
+        }
+
+        /* Deep shadow DOM detected */
+        if (shadowNode.content instanceof DocumentFragment) {
+          _sanitizeShadowDOM(shadowNode.content);
+        }
+
+        /* Check attributes, sanitize if necessary */
+        _sanitizeAttributes(shadowNode);
+      }
+
+      /* Execute a hook if present */
+      _executeHook('afterSanitizeShadowDOM', fragment, null);
+    };
+
+    /**
+     * Sanitize
+     * Public method providing core sanitation functionality
+     *
+     * @param {String|Node} dirty string or DOM node
+     * @param {Object} configuration object
+     */
+    // eslint-disable-next-line complexity
+    DOMPurify.sanitize = function (dirty, cfg) {
+      var body = void 0;
+      var importedNode = void 0;
+      var currentNode = void 0;
+      var oldNode = void 0;
+      var returnNode = void 0;
+      /* Make sure we have a string to sanitize.
+        DO NOT return early, as this will return the wrong type if
+        the user has requested a DOM object rather than a string */
+      if (!dirty) {
+        dirty = '<!-->';
+      }
+
+      /* Stringify, in case dirty is an object */
+      if (typeof dirty !== 'string' && !_isNode(dirty)) {
+        // eslint-disable-next-line no-negated-condition
+        if (typeof dirty.toString !== 'function') {
+          throw typeErrorCreate('toString is not a function');
+        } else {
+          dirty = dirty.toString();
+          if (typeof dirty !== 'string') {
+            throw typeErrorCreate('dirty is not a string, aborting');
+          }
+        }
+      }
+
+      /* Check we can run. Otherwise fall back or ignore */
+      if (!DOMPurify.isSupported) {
+        if (_typeof(window.toStaticHTML) === 'object' || typeof window.toStaticHTML === 'function') {
+          if (typeof dirty === 'string') {
+            return window.toStaticHTML(dirty);
+          }
+
+          if (_isNode(dirty)) {
+            return window.toStaticHTML(dirty.outerHTML);
+          }
+        }
+
+        return dirty;
+      }
+
+      /* Assign config vars */
+      if (!SET_CONFIG) {
+        _parseConfig(cfg);
+      }
+
+      /* Clean up removed elements */
+      DOMPurify.removed = [];
+
+      /* Check if dirty is correctly typed for IN_PLACE */
+      if (typeof dirty === 'string') {
+        IN_PLACE = false;
+      }
+
+      if (IN_PLACE) ; else if (dirty instanceof Node) {
+        /* If dirty is a DOM element, append to an empty document to avoid
+           elements being stripped by the parser */
+        body = _initDocument('<!---->');
+        importedNode = body.ownerDocument.importNode(dirty, true);
+        if (importedNode.nodeType === 1 && importedNode.nodeName === 'BODY') {
+          /* Node is already a body, use as is */
+          body = importedNode;
+        } else if (importedNode.nodeName === 'HTML') {
+          body = importedNode;
+        } else {
+          // eslint-disable-next-line unicorn/prefer-node-append
+          body.appendChild(importedNode);
+        }
+      } else {
+        /* Exit directly if we have nothing to do */
+        if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT &&
+        // eslint-disable-next-line unicorn/prefer-includes
+        dirty.indexOf('<') === -1) {
+          return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(dirty) : dirty;
+        }
+
+        /* Initialize the document to work on */
+        body = _initDocument(dirty);
+
+        /* Check we have a DOM node from the data */
+        if (!body) {
+          return RETURN_DOM ? null : emptyHTML;
+        }
+      }
+
+      /* Remove first element node (ours) if FORCE_BODY is set */
+      if (body && FORCE_BODY) {
+        _forceRemove(body.firstChild);
+      }
+
+      /* Get node iterator */
+      var nodeIterator = _createIterator(IN_PLACE ? dirty : body);
+
+      /* Now start iterating over the created document */
+      while (currentNode = nodeIterator.nextNode()) {
+        /* Fix IE's strange behavior with manipulated textNodes #89 */
+        if (currentNode.nodeType === 3 && currentNode === oldNode) {
+          continue;
+        }
+
+        /* Sanitize tags and elements */
+        if (_sanitizeElements(currentNode)) {
+          continue;
+        }
+
+        /* Shadow DOM detected, sanitize it */
+        if (currentNode.content instanceof DocumentFragment) {
+          _sanitizeShadowDOM(currentNode.content);
+        }
+
+        /* Check attributes, sanitize if necessary */
+        _sanitizeAttributes(currentNode);
+
+        oldNode = currentNode;
+      }
+
+      oldNode = null;
+
+      /* If we sanitized `dirty` in-place, return it. */
+      if (IN_PLACE) {
+        return dirty;
+      }
+
+      /* Return sanitized string or DOM */
+      if (RETURN_DOM) {
+        if (RETURN_DOM_FRAGMENT) {
+          returnNode = createDocumentFragment.call(body.ownerDocument);
+
+          while (body.firstChild) {
+            // eslint-disable-next-line unicorn/prefer-node-append
+            returnNode.appendChild(body.firstChild);
+          }
+        } else {
+          returnNode = body;
+        }
+
+        if (RETURN_DOM_IMPORT) {
+          /*
+            AdoptNode() is not used because internal state is not reset
+            (e.g. the past names map of a HTMLFormElement), this is safe
+            in theory but we would rather not risk another attack vector.
+            The state that is cloned by importNode() is explicitly defined
+            by the specs.
+          */
+          returnNode = importNode.call(originalDocument, returnNode, true);
+        }
+
+        return returnNode;
+      }
+
+      var serializedHTML = WHOLE_DOCUMENT ? body.outerHTML : body.innerHTML;
+
+      /* Sanitize final string template-safe */
+      if (SAFE_FOR_TEMPLATES) {
+        serializedHTML = stringReplace(serializedHTML, MUSTACHE_EXPR$$1, ' ');
+        serializedHTML = stringReplace(serializedHTML, ERB_EXPR$$1, ' ');
+      }
+
+      return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;
+    };
+
+    /**
+     * Public method to set the configuration once
+     * setConfig
+     *
+     * @param {Object} cfg configuration object
+     */
+    DOMPurify.setConfig = function (cfg) {
+      _parseConfig(cfg);
+      SET_CONFIG = true;
+    };
+
+    /**
+     * Public method to remove the configuration
+     * clearConfig
+     *
+     */
+    DOMPurify.clearConfig = function () {
+      CONFIG = null;
+      SET_CONFIG = false;
+    };
+
+    /**
+     * Public method to check if an attribute value is valid.
+     * Uses last set config, if any. Otherwise, uses config defaults.
+     * isValidAttribute
+     *
+     * @param  {string} tag Tag name of containing element.
+     * @param  {string} attr Attribute name.
+     * @param  {string} value Attribute value.
+     * @return {Boolean} Returns true if `value` is valid. Otherwise, returns false.
+     */
+    DOMPurify.isValidAttribute = function (tag, attr, value) {
+      /* Initialize shared config vars if necessary. */
+      if (!CONFIG) {
+        _parseConfig({});
+      }
+
+      var lcTag = stringToLowerCase(tag);
+      var lcName = stringToLowerCase(attr);
+      return _isValidAttribute(lcTag, lcName, value);
+    };
+
+    /**
+     * AddHook
+     * Public method to add DOMPurify hooks
+     *
+     * @param {String} entryPoint entry point for the hook to add
+     * @param {Function} hookFunction function to execute
+     */
+    DOMPurify.addHook = function (entryPoint, hookFunction) {
+      if (typeof hookFunction !== 'function') {
+        return;
+      }
+
+      hooks[entryPoint] = hooks[entryPoint] || [];
+      arrayPush(hooks[entryPoint], hookFunction);
+    };
+
+    /**
+     * RemoveHook
+     * Public method to remove a DOMPurify hook at a given entryPoint
+     * (pops it from the stack of hooks if more are present)
+     *
+     * @param {String} entryPoint entry point for the hook to remove
+     */
+    DOMPurify.removeHook = function (entryPoint) {
+      if (hooks[entryPoint]) {
+        arrayPop(hooks[entryPoint]);
+      }
+    };
+
+    /**
+     * RemoveHooks
+     * Public method to remove all DOMPurify hooks at a given entryPoint
+     *
+     * @param  {String} entryPoint entry point for the hooks to remove
+     */
+    DOMPurify.removeHooks = function (entryPoint) {
+      if (hooks[entryPoint]) {
+        hooks[entryPoint] = [];
+      }
+    };
+
+    /**
+     * RemoveAllHooks
+     * Public method to remove all DOMPurify hooks
+     *
+     */
+    DOMPurify.removeAllHooks = function () {
+      hooks = {};
+    };
 
     return DOMPurify;
   }
 
-  var originalDocument = window.document;
-  var useDOMParser = false; // See comment below
-  var useXHR = false;
+  var purify = createDOMPurify();
 
-  var document = window.document;
-  var DocumentFragment = window.DocumentFragment,
-      HTMLTemplateElement = window.HTMLTemplateElement,
-      Node = window.Node,
-      NodeFilter = window.NodeFilter,
-      _window$NamedNodeMap = window.NamedNodeMap,
-      NamedNodeMap = _window$NamedNodeMap === undefined ? window.NamedNodeMap || window.MozNamedAttrMap : _window$NamedNodeMap,
-      Text = window.Text,
-      Comment = window.Comment,
-      DOMParser = window.DOMParser,
-      _window$XMLHttpReques = window.XMLHttpRequest,
-      XMLHttpRequest = _window$XMLHttpReques === undefined ? window.XMLHttpRequest : _window$XMLHttpReques,
-      _window$encodeURI = window.encodeURI,
-      encodeURI = _window$encodeURI === undefined ? window.encodeURI : _window$encodeURI;
+  return purify;
 
-  // As per issue #47, the web-components registry is inherited by a
-  // new document created via createHTMLDocument. As per the spec
-  // (http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries)
-  // a new empty registry is used when creating a template contents owner
-  // document, so we use that as our parent document to ensure nothing
-  // is inherited.
-
-  if (typeof HTMLTemplateElement === 'function') {
-    var template = document.createElement('template');
-    if (template.content && template.content.ownerDocument) {
-      document = template.content.ownerDocument;
-    }
-  }
-
-  var _document = document,
-      implementation = _document.implementation,
-      createNodeIterator = _document.createNodeIterator,
-      getElementsByTagName = _document.getElementsByTagName,
-      createDocumentFragment = _document.createDocumentFragment;
-
-  var importNode = originalDocument.importNode;
-
-  var hooks = {};
-
-  /**
-    * Expose whether this browser supports running the full DOMPurify.
-    */
-  DOMPurify.isSupported = implementation && typeof implementation.createHTMLDocument !== 'undefined' && document.documentMode !== 9;
-
-  /**
-    * We consider the elements and attributes below to be safe. Ideally
-    * don't add any new ones but feel free to remove unwanted ones.
-    */
-
-  /* allowed element names */
-  var ALLOWED_TAGS = null;
-  var DEFAULT_ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray(html), _toConsumableArray(svg), _toConsumableArray(svgFilters), _toConsumableArray(mathMl), _toConsumableArray(text)));
-
-  /* Allowed attribute names */
-  var ALLOWED_ATTR = null;
-  var DEFAULT_ALLOWED_ATTR = addToSet({}, [].concat(_toConsumableArray(html$1), _toConsumableArray(svg$1), _toConsumableArray(mathMl$1), _toConsumableArray(xml)));
-
-  /* Explicitly forbidden tags (overrides ALLOWED_TAGS/ADD_TAGS) */
-  var FORBID_TAGS = null;
-
-  /* Explicitly forbidden attributes (overrides ALLOWED_ATTR/ADD_ATTR) */
-  var FORBID_ATTR = null;
-
-  /* Decide if ARIA attributes are okay */
-  var ALLOW_ARIA_ATTR = true;
-
-  /* Decide if custom data attributes are okay */
-  var ALLOW_DATA_ATTR = true;
-
-  /* Decide if unknown protocols are okay */
-  var ALLOW_UNKNOWN_PROTOCOLS = false;
-
-  /* Output should be safe for jQuery's $() factory? */
-  var SAFE_FOR_JQUERY = false;
-
-  /* Output should be safe for common template engines.
-   * This means, DOMPurify removes data attributes, mustaches and ERB
-   */
-  var SAFE_FOR_TEMPLATES = false;
-
-  /* Specify template detection regex for SAFE_FOR_TEMPLATES mode */
-  var MUSTACHE_EXPR = /\{\{[\s\S]*|[\s\S]*\}\}/gm;
-  var ERB_EXPR = /<%[\s\S]*|[\s\S]*%>/gm;
-
-  /* Decide if document with <html>... should be returned */
-  var WHOLE_DOCUMENT = false;
-
-  /* Track whether config is already set on this instance of DOMPurify. */
-  var SET_CONFIG = false;
-
-  /* Decide if all elements (e.g. style, script) must be children of
-   * document.body. By default, browsers might move them to document.head */
-  var FORCE_BODY = false;
-
-  /* Decide if a DOM `HTMLBodyElement` should be returned, instead of a html string.
-   * If `WHOLE_DOCUMENT` is enabled a `HTMLHtmlElement` will be returned instead
-   */
-  var RETURN_DOM = false;
-
-  /* Decide if a DOM `DocumentFragment` should be returned, instead of a html string */
-  var RETURN_DOM_FRAGMENT = false;
-
-  /* If `RETURN_DOM` or `RETURN_DOM_FRAGMENT` is enabled, decide if the returned DOM
-   * `Node` is imported into the current `Document`. If this flag is not enabled the
-   * `Node` will belong (its ownerDocument) to a fresh `HTMLDocument`, created by
-   * DOMPurify. */
-  var RETURN_DOM_IMPORT = false;
-
-  /* Output should be free from DOM clobbering attacks? */
-  var SANITIZE_DOM = true;
-
-  /* Keep element content when removing element? */
-  var KEEP_CONTENT = true;
-
-  /* Allow usage of profiles like html, svg and mathMl */
-  var USE_PROFILES = {};
-
-  /* Tags to ignore content of when KEEP_CONTENT is true */
-  var FORBID_CONTENTS = addToSet({}, ['audio', 'head', 'math', 'script', 'style', 'template', 'svg', 'video']);
-
-  /* Tags that are safe for data: URIs */
-  var DATA_URI_TAGS = addToSet({}, ['audio', 'video', 'img', 'source', 'image']);
-
-  /* Attributes safe for values like "javascript:" */
-  var URI_SAFE_ATTRIBUTES = addToSet({}, ['alt', 'class', 'for', 'id', 'label', 'name', 'pattern', 'placeholder', 'summary', 'title', 'value', 'style', 'xmlns']);
-
-  /* Keep a reference to config to pass to hooks */
-  var CONFIG = null;
-
-  /* Ideally, do not touch anything below this line */
-  /* ______________________________________________ */
-
-  var formElement = document.createElement('form');
-
-  /**
-  * _parseConfig
-  *
-  * @param  optional config literal
-  */
-  // eslint-disable-next-line complexity
-  var _parseConfig = function _parseConfig(cfg) {
-    /* Shield configuration object from tampering */
-    if ((typeof cfg === 'undefined' ? 'undefined' : _typeof(cfg)) !== 'object') {
-      cfg = {};
-    }
-
-    /* Set configuration parameters */
-    ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS) : DEFAULT_ALLOWED_TAGS;
-    ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR) : DEFAULT_ALLOWED_ATTR;
-    FORBID_TAGS = 'FORBID_TAGS' in cfg ? addToSet({}, cfg.FORBID_TAGS) : {};
-    FORBID_ATTR = 'FORBID_ATTR' in cfg ? addToSet({}, cfg.FORBID_ATTR) : {};
-    USE_PROFILES = 'USE_PROFILES' in cfg ? cfg.USE_PROFILES : false;
-    ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
-    ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
-    ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
-    SAFE_FOR_JQUERY = cfg.SAFE_FOR_JQUERY || false; // Default false
-    SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
-    WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false; // Default false
-    RETURN_DOM = cfg.RETURN_DOM || false; // Default false
-    RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false; // Default false
-    RETURN_DOM_IMPORT = cfg.RETURN_DOM_IMPORT || false; // Default false
-    FORCE_BODY = cfg.FORCE_BODY || false; // Default false
-    SANITIZE_DOM = cfg.SANITIZE_DOM !== false; // Default true
-    KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
-
-    if (SAFE_FOR_TEMPLATES) {
-      ALLOW_DATA_ATTR = false;
-    }
-
-    if (RETURN_DOM_FRAGMENT) {
-      RETURN_DOM = true;
-    }
-
-    /* Parse profile info */
-    if (USE_PROFILES) {
-      ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray(text)));
-      ALLOWED_ATTR = [];
-      if (USE_PROFILES.html === true) {
-        addToSet(ALLOWED_TAGS, html);
-        addToSet(ALLOWED_ATTR, html$1);
-      }
-      if (USE_PROFILES.svg === true) {
-        addToSet(ALLOWED_TAGS, svg);
-        addToSet(ALLOWED_ATTR, svg$1);
-        addToSet(ALLOWED_ATTR, xml);
-      }
-      if (USE_PROFILES.svgFilters === true) {
-        addToSet(ALLOWED_TAGS, svgFilters);
-        addToSet(ALLOWED_ATTR, svg$1);
-        addToSet(ALLOWED_ATTR, xml);
-      }
-      if (USE_PROFILES.mathMl === true) {
-        addToSet(ALLOWED_TAGS, mathMl);
-        addToSet(ALLOWED_ATTR, mathMl$1);
-        addToSet(ALLOWED_ATTR, xml);
-      }
-    }
-
-    /* Merge configuration parameters */
-    if (cfg.ADD_TAGS) {
-      if (ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS) {
-        ALLOWED_TAGS = clone(ALLOWED_TAGS);
-      }
-      addToSet(ALLOWED_TAGS, cfg.ADD_TAGS);
-    }
-    if (cfg.ADD_ATTR) {
-      if (ALLOWED_ATTR === DEFAULT_ALLOWED_ATTR) {
-        ALLOWED_ATTR = clone(ALLOWED_ATTR);
-      }
-      addToSet(ALLOWED_ATTR, cfg.ADD_ATTR);
-    }
-    if (cfg.ADD_URI_SAFE_ATTR) {
-      addToSet(URI_SAFE_ATTRIBUTES, cfg.ADD_URI_SAFE_ATTR);
-    }
-
-    /* Add #text in case KEEP_CONTENT is set to true */
-    if (KEEP_CONTENT) {
-      ALLOWED_TAGS['#text'] = true;
-    }
-
-    // Prevent further manipulation of configuration.
-    // Not available in IE8, Safari 5, etc.
-    if (Object && 'freeze' in Object) {
-      Object.freeze(cfg);
-    }
-
-    CONFIG = cfg;
-  };
-
-  /**
-  * _forceRemove
-  *
-  * @param  a DOM node
-  */
-  var _forceRemove = function _forceRemove(node) {
-    DOMPurify.removed.push({ element: node });
-    try {
-      node.parentNode.removeChild(node);
-    } catch (err) {
-      node.outerHTML = '';
-    }
-  };
-
-  /**
-  * _removeAttribute
-  *
-  * @param  an Attribute name
-  * @param  a DOM node
-  */
-  var _removeAttribute = function _removeAttribute(name, node) {
-    DOMPurify.removed.push({
-      attribute: node.getAttributeNode(name),
-      from: node
-    });
-    node.removeAttribute(name);
-  };
-
-  /**
-  * _initDocument
-  *
-  * @param  a string of dirty markup
-  * @return a DOM, filled with the dirty markup
-  */
-  var _initDocument = function _initDocument(dirty) {
-    /* Create a HTML document */
-    var doc = void 0;
-    var body = void 0;
-
-    if (FORCE_BODY) {
-      dirty = '<remove></remove>' + dirty;
-    }
-
-    /* Use XHR if necessary because Safari 10.1 and newer are buggy */
-    if (useXHR) {
-      try {
-        dirty = encodeURI(dirty);
-      } catch (err) {}
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'document';
-      xhr.open('GET', 'data:text/html;charset=utf-8,' + dirty, false);
-      xhr.send(null);
-      doc = xhr.response;
-    }
-
-    /* Use DOMParser to workaround Firefox bug (see comment below) */
-    if (useDOMParser) {
-      try {
-        doc = new DOMParser().parseFromString(dirty, 'text/html');
-      } catch (err) {}
-    }
-
-    /* Otherwise use createHTMLDocument, because DOMParser is unsafe in
-    Safari (see comment below) */
-    if (!doc || !doc.documentElement) {
-      doc = implementation.createHTMLDocument('');
-      body = doc.body;
-      body.parentNode.removeChild(body.parentNode.firstElementChild);
-      body.outerHTML = dirty;
-    }
-
-    /* Work on whole document or just its body */
-    return getElementsByTagName.call(doc, WHOLE_DOCUMENT ? 'html' : 'body')[0];
-  };
-
-  // Safari 10.1+ (unfixed as of time of writing) has a catastrophic bug in
-  // its implementation of DOMParser such that the following executes the
-  // JavaScript:
-  //
-  // new DOMParser()
-  //   .parseFromString('<svg onload=alert(document.domain)>', 'text/html');
-  //
-  // Later, it was also noticed that even more assumed benign and inert ways
-  // of creating a document are now insecure thanks to Safari. So we work
-  // around that with a feature test and use XHR to create the document in
-  // case we really have to. That one seems safe for now.
-  //
-  // However, Firefox uses a different parser for innerHTML rather than
-  // DOMParser (see https://bugzilla.mozilla.org/show_bug.cgi?id=1205631)
-  // which means that you *must* use DOMParser, otherwise the output may
-  // not be safe if used in a document.write context later.
-  //
-  // So we feature detect the Firefox bug and use the DOMParser if necessary.
-  if (DOMPurify.isSupported) {
-    (function () {
-      var doc = _initDocument('<svg><g onload="this.parentNode.remove()"></g></svg>');
-      if (!doc.querySelector('svg')) {
-        useXHR = true;
-      }
-      try {
-        doc = _initDocument('<svg><p><style><img src="</style><img src=x onerror=alert(1)//">');
-        if (doc.querySelector('svg img')) {
-          useDOMParser = true;
-        }
-      } catch (err) {}
-    })();
-  }
-
-  /**
-  * _createIterator
-  *
-  * @param  document/fragment to create iterator for
-  * @return iterator instance
-  */
-  var _createIterator = function _createIterator(root) {
-    return createNodeIterator.call(root.ownerDocument || root, root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, function () {
-      return NodeFilter.FILTER_ACCEPT;
-    }, false);
-  };
-
-  /**
-  * _isClobbered
-  *
-  * @param  element to check for clobbering attacks
-  * @return true if clobbered, false if safe
-  */
-  var _isClobbered = function _isClobbered(elm) {
-    if (elm instanceof Text || elm instanceof Comment) {
-      return false;
-    }
-    if (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function') {
-      return true;
-    }
-    return false;
-  };
-
-  /**
-  * _isNode
-  *
-  * @param object to check whether it's a DOM node
-  * @return true is object is a DOM node
-  */
-  var _isNode = function _isNode(obj) {
-    return (typeof Node === 'undefined' ? 'undefined' : _typeof(Node)) === 'object' ? obj instanceof Node : obj && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && typeof obj.nodeType === 'number' && typeof obj.nodeName === 'string';
-  };
-
-  /**
-  * _executeHook
-  * Execute user configurable hooks
-  *
-  * @param  {String} entryPoint  Name of the hook's entry point
-  * @param  {Node} currentNode
-  */
-  var _executeHook = function _executeHook(entryPoint, currentNode, data) {
-    if (!hooks[entryPoint]) {
-      return;
-    }
-
-    hooks[entryPoint].forEach(function (hook) {
-      hook.call(DOMPurify, currentNode, data, CONFIG);
-    });
-  };
-
-  /**
-  * _sanitizeElements
-  *
-  * @protect nodeName
-  * @protect textContent
-  * @protect removeChild
-  *
-  * @param   node to check for permission to exist
-  * @return  true if node was killed, false if left alive
-  */
-  var _sanitizeElements = function _sanitizeElements(currentNode) {
-    var content = void 0;
-
-    /* Execute a hook if present */
-    _executeHook('beforeSanitizeElements', currentNode, null);
-
-    /* Check if element is clobbered or can clobber */
-    if (_isClobbered(currentNode)) {
-      _forceRemove(currentNode);
-      return true;
-    }
-
-    /* Now let's check the element's type and name */
-    var tagName = currentNode.nodeName.toLowerCase();
-
-    /* Execute a hook if present */
-    _executeHook('uponSanitizeElement', currentNode, {
-      tagName: tagName,
-      allowedTags: ALLOWED_TAGS
-    });
-
-    /* Remove element if anything forbids its presence */
-    if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
-      /* Keep content except for black-listed elements */
-      if (KEEP_CONTENT && !FORBID_CONTENTS[tagName] && typeof currentNode.insertAdjacentHTML === 'function') {
-        try {
-          currentNode.insertAdjacentHTML('AfterEnd', currentNode.innerHTML);
-        } catch (err) {}
-      }
-      _forceRemove(currentNode);
-      return true;
-    }
-
-    /* Convert markup to cover jQuery behavior */
-    if (SAFE_FOR_JQUERY && !currentNode.firstElementChild && (!currentNode.content || !currentNode.content.firstElementChild) && /</g.test(currentNode.textContent)) {
-      DOMPurify.removed.push({ element: currentNode.cloneNode() });
-      currentNode.innerHTML = currentNode.textContent.replace(/</g, '&lt;');
-    }
-
-    /* Sanitize element content to be template-safe */
-    if (SAFE_FOR_TEMPLATES && currentNode.nodeType === 3) {
-      /* Get the element's text content */
-      content = currentNode.textContent;
-      content = content.replace(MUSTACHE_EXPR, ' ');
-      content = content.replace(ERB_EXPR, ' ');
-      if (currentNode.textContent !== content) {
-        DOMPurify.removed.push({ element: currentNode.cloneNode() });
-        currentNode.textContent = content;
-      }
-    }
-
-    /* Execute a hook if present */
-    _executeHook('afterSanitizeElements', currentNode, null);
-
-    return false;
-  };
-
-  var DATA_ATTR = /^data-[\-\w.\u00B7-\uFFFF]/; // eslint-disable-line no-useless-escape
-  var ARIA_ATTR = /^aria-[\-\w]+$/; // eslint-disable-line no-useless-escape
-  var IS_ALLOWED_URI = /^(?:(?:(?:f|ht)tps?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i; // eslint-disable-line no-useless-escape
-  var IS_SCRIPT_OR_DATA = /^(?:\w+script|data):/i;
-  /* This needs to be extensive thanks to Webkit/Blink's behavior */
-  var ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
-
-  /**
-  * _sanitizeAttributes
-  *
-  * @protect attributes
-  * @protect nodeName
-  * @protect removeAttribute
-  * @protect setAttribute
-  *
-  * @param   node to sanitize
-  * @return  void
-  */
-  // eslint-disable-next-line complexity
-  var _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
-    var attr = void 0;
-    var name = void 0;
-    var value = void 0;
-    var lcName = void 0;
-    var idAttr = void 0;
-    var attributes = void 0;
-    var l = void 0;
-    /* Execute a hook if present */
-    _executeHook('beforeSanitizeAttributes', currentNode, null);
-
-    attributes = currentNode.attributes;
-
-    /* Check if we have attributes; if not we might have a text node */
-    if (!attributes) {
-      return;
-    }
-
-    var hookEvent = {
-      attrName: '',
-      attrValue: '',
-      keepAttr: true,
-      allowedAttributes: ALLOWED_ATTR
-    };
-    l = attributes.length;
-
-    /* Go backwards over all attributes; safely remove bad ones */
-    while (l--) {
-      attr = attributes[l];
-      name = attr.name;
-      value = attr.value.trim();
-      lcName = name.toLowerCase();
-
-      /* Execute a hook if present */
-      hookEvent.attrName = lcName;
-      hookEvent.attrValue = value;
-      hookEvent.keepAttr = true;
-      _executeHook('uponSanitizeAttribute', currentNode, hookEvent);
-      value = hookEvent.attrValue;
-
-      /* Remove attribute */
-      // Safari (iOS + Mac), last tested v8.0.5, crashes if you try to
-      // remove a "name" attribute from an <img> tag that has an "id"
-      // attribute at the time.
-      if (lcName === 'name' && currentNode.nodeName === 'IMG' && attributes.id) {
-        idAttr = attributes.id;
-        attributes = Array.prototype.slice.apply(attributes);
-        _removeAttribute('id', currentNode);
-        _removeAttribute(name, currentNode);
-        if (attributes.indexOf(idAttr) > l) {
-          currentNode.setAttribute('id', idAttr.value);
-        }
-      } else if (
-      // This works around a bug in Safari, where input[type=file]
-      // cannot be dynamically set after type has been removed
-      currentNode.nodeName === 'INPUT' && lcName === 'type' && value === 'file' && (ALLOWED_ATTR[lcName] || !FORBID_ATTR[lcName])) {
-        continue;
-      } else {
-        // This avoids a crash in Safari v9.0 with double-ids.
-        // The trick is to first set the id to be empty and then to
-        // remove the attribute
-        if (name === 'id') {
-          currentNode.setAttribute(name, '');
-        }
-        _removeAttribute(name, currentNode);
-      }
-
-      /* Did the hooks approve of the attribute? */
-      if (!hookEvent.keepAttr) {
-        continue;
-      }
-
-      /* Make sure attribute cannot clobber */
-      if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in window || value in document || value in formElement)) {
-        continue;
-      }
-
-      /* Sanitize attribute content to be template-safe */
-      if (SAFE_FOR_TEMPLATES) {
-        value = value.replace(MUSTACHE_EXPR, ' ');
-        value = value.replace(ERB_EXPR, ' ');
-      }
-
-      /* Allow valid data-* attributes: At least one character after "-"
-         (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
-         XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
-         We don't need to check the value; it's always URI safe. */
-      if (ALLOW_DATA_ATTR && DATA_ATTR.test(lcName)) {
-        // This attribute is safe
-      } else if (ALLOW_ARIA_ATTR && ARIA_ATTR.test(lcName)) {
-        // This attribute is safe
-        /* Otherwise, check the name is permitted */
-      } else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
-        continue;
-
-        /* Check value is safe. First, is attr inert? If so, is safe */
-      } else if (URI_SAFE_ATTRIBUTES[lcName]) {
-        // This attribute is safe
-        /* Check no script, data or unknown possibly unsafe URI
-         unless we know URI values are safe for that attribute */
-      } else if (IS_ALLOWED_URI.test(value.replace(ATTR_WHITESPACE, ''))) {
-        // This attribute is safe
-        /* Keep image data URIs alive if src/xlink:href is allowed */
-      } else if ((lcName === 'src' || lcName === 'xlink:href') && value.indexOf('data:') === 0 && DATA_URI_TAGS[currentNode.nodeName.toLowerCase()]) {
-        // This attribute is safe
-        /* Allow unknown protocols: This provides support for links that
-         are handled by protocol handlers which may be unknown ahead of
-         time, e.g. fb:, spotify: */
-      } else if (ALLOW_UNKNOWN_PROTOCOLS && !IS_SCRIPT_OR_DATA.test(value.replace(ATTR_WHITESPACE, ''))) {
-        // This attribute is safe
-        /* Check for binary attributes */
-        // eslint-disable-next-line no-negated-condition
-      } else if (!value) {
-        // Binary attributes are safe at this point
-        /* Anything else, presume unsafe, do not add it back */
-      } else {
-        continue;
-      }
-
-      /* Handle invalid data-* attribute set by try-catching it */
-      try {
-        currentNode.setAttribute(name, value);
-        DOMPurify.removed.pop();
-      } catch (err) {}
-    }
-
-    /* Execute a hook if present */
-    _executeHook('afterSanitizeAttributes', currentNode, null);
-  };
-
-  /**
-  * _sanitizeShadowDOM
-  *
-  * @param  fragment to iterate over recursively
-  * @return void
-  */
-  var _sanitizeShadowDOM = function _sanitizeShadowDOM(fragment) {
-    var shadowNode = void 0;
-    var shadowIterator = _createIterator(fragment);
-
-    /* Execute a hook if present */
-    _executeHook('beforeSanitizeShadowDOM', fragment, null);
-
-    while (shadowNode = shadowIterator.nextNode()) {
-      /* Execute a hook if present */
-      _executeHook('uponSanitizeShadowNode', shadowNode, null);
-
-      /* Sanitize tags and elements */
-      if (_sanitizeElements(shadowNode)) {
-        continue;
-      }
-
-      /* Deep shadow DOM detected */
-      if (shadowNode.content instanceof DocumentFragment) {
-        _sanitizeShadowDOM(shadowNode.content);
-      }
-
-      /* Check attributes, sanitize if necessary */
-      _sanitizeAttributes(shadowNode);
-    }
-
-    /* Execute a hook if present */
-    _executeHook('afterSanitizeShadowDOM', fragment, null);
-  };
-
-  /**
-  * Sanitize
-  * Public method providing core sanitation functionality
-  *
-  * @param {String|Node} dirty string or DOM node
-  * @param {Object} configuration object
-  */
-  // eslint-disable-next-line complexity
-  DOMPurify.sanitize = function (dirty, cfg) {
-    var body = void 0;
-    var importedNode = void 0;
-    var currentNode = void 0;
-    var oldNode = void 0;
-    var returnNode = void 0;
-    /* Make sure we have a string to sanitize.
-      DO NOT return early, as this will return the wrong type if
-      the user has requested a DOM object rather than a string */
-    if (!dirty) {
-      dirty = '<!-->';
-    }
-
-    /* Stringify, in case dirty is an object */
-    if (typeof dirty !== 'string' && !_isNode(dirty)) {
-      // eslint-disable-next-line no-negated-condition
-      if (typeof dirty.toString !== 'function') {
-        throw new TypeError('toString is not a function');
-      } else {
-        dirty = dirty.toString();
-      }
-    }
-
-    /* Check we can run. Otherwise fall back or ignore */
-    if (!DOMPurify.isSupported) {
-      if (_typeof(window.toStaticHTML) === 'object' || typeof window.toStaticHTML === 'function') {
-        if (typeof dirty === 'string') {
-          return window.toStaticHTML(dirty);
-        } else if (_isNode(dirty)) {
-          return window.toStaticHTML(dirty.outerHTML);
-        }
-      }
-      return dirty;
-    }
-
-    /* Assign config vars */
-    if (!SET_CONFIG) {
-      _parseConfig(cfg);
-    }
-
-    /* Clean up removed elements */
-    DOMPurify.removed = [];
-
-    if (dirty instanceof Node) {
-      /* If dirty is a DOM element, append to an empty document to avoid
-         elements being stripped by the parser */
-      body = _initDocument('<!-->');
-      importedNode = body.ownerDocument.importNode(dirty, true);
-      if (importedNode.nodeType === 1 && importedNode.nodeName === 'BODY') {
-        /* Node is already a body, use as is */
-        body = importedNode;
-      } else {
-        body.appendChild(importedNode);
-      }
-    } else {
-      /* Exit directly if we have nothing to do */
-      if (!RETURN_DOM && !WHOLE_DOCUMENT && dirty.indexOf('<') === -1) {
-        return dirty;
-      }
-
-      /* Initialize the document to work on */
-      body = _initDocument(dirty);
-
-      /* Check we have a DOM node from the data */
-      if (!body) {
-        return RETURN_DOM ? null : '';
-      }
-    }
-
-    /* Remove first element node (ours) if FORCE_BODY is set */
-    if (FORCE_BODY) {
-      _forceRemove(body.firstChild);
-    }
-
-    /* Get node iterator */
-    var nodeIterator = _createIterator(body);
-
-    /* Now start iterating over the created document */
-    while (currentNode = nodeIterator.nextNode()) {
-      /* Fix IE's strange behavior with manipulated textNodes #89 */
-      if (currentNode.nodeType === 3 && currentNode === oldNode) {
-        continue;
-      }
-
-      /* Sanitize tags and elements */
-      if (_sanitizeElements(currentNode)) {
-        continue;
-      }
-
-      /* Shadow DOM detected, sanitize it */
-      if (currentNode.content instanceof DocumentFragment) {
-        _sanitizeShadowDOM(currentNode.content);
-      }
-
-      /* Check attributes, sanitize if necessary */
-      _sanitizeAttributes(currentNode);
-
-      oldNode = currentNode;
-    }
-
-    /* Return sanitized string or DOM */
-    if (RETURN_DOM) {
-      if (RETURN_DOM_FRAGMENT) {
-        returnNode = createDocumentFragment.call(body.ownerDocument);
-
-        while (body.firstChild) {
-          returnNode.appendChild(body.firstChild);
-        }
-      } else {
-        returnNode = body;
-      }
-
-      if (RETURN_DOM_IMPORT) {
-        /* AdoptNode() is not used because internal state is not reset
-               (e.g. the past names map of a HTMLFormElement), this is safe
-               in theory but we would rather not risk another attack vector.
-               The state that is cloned by importNode() is explicitly defined
-               by the specs. */
-        returnNode = importNode.call(originalDocument, returnNode, true);
-      }
-
-      return returnNode;
-    }
-
-    return WHOLE_DOCUMENT ? body.outerHTML : body.innerHTML;
-  };
-
-  /**
-  * Public method to set the configuration once
-  * setConfig
-  *
-  * @param {Object} configuration object
-  * @return void
-  */
-  DOMPurify.setConfig = function (cfg) {
-    _parseConfig(cfg);
-    SET_CONFIG = true;
-  };
-
-  /**
-  * Public method to remove the configuration
-  * clearConfig
-  *
-  * @return void
-  */
-  DOMPurify.clearConfig = function () {
-    CONFIG = null;
-    SET_CONFIG = false;
-  };
-
-  /**
-  * AddHook
-  * Public method to add DOMPurify hooks
-  *
-  * @param {String} entryPoint
-  * @param {Function} hookFunction
-  */
-  DOMPurify.addHook = function (entryPoint, hookFunction) {
-    if (typeof hookFunction !== 'function') {
-      return;
-    }
-    hooks[entryPoint] = hooks[entryPoint] || [];
-    hooks[entryPoint].push(hookFunction);
-  };
-
-  /**
-  * RemoveHook
-  * Public method to remove a DOMPurify hook at a given entryPoint
-  * (pops it from the stack of hooks if more are present)
-  *
-  * @param {String} entryPoint
-  * @return void
-  */
-  DOMPurify.removeHook = function (entryPoint) {
-    if (hooks[entryPoint]) {
-      hooks[entryPoint].pop();
-    }
-  };
-
-  /**
-  * RemoveHooks
-  * Public method to remove all DOMPurify hooks at a given entryPoint
-  *
-  * @param  {String} entryPoint
-  * @return void
-  */
-  DOMPurify.removeHooks = function (entryPoint) {
-    if (hooks[entryPoint]) {
-      hooks[entryPoint] = [];
-    }
-  };
-
-  /**
-  * RemoveAllHooks
-  * Public method to remove all DOMPurify hooks
-  *
-  * @return void
-  */
-  DOMPurify.removeAllHooks = function () {
-    hooks = {};
-  };
-
-  return DOMPurify;
-}
-
-var purify = createDOMPurify();
-
-return purify;
-
-})));
+}));
 //# sourceMappingURL=purify.js.map
 
 
@@ -13065,6 +13291,398 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _DashboardView = __webpack_require__(13);
+
+var _DashboardView2 = _interopRequireDefault(_DashboardView);
+
+var _Sanitize = __webpack_require__(7);
+
+var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+var _LoginView = __webpack_require__(6);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
+
+var _localeFallback = __webpack_require__(5);
+
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var UpgradeView = function () {
+	function UpgradeView() {
+		_classCallCheck(this, UpgradeView);
+
+		this.template = _folders2.default.VIEWS + '/upgrade.html';
+		this.header = _folders2.default.VIEWS + '/header.html';
+	}
+
+	_createClass(UpgradeView, [{
+		key: 'initView',
+		value: function initView() {
+			var _this = this;
+
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
+
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			_jquery2.default.get(_this.header, function (header) {
+				_this.App.append(header);
+				_jquery2.default.get(_this.template, function (template) {
+
+					_this.loadStorageData().then(function (storage) {
+						_this.Storage = storage;
+
+						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+						_this.App.append(loadedTemplate);
+
+						_this.selectElements();
+
+						// Setting all events for selected elements
+						_this.setEvents();
+						_this.setHeaderBackButton();
+
+						_this.upgradeView.css("display", "none");
+
+						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this)).catch(_this.onProductError.bind(_this));
+					});
+				}, "html");
+			}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements() {
+			var _this = this;
+
+			_this.headerLogo = (0, _jquery2.default)('#header-logo');
+
+			_this.productTable = (0, _jquery2.default)('#product-table');
+			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
+
+			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
+
+			_this.nextToPayment = (0, _jquery2.default)('#next-to-payment');
+			_this.backToProduct = (0, _jquery2.default)('#back-to-product');
+
+			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
+
+			_this.errorMessage = (0, _jquery2.default)('#error_message');
+
+			_this.paymentButton = (0, _jquery2.default)('#payment-button');
+
+			_this.setServiceElements();
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements() {
+			var _this = this;
+			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
+		}
+	}, {
+		key: 'setEvents',
+		value: function setEvents() {
+			var _this = this;
+
+			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
+			_this.nextToPayment.click(_this.onNextToPaymentClicked.bind(this));
+			_this.backToProduct.click(_this.onBackToProductClicked.bind(this));
+		}
+	}, {
+		key: 'setHeaderBackButton',
+		value: function setHeaderBackButton() {
+			var _this = this;
+			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
+			_this.headerBackButton.css('display', 'block');
+			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
+		}
+	}, {
+		key: 'loadProductsFromServer',
+		value: function loadProductsFromServer() {
+			var _this = this;
+
+			return new Promise(function (resolve, reject) {
+
+				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
+
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+					var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+					_BackgroundRequester2.default.request('api', 'getProducts', userdata).then(function (response) {
+
+						(0, _jquery2.default)('.loadingimg').css('display', 'none');
+
+						if (_Utils2.default.isResponse200(response)) {
+
+							var products = response["products"];
+							var paymentMethods = response["payment_methods"];
+
+							if (Array.isArray(products) && Array.isArray(paymentMethods)) {
+
+								products.forEach(function (productPackage) {
+									var checked = productPackage.default ? 'checked="checked"' : '';
+									var packageItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(productPackage.id) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.title) + '</td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.price) + ' ' + _Sanitize2.default.escpateData(productPackage.currency) + '</td></tr>';
+
+									_this.productTableBody.append(packageItem);
+								});
+
+								paymentMethods.forEach(function (paymentMethod) {
+
+									var paymentItem = '<div class="paymentItem">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(paymentMethod.endpoint) + '">' + '<img class="upgrade-view__payment-image" alt="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" title="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" src="' + _Sanitize2.default.escpateData(paymentMethod.logosrc) + '">' + '</div>';
+
+									_this.paymentContainer.append(paymentItem);
+								});
+
+								(0, _jquery2.default)('.upgrade-view__payment-image').click(function () {
+									(0, _jquery2.default)(this).prev().prop("checked", true);
+								});
+							} else {
+								reject({ code: 0, msg: "Response is not array" });
+								return;
+							}
+
+							resolve();
+						} else {
+							reject({ code: 1, response: response });
+						}
+					});
+				});
+			});
+		}
+	}, {
+		key: 'loadStorageData',
+		value: function loadStorageData() {
+			return new Promise(function (resolve, reject) {
+
+				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
+
+					resolve(storage);
+				});
+			});
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+			var _this = this;
+			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "UpgradeView", _jquery2.default);
+		}
+
+		/* Modifier */
+
+	}, {
+		key: 'makeButtonInactive',
+		value: function makeButtonInactive(button) {
+			button.unbind('click');
+			button.addClass('btn--inactive');
+		}
+	}, {
+		key: 'makeButtonActive',
+		value: function makeButtonActive(button) {
+			button.click(this.onPaymentButtonClicked.bind(this));
+			button.removeClass('btn--inactive');
+		}
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
+			_this.makeButtonInactive(_this.paymentButton);
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			_this.makeButtonActive(_this.paymentButton);
+		}
+	}, {
+		key: 'displayErrors',
+		value: function displayErrors(error) {
+			var _this = this;
+			_this.errorMessage.html("");
+			_this.errorMessage.text(error);
+		}
+
+		/* Events */
+
+	}, {
+		key: 'onProductsLoaded',
+		value: function onProductsLoaded() {
+			var _this = this;
+
+			_this.upgradeView.css("display", "block");
+		}
+	}, {
+		key: 'showError',
+		value: function showError(msg) {
+			var _this = this;
+			_this.upgradeView.css("display", "block");
+			_this.upgradeView.html("<p>" + msg + "</p>");
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#upgrade-mode').css('display', 'none');
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
+		key: 'onProductError',
+		value: function onProductError(error) {
+			var _this = this;
+
+			if (error.code === 0) {
+				_this.showError(error.msg);
+				return;
+			}
+
+			if (error.code === 1 && error.response) {
+				var response = error.response;
+				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+				}
+
+				if (_Utils2.default.isResponseAuthError(response)) {
+					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+						chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+							_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+						});
+					});
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.showMaintenanceMessage(response.message);
+				}
+			}
+		}
+	}, {
+		key: 'onPaymentButtonClicked',
+		value: function onPaymentButtonClicked() {
+			var _this = this;
+
+			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
+			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
+
+			var productId = selectedPackage.val();
+			var paymentPath = selectedPayment.val();
+
+			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
+
+			_this.setLoading();
+
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+
+				var paymentData = {
+					productid: productId,
+					endpoint: paymentPath
+				};
+
+				_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
+
+					_this.unsetLoading();
+
+					if (_Utils2.default.isResponse200(response)) {
+						_Utils2.default.openNewTab(response.payat);
+						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
+						window.close();
+					} else {
+
+						if (_Utils2.default.isResponseMinus20(response)) return _this.displayErrors(response.message);
+
+						if (_Utils2.default.isResponseMinusOne(response)) {
+							return _Utils2.default.showMinusOneError(_this.displayErrors.bind(_this));
+						}
+
+						if (_Utils2.default.isResponseAuthError(response)) {
+							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+								chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+									_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+								});
+							});
+						}
+
+						if (_Utils2.default.isMaintenanceMode(response)) {
+							_this.showMaintenanceMessage(response.message);
+						}
+					}
+				});
+			});
+		}
+	}, {
+		key: 'onHeaderBackButtonClicked',
+		value: function onHeaderBackButtonClicked() {
+			var _this = this;
+
+			_DashboardView2.default.initView();
+		}
+	}, {
+		key: 'onNextToPaymentClicked',
+		value: function onNextToPaymentClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'none');
+			(0, _jquery2.default)('#payment-step').css('display', 'block');
+		}
+	}, {
+		key: 'onBackToProductClicked',
+		value: function onBackToProductClicked() {
+			var _this = this;
+			(0, _jquery2.default)('#product-step').css('display', 'block');
+			(0, _jquery2.default)('#payment-step').css('display', 'none');
+		}
+	}]);
+
+	return UpgradeView;
+}();
+
+exports.default = new UpgradeView();
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(3);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
 var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
@@ -13085,11 +13703,11 @@ var _ServerList = __webpack_require__(36);
 
 var _ServerList2 = _interopRequireDefault(_ServerList);
 
-var _ProxySearchView = __webpack_require__(21);
+var _ProxySearchView = __webpack_require__(20);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -13113,7 +13731,7 @@ var _GifView = __webpack_require__(55);
 
 var _GifView2 = _interopRequireDefault(_GifView);
 
-var _Sticked = __webpack_require__(25);
+var _Sticked = __webpack_require__(24);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
 
@@ -13133,13 +13751,13 @@ var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
 
-var _OtherToolsView = __webpack_require__(26);
+var _OtherToolsView = __webpack_require__(25);
 
 var _OtherToolsView2 = _interopRequireDefault(_OtherToolsView);
 
-var _Tooltip = __webpack_require__(19);
+var _tooltip = __webpack_require__(26);
 
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
+var _tooltip2 = _interopRequireDefault(_tooltip);
 
 var _GetPremiumView = __webpack_require__(27);
 
@@ -13153,7 +13771,7 @@ var _TeaserView = __webpack_require__(56);
 
 var _TeaserView2 = _interopRequireDefault(_TeaserView);
 
-var _UpdateRequiredView = __webpack_require__(20);
+var _UpdateRequiredView = __webpack_require__(19);
 
 var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
 
@@ -13275,7 +13893,7 @@ var DashboardView = function () {
 					// Setting all events for selected elements
 					_this.setEvents();
 
-					_this.setAuthcodeContainer(storage);
+					//_this.setAuthcodeContainer(storage);
 				}, "html");
 			}, "html");
 		}
@@ -13477,16 +14095,13 @@ var DashboardView = function () {
 			var _this = this;
 			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
 				var logosource = _ServiceMeta2.default.IMAGES.HEADERLOGO;
-				var uid = "";
-				var config = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
+				var configData = storage[_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA];
 
-				if (config && config.uid !== undefined) uid = "&uid=" + config.uid;
+				if (configData && _Utils2.default.isObject(configData) && configData.hasOwnProperty("assets") && _Utils2.default.isObject(configData.assets) && configData.assets.hasOwnProperty("mainlogo")) {
+					logosource = configData.assets["mainlogo"];
+				}
 
-				var headerlogo = logosource + "?cv=" + _ServiceMeta2.default.VERSION + uid;
-				_this.headerLogo.attr('src', headerlogo);
-
-				var otherToolsGif = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] ? storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + _ServiceMeta2.default.IMAGES.OTHERTOOLSGIF : "";
-				_this.otherToolsGif.attr('src', otherToolsGif);
+				_this.headerLogo.attr('src', logosource);
 			});
 			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
 		}
@@ -13500,19 +14115,19 @@ var DashboardView = function () {
 				title: "Top"
 			};
 
-			new _Tooltip2.default(_this.logoutButton, {
+			new _tooltip2.default(_this.logoutButton, {
 				placement: 'top', // or bottom, left, right, and variations
 				title: locales.Logout
 			});
-			new _Tooltip2.default(_this.userProfileButton, {
+			new _tooltip2.default(_this.userProfileButton, {
 				placement: 'top', // or bottom, left, right, and variations
 				title: locales.EditProfile
 			});
-			new _Tooltip2.default(_this.ipLookupButton, {
+			new _tooltip2.default(_this.ipLookupButton, {
 				placement: 'top', // or bottom, left, right, and variations
 				title: locales.DasboardIPLookup
 			});
-			new _Tooltip2.default(_this.contactButton, {
+			new _tooltip2.default(_this.contactButton, {
 				placement: 'top', // or bottom, left, right, and variations
 				title: locales.DasboardContactSupport
 			});
@@ -13990,6 +14605,7 @@ var DashboardView = function () {
 			searchData.uid = config && _Utils2.default.isObject(config) && config.uid ? config.uid : false;
 			searchData.serverLabel = serverLabel;
 			searchData.serverType = serverType;
+			searchData.batch_size = config && _Utils2.default.isObject(config) && _Utils2.default.isInt(config.batch_size) && config.batch_size > 0 ? config.batch_size : 10;
 
 			_ProxySearchView2.default.initView(searchData);
 		}
@@ -14273,402 +14889,6 @@ var DashboardView = function () {
 exports.default = new DashboardView();
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(3);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _Utils = __webpack_require__(2);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _DashboardView = __webpack_require__(12);
-
-var _DashboardView2 = _interopRequireDefault(_DashboardView);
-
-var _Sanitize = __webpack_require__(7);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
-var _LoginView = __webpack_require__(6);
-
-var _LoginView2 = _interopRequireDefault(_LoginView);
-
-var _localeFallback = __webpack_require__(5);
-
-var _localeFallback2 = _interopRequireDefault(_localeFallback);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var UpgradeView = function () {
-	function UpgradeView() {
-		_classCallCheck(this, UpgradeView);
-
-		this.template = _folders2.default.VIEWS + '/upgrade.html';
-		this.header = _folders2.default.VIEWS + '/header.html';
-	}
-
-	_createClass(UpgradeView, [{
-		key: 'initView',
-		value: function initView() {
-			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
-
-			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(locale) {
-			var _this = this;
-
-			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
-				_jquery2.default.get(_this.template, function (template) {
-
-					_this.loadStorageData().then(function (storage) {
-						_this.Storage = storage;
-
-						var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
-						_this.App.append(loadedTemplate);
-
-						_this.selectElements();
-
-						// Setting all events for selected elements
-						_this.setEvents();
-						_this.setHeaderBackButton();
-
-						_this.upgradeView.css("display", "none");
-
-						_this.loadProductsFromServer().then(_this.onProductsLoaded.bind(_this)).catch(_this.onProductError.bind(_this));
-					});
-				}, "html");
-			}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements() {
-			var _this = this;
-
-			_this.headerLogo = (0, _jquery2.default)('#header-logo');
-
-			_this.productTable = (0, _jquery2.default)('#product-table');
-			_this.productTableBody = (0, _jquery2.default)('#product-table-body');
-
-			_this.paymentContainer = (0, _jquery2.default)('#payment-container');
-
-			_this.nextToPayment = (0, _jquery2.default)('#next-to-payment');
-			_this.backToProduct = (0, _jquery2.default)('#back-to-product');
-
-			_this.upgradeView = (0, _jquery2.default)('#upgrade-view');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			_this.paymentButton = (0, _jquery2.default)('#payment-button');
-
-			_this.setServiceElements();
-		}
-	}, {
-		key: 'setServiceElements',
-		value: function setServiceElements() {
-			var _this = this;
-			_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
-		}
-	}, {
-		key: 'setEvents',
-		value: function setEvents() {
-			var _this = this;
-
-			_this.paymentButton.click(_this.onPaymentButtonClicked.bind(this));
-			_this.nextToPayment.click(_this.onNextToPaymentClicked.bind(this));
-			_this.backToProduct.click(_this.onBackToProductClicked.bind(this));
-		}
-	}, {
-		key: 'setHeaderBackButton',
-		value: function setHeaderBackButton() {
-			var _this = this;
-			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
-			_this.headerBackButton.css('display', 'block');
-			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
-		}
-	}, {
-		key: 'loadProductsFromServer',
-		value: function loadProductsFromServer() {
-			var _this = this;
-
-			return new Promise(function (resolve, reject) {
-
-				_this.App.append('<div class="loadingimg"><img src="images/loading.gif"></div>');
-
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
-					var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
-					_BackgroundRequester2.default.request('api', 'getProducts', {
-						authcode: userdata && userdata.authcode ? userdata.authcode.toLowerCase() : ""
-					}).then(function (response) {
-
-						(0, _jquery2.default)('.loadingimg').css('display', 'none');
-
-						if (_Utils2.default.isResponse200(response)) {
-
-							var products = response["products"];
-							var paymentMethods = response["payment_methods"];
-
-							if (Array.isArray(products) && Array.isArray(paymentMethods)) {
-
-								products.forEach(function (productPackage) {
-									var checked = productPackage.default ? 'checked="checked"' : '';
-									var packageItem = '<tr><td>' + '<input type="radio" ' + checked + ' name="package" value="' + _Sanitize2.default.escpateData(productPackage.id) + '"></td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.title) + '</td>' + '<td>' + _Sanitize2.default.escpateData(productPackage.price) + ' ' + _Sanitize2.default.escpateData(productPackage.currency) + '</td></tr>';
-
-									_this.productTableBody.append(packageItem);
-								});
-
-								paymentMethods.forEach(function (paymentMethod) {
-
-									var paymentItem = '<div class="paymentItem">' + '<input type="radio" name="provider" value="' + _Sanitize2.default.escpateData(paymentMethod.endpoint) + '">' + '<img class="upgrade-view__payment-image" alt="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" title="' + _Sanitize2.default.escpateData(paymentMethod.title) + '" src="' + _Sanitize2.default.escpateData(paymentMethod.logosrc) + '">' + '</div>';
-
-									_this.paymentContainer.append(paymentItem);
-								});
-
-								(0, _jquery2.default)('.upgrade-view__payment-image').click(function () {
-									(0, _jquery2.default)(this).prev().prop("checked", true);
-								});
-							} else {
-								reject({ code: 0, msg: "Response is not array" });
-								return;
-							}
-
-							resolve();
-						} else {
-							reject({ code: 1, response: response });
-						}
-					});
-				});
-			});
-		}
-	}, {
-		key: 'loadStorageData',
-		value: function loadStorageData() {
-			return new Promise(function (resolve, reject) {
-
-				chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA, _ServiceMeta2.default.STORAGEKEYS.CONFIGDATA], function (storage) {
-
-					resolve(storage);
-				});
-			});
-		}
-	}, {
-		key: 'loadLocaleFromServer',
-		value: function loadLocaleFromServer() {
-			var _this = this;
-			_Utils2.default.loadLocaleFromServer(_this.App, _this.App, _this.showMaintenanceMessage, _BackgroundRequester2.default, "UpgradeView", _jquery2.default);
-		}
-
-		/* Modifier */
-
-	}, {
-		key: 'makeButtonInactive',
-		value: function makeButtonInactive(button) {
-			button.unbind('click');
-			button.addClass('btn--inactive');
-		}
-	}, {
-		key: 'makeButtonActive',
-		value: function makeButtonActive(button) {
-			button.click(this.onPaymentButtonClicked.bind(this));
-			button.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
-			var _this = this;
-
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.makeButtonInactive(_this.paymentButton);
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.makeButtonActive(_this.paymentButton);
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(error) {
-			var _this = this;
-			_this.errorMessage.html("");
-			_this.errorMessage.text(error);
-		}
-
-		/* Events */
-
-	}, {
-		key: 'onProductsLoaded',
-		value: function onProductsLoaded() {
-			var _this = this;
-
-			_this.upgradeView.css("display", "block");
-		}
-	}, {
-		key: 'showError',
-		value: function showError(msg) {
-			var _this = this;
-			_this.upgradeView.css("display", "block");
-			_this.upgradeView.html("<p>" + msg + "</p>");
-		}
-	}, {
-		key: 'showMaintenanceMessage',
-		value: function showMaintenanceMessage(message) {
-			var _this = this;
-			(0, _jquery2.default)('#maintenance-msg').text(message);
-			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
-				location.reload();
-			});
-			(0, _jquery2.default)('#upgrade-mode').css('display', 'none');
-			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
-			(0, _jquery2.default)('#header-container').css('display', 'none');
-		}
-	}, {
-		key: 'onProductError',
-		value: function onProductError(error) {
-			var _this = this;
-
-			if (error.code === 0) {
-				_this.showError(error.msg);
-				return;
-			}
-
-			if (error.code === 1 && error.response) {
-				var response = error.response;
-				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
-
-				if (_Utils2.default.isResponseMinusOne(response)) {
-					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
-				}
-
-				if (_Utils2.default.isResponseAuthError(response)) {
-					chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
-						chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
-							_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
-						});
-					});
-				}
-
-				if (_Utils2.default.isMaintenanceMode(response)) {
-					_this.showMaintenanceMessage(response.message);
-				}
-			}
-		}
-	}, {
-		key: 'onPaymentButtonClicked',
-		value: function onPaymentButtonClicked() {
-			var _this = this;
-
-			var selectedPackage = (0, _jquery2.default)('#product-table-body input:checked');
-			var selectedPayment = (0, _jquery2.default)('#payment-container input:checked');
-
-			var productId = selectedPackage.val();
-			var paymentPath = selectedPayment.val();
-
-			if (!paymentPath) return _this.displayErrors(["Please select a payment method"]);
-
-			_this.setLoading();
-
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
-
-				var paymentData = {
-					productid: productId,
-					endpoint: paymentPath
-				};
-
-				var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
-				paymentData.authcode = userdata && userdata.authcode ? userdata.authcode.toLowerCase() : "";
-				_BackgroundRequester2.default.request('api', 'getPaymentLink', paymentData).then(function (response) {
-
-					_this.unsetLoading();
-
-					if (_Utils2.default.isResponse200(response)) {
-						_Utils2.default.openNewTab(response.payat);
-						chrome.storage.local.remove(_ServiceMeta2.default.STORAGEKEYS.CONFIGDATA);
-						window.close();
-					} else {
-
-						if (_Utils2.default.isResponseMinus20(response)) return _this.displayErrors(response.message);
-
-						if (_Utils2.default.isResponseMinusOne(response)) {
-							return _Utils2.default.showMinusOneError(_this.displayErrors.bind(_this));
-						}
-
-						if (_Utils2.default.isResponseAuthError(response)) {
-							chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
-								chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
-									_LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
-								});
-							});
-						}
-
-						if (_Utils2.default.isMaintenanceMode(response)) {
-							_this.showMaintenanceMessage(response.message);
-						}
-					}
-				});
-			});
-		}
-	}, {
-		key: 'onHeaderBackButtonClicked',
-		value: function onHeaderBackButtonClicked() {
-			var _this = this;
-
-			_DashboardView2.default.initView();
-		}
-	}, {
-		key: 'onNextToPaymentClicked',
-		value: function onNextToPaymentClicked() {
-			var _this = this;
-			(0, _jquery2.default)('#product-step').css('display', 'none');
-			(0, _jquery2.default)('#payment-step').css('display', 'block');
-		}
-	}, {
-		key: 'onBackToProductClicked',
-		value: function onBackToProductClicked() {
-			var _this = this;
-			(0, _jquery2.default)('#product-step').css('display', 'block');
-			(0, _jquery2.default)('#payment-step').css('display', 'none');
-		}
-	}]);
-
-	return UpgradeView;
-}();
-
-exports.default = new UpgradeView();
-
-/***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14839,9 +15059,9 @@ var exports = module.exports = function SHA (algorithm) {
 exports.sha = __webpack_require__(39)
 exports.sha1 = __webpack_require__(44)
 exports.sha224 = __webpack_require__(45)
-exports.sha256 = __webpack_require__(23)
+exports.sha256 = __webpack_require__(22)
 exports.sha384 = __webpack_require__(46)
-exports.sha512 = __webpack_require__(24)
+exports.sha512 = __webpack_require__(23)
 
 
 /***/ }),
@@ -14863,20 +15083,21 @@ exports.default = {
 	TICKETTOKEN: '/api/misc/persist',
 	REST: '/api',
 	REST2: '/api2',
-	FORGOTPASS: '/api/user/forgotpassword',
+	FORGOTPASS: '/api2/user/forgotpassword',
 	PRODUCTS: '/api2/i/p',
 	PROFILE: '/api/user/profile',
 	AUTOPROXY: '/api2/m/debug',
 	FEEDBACK: '/api2/m/feedback',
 	NOTIFICATION: '/api/user/profile/notification',
-	SUPPORT: '/support',
+	SUPPORT: '/api2/pub/clientsupport',
 	DISCONNECTS: '/api/misc/disconnects',
 	RESENDACTIVATION: '/api/user/activation/resend',
 	CLOSEACCOUNT: '/api2/user/closeaccount',
 	TRIAL: '/api2/user/trial',
 	CLIENTUPDATES: '/api2/cu',
-	CREATEAUTHCODE: '/api2/r6',
-	LOGINAUTHCODE: '/api2/c/2'
+	REGISTER: '/api2/r/email',
+	LOGINAUTHCODE: '/api2/c/2',
+	WP: '/api2/wp'
 };
 
 /***/ }),
@@ -15087,597 +15308,6 @@ exports.default = new PermissionView();
 
 /***/ }),
 /* 19 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_popper_js__ = __webpack_require__(54);
-/**!
- * @fileOverview Kickass library to create and place poppers near their reference elements.
- * @version 1.3.2
- * @license
- * Copyright (c) 2016 Federico Zivolo and contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
-
-/**
- * Check if the given variable is a function
- * @method
- * @memberof Popper.Utils
- * @argument {Any} functionToCheck - variable to check
- * @returns {Boolean} answer to: is a function?
- */
-function isFunction(functionToCheck) {
-  var getType = {};
-  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-}
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
-
-var DEFAULT_OPTIONS = {
-  container: false,
-  delay: 0,
-  html: false,
-  placement: 'top',
-  title: '',
-  template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
-  trigger: 'hover focus',
-  offset: 0,
-  arrowSelector: '.tooltip-arrow, .tooltip__arrow',
-  innerSelector: '.tooltip-inner, .tooltip__inner'
-};
-
-var Tooltip = function () {
-  /**
-   * Create a new Tooltip.js instance
-   * @class Tooltip
-   * @param {HTMLElement} reference - The DOM node used as reference of the tooltip (it can be a jQuery element).
-   * @param {Object} options
-   * @param {String} options.placement='top'
-   *      Placement of the popper accepted values: `top(-start, -end), right(-start, -end), bottom(-start, -end),
-   *      left(-start, -end)`
-   * @param {String} options.arrowSelector='.tooltip-arrow, .tooltip__arrow' - className used to locate the DOM arrow element in the tooltip.
-   * @param {String} options.innerSelector='.tooltip-inner, .tooltip__inner' - className used to locate the DOM inner element in the tooltip.
-   * @param {HTMLElement|String|false} options.container=false - Append the tooltip to a specific element.
-   * @param {Number|Object} options.delay=0
-   *      Delay showing and hiding the tooltip (ms) - does not apply to manual trigger type.
-   *      If a number is supplied, delay is applied to both hide/show.
-   *      Object structure is: `{ show: 500, hide: 100 }`
-   * @param {Boolean} options.html=false - Insert HTML into the tooltip. If false, the content will inserted with `textContent`.
-   * @param {String} [options.template='<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>']
-   *      Base HTML to used when creating the tooltip.
-   *      The tooltip's `title` will be injected into the `.tooltip-inner` or `.tooltip__inner`.
-   *      `.tooltip-arrow` or `.tooltip__arrow` will become the tooltip's arrow.
-   *      The outermost wrapper element should have the `.tooltip` class.
-   * @param {String|HTMLElement|TitleFunction} options.title='' - Default title value if `title` attribute isn't present.
-   * @param {String} [options.trigger='hover focus']
-   *      How tooltip is triggered - click, hover, focus, manual.
-   *      You may pass multiple triggers; separate them with a space. `manual` cannot be combined with any other trigger.
-   * @param {Boolean} options.closeOnClickOutside=false - Close a popper on click outside of the popper and reference element. This has effect only when options.trigger is 'click'.
-   * @param {String|HTMLElement} options.boundariesElement
-   *      The element used as boundaries for the tooltip. For more information refer to Popper.js'
-   *      [boundariesElement docs](https://popper.js.org/popper-documentation.html)
-   * @param {Number|String} options.offset=0 - Offset of the tooltip relative to its reference. For more information refer to Popper.js'
-   *      [offset docs](https://popper.js.org/popper-documentation.html)
-   * @param {Object} options.popperOptions={} - Popper options, will be passed directly to popper instance. For more information refer to Popper.js'
-   *      [options docs](https://popper.js.org/popper-documentation.html)
-   * @return {Object} instance - The generated tooltip instance
-   */
-  function Tooltip(reference, options) {
-    classCallCheck(this, Tooltip);
-
-    _initialiseProps.call(this);
-
-    // apply user options over default ones
-    options = _extends({}, DEFAULT_OPTIONS, options);
-
-    reference.jquery && (reference = reference[0]);
-
-    // cache reference and options
-    this.reference = reference;
-    this.options = options;
-
-    // get events list
-    var events = typeof options.trigger === 'string' ? options.trigger.split(' ').filter(function (trigger) {
-      return ['click', 'hover', 'focus'].indexOf(trigger) !== -1;
-    }) : [];
-
-    // set initial state
-    this._isOpen = false;
-    this._popperOptions = {};
-
-    // set event listeners
-    this._setEventListeners(reference, events, options);
-  }
-
-  //
-  // Public methods
-  //
-
-  /**
-   * Reveals an element's tooltip. This is considered a "manual" triggering of the tooltip.
-   * Tooltips with zero-length titles are never displayed.
-   * @method Tooltip#show
-   * @memberof Tooltip
-   */
-
-
-  /**
-   * Hides an element’s tooltip. This is considered a “manual” triggering of the tooltip.
-   * @method Tooltip#hide
-   * @memberof Tooltip
-   */
-
-
-  /**
-   * Hides and destroys an element’s tooltip.
-   * @method Tooltip#dispose
-   * @memberof Tooltip
-   */
-
-
-  /**
-   * Toggles an element’s tooltip. This is considered a “manual” triggering of the tooltip.
-   * @method Tooltip#toggle
-   * @memberof Tooltip
-   */
-
-
-  /**
-   * Updates the tooltip's title content
-   * @method Tooltip#updateTitleContent
-   * @memberof Tooltip
-   * @param {String|HTMLElement} title - The new content to use for the title
-   */
-
-
-  //
-  // Private methods
-  //
-
-  createClass(Tooltip, [{
-    key: '_create',
-
-
-    /**
-     * Creates a new tooltip node
-     * @memberof Tooltip
-     * @private
-     * @param {HTMLElement} reference
-     * @param {String} template
-     * @param {String|HTMLElement|TitleFunction} title
-     * @param {Boolean} allowHtml
-     * @return {HTMLElement} tooltipNode
-     */
-    value: function _create(reference, template, title, allowHtml) {
-      // create tooltip element
-      var tooltipGenerator = window.document.createElement('div');
-      tooltipGenerator.innerHTML = template.trim();
-      var tooltipNode = tooltipGenerator.childNodes[0];
-
-      // add unique ID to our tooltip (needed for accessibility reasons)
-      tooltipNode.id = 'tooltip_' + Math.random().toString(36).substr(2, 10);
-
-      // set initial `aria-hidden` state to `false` (it's visible!)
-      tooltipNode.setAttribute('aria-hidden', 'false');
-
-      // add title to tooltip
-      var titleNode = tooltipGenerator.querySelector(this.options.innerSelector);
-      this._addTitleContent(reference, title, allowHtml, titleNode);
-
-      // return the generated tooltip node
-      return tooltipNode;
-    }
-  }, {
-    key: '_addTitleContent',
-    value: function _addTitleContent(reference, title, allowHtml, titleNode) {
-      if (title.nodeType === 1 || title.nodeType === 11) {
-        // if title is a element node or document fragment, append it only if allowHtml is true
-        allowHtml && titleNode.appendChild(title);
-      } else if (isFunction(title)) {
-        // if title is a function, call it and set textContent or innerHtml depending by `allowHtml` value
-        var titleText = title.call(reference);
-        allowHtml ? titleNode.innerHTML = titleText : titleNode.textContent = titleText;
-      } else {
-        // if it's just a simple text, set textContent or innerHtml depending by `allowHtml` value
-        allowHtml ? titleNode.innerHTML = title : titleNode.textContent = title;
-      }
-    }
-  }, {
-    key: '_show',
-    value: function _show(reference, options) {
-      // don't show if it's already visible
-      // or if it's not being showed
-      if (this._isOpen && !this._isOpening) {
-        return this;
-      }
-      this._isOpen = true;
-
-      // if the tooltipNode already exists, just show it
-      if (this._tooltipNode) {
-        this._tooltipNode.style.visibility = 'visible';
-        this._tooltipNode.setAttribute('aria-hidden', 'false');
-        this.popperInstance.update();
-        return this;
-      }
-
-      // get title
-      var title = reference.getAttribute('title') || options.title;
-
-      // don't show tooltip if no title is defined
-      if (!title) {
-        return this;
-      }
-
-      // create tooltip node
-      var tooltipNode = this._create(reference, options.template, title, options.html);
-
-      // Add `aria-describedby` to our reference element for accessibility reasons
-      reference.setAttribute('aria-describedby', tooltipNode.id);
-
-      // append tooltip to container
-      var container = this._findContainer(options.container, reference);
-
-      this._append(tooltipNode, container);
-
-      this._popperOptions = _extends({}, options.popperOptions, {
-        placement: options.placement
-      });
-
-      this._popperOptions.modifiers = _extends({}, this._popperOptions.modifiers, {
-        arrow: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.arrow, {
-          element: options.arrowSelector
-        }),
-        offset: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.offset, {
-          offset: options.offset
-        })
-      });
-
-      if (options.boundariesElement) {
-        this._popperOptions.modifiers.preventOverflow = {
-          boundariesElement: options.boundariesElement
-        };
-      }
-
-      this.popperInstance = new __WEBPACK_IMPORTED_MODULE_0_popper_js__["a" /* default */](reference, tooltipNode, this._popperOptions);
-
-      this._tooltipNode = tooltipNode;
-
-      return this;
-    }
-  }, {
-    key: '_hide',
-    value: function _hide() /*reference, options*/{
-      // don't hide if it's already hidden
-      if (!this._isOpen) {
-        return this;
-      }
-
-      this._isOpen = false;
-
-      // hide tooltipNode
-      this._tooltipNode.style.visibility = 'hidden';
-      this._tooltipNode.setAttribute('aria-hidden', 'true');
-
-      return this;
-    }
-  }, {
-    key: '_dispose',
-    value: function _dispose() {
-      var _this = this;
-
-      // remove event listeners first to prevent any unexpected behaviour
-      this._events.forEach(function (_ref) {
-        var func = _ref.func,
-            event = _ref.event;
-
-        _this.reference.removeEventListener(event, func);
-      });
-      this._events = [];
-
-      if (this._tooltipNode) {
-        this._hide();
-
-        // destroy instance
-        this.popperInstance.destroy();
-
-        // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
-        if (!this.popperInstance.options.removeOnDestroy) {
-          this._tooltipNode.parentNode.removeChild(this._tooltipNode);
-          this._tooltipNode = null;
-        }
-      }
-      return this;
-    }
-  }, {
-    key: '_findContainer',
-    value: function _findContainer(container, reference) {
-      // if container is a query, get the relative element
-      if (typeof container === 'string') {
-        container = window.document.querySelector(container);
-      } else if (container === false) {
-        // if container is `false`, set it to reference parent
-        container = reference.parentNode;
-      }
-      return container;
-    }
-
-    /**
-     * Append tooltip to container
-     * @memberof Tooltip
-     * @private
-     * @param {HTMLElement} tooltipNode
-     * @param {HTMLElement|String|false} container
-     */
-
-  }, {
-    key: '_append',
-    value: function _append(tooltipNode, container) {
-      container.appendChild(tooltipNode);
-    }
-  }, {
-    key: '_setEventListeners',
-    value: function _setEventListeners(reference, events, options) {
-      var _this2 = this;
-
-      var directEvents = [];
-      var oppositeEvents = [];
-
-      events.forEach(function (event) {
-        switch (event) {
-          case 'hover':
-            directEvents.push('mouseenter');
-            oppositeEvents.push('mouseleave');
-            break;
-          case 'focus':
-            directEvents.push('focus');
-            oppositeEvents.push('blur');
-            break;
-          case 'click':
-            directEvents.push('click');
-            oppositeEvents.push('click');
-            break;
-        }
-      });
-
-      // schedule show tooltip
-      directEvents.forEach(function (event) {
-        var func = function func(evt) {
-          if (_this2._isOpening === true) {
-            return;
-          }
-          evt.usedByTooltip = true;
-          _this2._scheduleShow(reference, options.delay, options, evt);
-        };
-        _this2._events.push({ event: event, func: func });
-        reference.addEventListener(event, func);
-      });
-
-      // schedule hide tooltip
-      oppositeEvents.forEach(function (event) {
-        var func = function func(evt) {
-          if (evt.usedByTooltip === true) {
-            return;
-          }
-          _this2._scheduleHide(reference, options.delay, options, evt);
-        };
-        _this2._events.push({ event: event, func: func });
-        reference.addEventListener(event, func);
-        if (event === 'click' && options.closeOnClickOutside) {
-          document.addEventListener('mousedown', function (e) {
-            if (!_this2._isOpening) {
-              return;
-            }
-            var popper = _this2.popperInstance.popper;
-            if (reference.contains(e.target) || popper.contains(e.target)) {
-              return;
-            }
-            func(e);
-          }, true);
-        }
-      });
-    }
-  }, {
-    key: '_scheduleShow',
-    value: function _scheduleShow(reference, delay, options /*, evt */) {
-      var _this3 = this;
-
-      this._isOpening = true;
-      // defaults to 0
-      var computedDelay = delay && delay.show || delay || 0;
-      this._showTimeout = window.setTimeout(function () {
-        return _this3._show(reference, options);
-      }, computedDelay);
-    }
-  }, {
-    key: '_scheduleHide',
-    value: function _scheduleHide(reference, delay, options, evt) {
-      var _this4 = this;
-
-      this._isOpening = false;
-      // defaults to 0
-      var computedDelay = delay && delay.hide || delay || 0;
-      window.clearTimeout(this._showTimeout);
-      window.setTimeout(function () {
-        if (_this4._isOpen === false) {
-          return;
-        }
-        if (!document.body.contains(_this4._tooltipNode)) {
-          return;
-        }
-
-        // if we are hiding because of a mouseleave, we must check that the new
-        // reference isn't the tooltip, because in this case we don't want to hide it
-        if (evt.type === 'mouseleave') {
-          var isSet = _this4._setTooltipNodeEvent(evt, reference, delay, options);
-
-          // if we set the new event, don't hide the tooltip yet
-          // the new event will take care to hide it if necessary
-          if (isSet) {
-            return;
-          }
-        }
-
-        _this4._hide(reference, options);
-      }, computedDelay);
-    }
-  }, {
-    key: '_updateTitleContent',
-    value: function _updateTitleContent(title) {
-      if (typeof this._tooltipNode === 'undefined') {
-        if (typeof this.options.title !== 'undefined') {
-          this.options.title = title;
-        }
-        return;
-      }
-      var titleNode = this._tooltipNode.querySelector(this.options.innerSelector);
-      this._clearTitleContent(titleNode, this.options.html, this.reference.getAttribute('title') || this.options.title);
-      this._addTitleContent(this.reference, title, this.options.html, titleNode);
-      this.options.title = title;
-      this.popperInstance.update();
-    }
-  }, {
-    key: '_clearTitleContent',
-    value: function _clearTitleContent(titleNode, allowHtml, lastTitle) {
-      if (lastTitle.nodeType === 1 || lastTitle.nodeType === 11) {
-        allowHtml && titleNode.removeChild(lastTitle);
-      } else {
-        allowHtml ? titleNode.innerHTML = '' : titleNode.textContent = '';
-      }
-    }
-  }]);
-  return Tooltip;
-}();
-
-/**
- * Title function, its context is the Tooltip instance.
- * @memberof Tooltip
- * @callback TitleFunction
- * @return {String} placement - The desired title.
- */
-
-
-var _initialiseProps = function _initialiseProps() {
-  var _this5 = this;
-
-  this.show = function () {
-    return _this5._show(_this5.reference, _this5.options);
-  };
-
-  this.hide = function () {
-    return _this5._hide();
-  };
-
-  this.dispose = function () {
-    return _this5._dispose();
-  };
-
-  this.toggle = function () {
-    if (_this5._isOpen) {
-      return _this5.hide();
-    } else {
-      return _this5.show();
-    }
-  };
-
-  this.updateTitleContent = function (title) {
-    return _this5._updateTitleContent(title);
-  };
-
-  this._events = [];
-
-  this._setTooltipNodeEvent = function (evt, reference, delay, options) {
-    var relatedreference = evt.relatedreference || evt.toElement || evt.relatedTarget;
-
-    var callback = function callback(evt2) {
-      var relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget;
-
-      // Remove event listener after call
-      _this5._tooltipNode.removeEventListener(evt.type, callback);
-
-      // If the new reference is not the reference element
-      if (!reference.contains(relatedreference2)) {
-        // Schedule to hide tooltip
-        _this5._scheduleHide(reference, options.delay, options, evt2);
-      }
-    };
-
-    if (_this5._tooltipNode.contains(relatedreference)) {
-      // listen to mouseleave on the tooltip element to be able to hide the tooltip
-      _this5._tooltipNode.addEventListener(evt.type, callback);
-      return true;
-    }
-
-    return false;
-  };
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (Tooltip);
-//# sourceMappingURL=tooltip.js.map
-
-
-/***/ }),
-/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15822,7 +15452,7 @@ var UpdateRequiredView = function () {
 exports.default = new UpdateRequiredView();
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16131,7 +15761,7 @@ var ProxySearchView = function () {
 exports.default = new ProxySearchView();
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports) {
 
 var g;
@@ -16158,7 +15788,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -16299,7 +15929,7 @@ module.exports = Sha256
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(10)
@@ -16565,7 +16195,7 @@ module.exports = Sha512
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16699,7 +16329,7 @@ var Sticked = function () {
 exports.default = new Sticked();
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16819,6 +16449,597 @@ var OtherToolsView = function () {
 exports.default = new OtherToolsView();
 
 /***/ }),
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_popper_js__ = __webpack_require__(54);
+/**!
+ * @fileOverview Kickass library to create and place poppers near their reference elements.
+ * @version 1.3.3
+ * @license
+ * Copyright (c) 2016 Federico Zivolo and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+/**
+ * Check if the given variable is a function
+ * @method
+ * @memberof Popper.Utils
+ * @argument {Any} functionToCheck - variable to check
+ * @returns {Boolean} answer to: is a function?
+ */
+function isFunction(functionToCheck) {
+  var getType = {};
+  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
+
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
+
+  return target;
+};
+
+var DEFAULT_OPTIONS = {
+  container: false,
+  delay: 0,
+  html: false,
+  placement: 'top',
+  title: '',
+  template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+  trigger: 'hover focus',
+  offset: 0,
+  arrowSelector: '.tooltip-arrow, .tooltip__arrow',
+  innerSelector: '.tooltip-inner, .tooltip__inner'
+};
+
+var Tooltip = function () {
+  /**
+   * Create a new Tooltip.js instance
+   * @class Tooltip
+   * @param {HTMLElement} reference - The DOM node used as reference of the tooltip (it can be a jQuery element).
+   * @param {Object} options
+   * @param {String} options.placement='top'
+   *      Placement of the popper accepted values: `top(-start, -end), right(-start, -end), bottom(-start, -end),
+   *      left(-start, -end)`
+   * @param {String} [options.arrowSelector='.tooltip-arrow, .tooltip__arrow'] - className used to locate the DOM arrow element in the tooltip.
+   * @param {String} [options.innerSelector='.tooltip-inner, .tooltip__inner'] - className used to locate the DOM inner element in the tooltip.
+   * @param {HTMLElement|String|false} options.container=false - Append the tooltip to a specific element.
+   * @param {Number|Object} options.delay=0
+   *      Delay showing and hiding the tooltip (ms) - does not apply to manual trigger type.
+   *      If a number is supplied, delay is applied to both hide/show.
+   *      Object structure is: `{ show: 500, hide: 100 }`
+   * @param {Boolean} options.html=false - Insert HTML into the tooltip. If false, the content will inserted with `textContent`.
+   * @param {String} [options.template='<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>']
+   *      Base HTML to used when creating the tooltip.
+   *      The tooltip's `title` will be injected into the `.tooltip-inner` or `.tooltip__inner`.
+   *      `.tooltip-arrow` or `.tooltip__arrow` will become the tooltip's arrow.
+   *      The outermost wrapper element should have the `.tooltip` class.
+   * @param {String|HTMLElement|TitleFunction} options.title='' - Default title value if `title` attribute isn't present.
+   * @param {String} [options.trigger='hover focus']
+   *      How tooltip is triggered - click, hover, focus, manual.
+   *      You may pass multiple triggers; separate them with a space. `manual` cannot be combined with any other trigger.
+   * @param {Boolean} options.closeOnClickOutside=false - Close a popper on click outside of the popper and reference element. This has effect only when options.trigger is 'click'.
+   * @param {String|HTMLElement} options.boundariesElement
+   *      The element used as boundaries for the tooltip. For more information refer to Popper.js'
+   *      [boundariesElement docs](https://popper.js.org/popper-documentation.html)
+   * @param {Number|String} options.offset=0 - Offset of the tooltip relative to its reference. For more information refer to Popper.js'
+   *      [offset docs](https://popper.js.org/popper-documentation.html)
+   * @param {Object} options.popperOptions={} - Popper options, will be passed directly to popper instance. For more information refer to Popper.js'
+   *      [options docs](https://popper.js.org/popper-documentation.html)
+   * @return {Object} instance - The generated tooltip instance
+   */
+  function Tooltip(reference, options) {
+    classCallCheck(this, Tooltip);
+
+    _initialiseProps.call(this);
+
+    // apply user options over default ones
+    options = _extends({}, DEFAULT_OPTIONS, options);
+
+    reference.jquery && (reference = reference[0]);
+
+    // cache reference and options
+    this.reference = reference;
+    this.options = options;
+
+    // get events list
+    var events = typeof options.trigger === 'string' ? options.trigger.split(' ').filter(function (trigger) {
+      return ['click', 'hover', 'focus'].indexOf(trigger) !== -1;
+    }) : [];
+
+    // set initial state
+    this._isOpen = false;
+    this._popperOptions = {};
+
+    // set event listeners
+    this._setEventListeners(reference, events, options);
+  }
+
+  //
+  // Public methods
+  //
+
+  /**
+   * Reveals an element's tooltip. This is considered a "manual" triggering of the tooltip.
+   * Tooltips with zero-length titles are never displayed.
+   * @method Tooltip#show
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Hides an element’s tooltip. This is considered a “manual” triggering of the tooltip.
+   * @method Tooltip#hide
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Hides and destroys an element’s tooltip.
+   * @method Tooltip#dispose
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Toggles an element’s tooltip. This is considered a “manual” triggering of the tooltip.
+   * @method Tooltip#toggle
+   * @memberof Tooltip
+   */
+
+
+  /**
+   * Updates the tooltip's title content
+   * @method Tooltip#updateTitleContent
+   * @memberof Tooltip
+   * @param {String|HTMLElement} title - The new content to use for the title
+   */
+
+
+  //
+  // Private methods
+  //
+
+  createClass(Tooltip, [{
+    key: '_create',
+
+
+    /**
+     * Creates a new tooltip node
+     * @memberof Tooltip
+     * @private
+     * @param {HTMLElement} reference
+     * @param {String} template
+     * @param {String|HTMLElement|TitleFunction} title
+     * @param {Boolean} allowHtml
+     * @return {HTMLElement} tooltipNode
+     */
+    value: function _create(reference, template, title, allowHtml) {
+      // create tooltip element
+      var tooltipGenerator = window.document.createElement('div');
+      tooltipGenerator.innerHTML = template.trim();
+      var tooltipNode = tooltipGenerator.childNodes[0];
+
+      // add unique ID to our tooltip (needed for accessibility reasons)
+      tooltipNode.id = 'tooltip_' + Math.random().toString(36).substr(2, 10);
+
+      // set initial `aria-hidden` state to `false` (it's visible!)
+      tooltipNode.setAttribute('aria-hidden', 'false');
+
+      // add title to tooltip
+      var titleNode = tooltipGenerator.querySelector(this.options.innerSelector);
+      this._addTitleContent(reference, title, allowHtml, titleNode);
+
+      // return the generated tooltip node
+      return tooltipNode;
+    }
+  }, {
+    key: '_addTitleContent',
+    value: function _addTitleContent(reference, title, allowHtml, titleNode) {
+      if (title.nodeType === 1 || title.nodeType === 11) {
+        // if title is a element node or document fragment, append it only if allowHtml is true
+        allowHtml && titleNode.appendChild(title);
+      } else if (isFunction(title)) {
+        // Recursively call ourself so that the return value of the function gets handled appropriately - either
+        // as a dom node, a string, or even as another function.
+        this._addTitleContent(reference, title.call(reference), allowHtml, titleNode);
+      } else {
+        // if it's just a simple text, set textContent or innerHtml depending by `allowHtml` value
+        allowHtml ? titleNode.innerHTML = title : titleNode.textContent = title;
+      }
+    }
+  }, {
+    key: '_show',
+    value: function _show(reference, options) {
+      // don't show if it's already visible
+      // or if it's not being showed
+      if (this._isOpen && !this._isOpening) {
+        return this;
+      }
+      this._isOpen = true;
+
+      // if the tooltipNode already exists, just show it
+      if (this._tooltipNode) {
+        this._tooltipNode.style.visibility = 'visible';
+        this._tooltipNode.setAttribute('aria-hidden', 'false');
+        this.popperInstance.update();
+        return this;
+      }
+
+      // get title
+      var title = reference.getAttribute('title') || options.title;
+
+      // don't show tooltip if no title is defined
+      if (!title) {
+        return this;
+      }
+
+      // create tooltip node
+      var tooltipNode = this._create(reference, options.template, title, options.html);
+
+      // Add `aria-describedby` to our reference element for accessibility reasons
+      reference.setAttribute('aria-describedby', tooltipNode.id);
+
+      // append tooltip to container
+      var container = this._findContainer(options.container, reference);
+
+      this._append(tooltipNode, container);
+
+      this._popperOptions = _extends({}, options.popperOptions, {
+        placement: options.placement
+      });
+
+      this._popperOptions.modifiers = _extends({}, this._popperOptions.modifiers, {
+        arrow: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.arrow, {
+          element: options.arrowSelector
+        }),
+        offset: _extends({}, this._popperOptions.modifiers && this._popperOptions.modifiers.offset, {
+          offset: options.offset || this._popperOptions.modifiers && this._popperOptions.modifiers.offset && this._popperOptions.modifiers.offset.offset || options.offset
+        })
+      });
+
+      if (options.boundariesElement) {
+        this._popperOptions.modifiers.preventOverflow = {
+          boundariesElement: options.boundariesElement
+        };
+      }
+
+      this.popperInstance = new __WEBPACK_IMPORTED_MODULE_0_popper_js__["a" /* default */](reference, tooltipNode, this._popperOptions);
+
+      this._tooltipNode = tooltipNode;
+
+      return this;
+    }
+  }, {
+    key: '_hide',
+    value: function _hide() /*reference, options*/{
+      // don't hide if it's already hidden
+      if (!this._isOpen) {
+        return this;
+      }
+
+      this._isOpen = false;
+
+      // hide tooltipNode
+      this._tooltipNode.style.visibility = 'hidden';
+      this._tooltipNode.setAttribute('aria-hidden', 'true');
+
+      return this;
+    }
+  }, {
+    key: '_dispose',
+    value: function _dispose() {
+      var _this = this;
+
+      // remove event listeners first to prevent any unexpected behaviour
+      this._events.forEach(function (_ref) {
+        var func = _ref.func,
+            event = _ref.event;
+
+        _this.reference.removeEventListener(event, func);
+      });
+      this._events = [];
+
+      if (this._tooltipNode) {
+        this._hide();
+
+        // destroy instance
+        this.popperInstance.destroy();
+
+        // destroy tooltipNode if removeOnDestroy is not set, as popperInstance.destroy() already removes the element
+        if (!this.popperInstance.options.removeOnDestroy) {
+          this._tooltipNode.parentNode.removeChild(this._tooltipNode);
+          this._tooltipNode = null;
+        }
+      }
+      return this;
+    }
+  }, {
+    key: '_findContainer',
+    value: function _findContainer(container, reference) {
+      // if container is a query, get the relative element
+      if (typeof container === 'string') {
+        container = window.document.querySelector(container);
+      } else if (container === false) {
+        // if container is `false`, set it to reference parent
+        container = reference.parentNode;
+      }
+      return container;
+    }
+
+    /**
+     * Append tooltip to container
+     * @memberof Tooltip
+     * @private
+     * @param {HTMLElement} tooltipNode
+     * @param {HTMLElement|String|false} container
+     */
+
+  }, {
+    key: '_append',
+    value: function _append(tooltipNode, container) {
+      container.appendChild(tooltipNode);
+    }
+  }, {
+    key: '_setEventListeners',
+    value: function _setEventListeners(reference, events, options) {
+      var _this2 = this;
+
+      var directEvents = [];
+      var oppositeEvents = [];
+
+      events.forEach(function (event) {
+        switch (event) {
+          case 'hover':
+            directEvents.push('mouseenter');
+            oppositeEvents.push('mouseleave');
+            break;
+          case 'focus':
+            directEvents.push('focus');
+            oppositeEvents.push('blur');
+            break;
+          case 'click':
+            directEvents.push('click');
+            oppositeEvents.push('click');
+            break;
+        }
+      });
+
+      // schedule show tooltip
+      directEvents.forEach(function (event) {
+        var func = function func(evt) {
+          if (_this2._isOpening === true) {
+            return;
+          }
+          evt.usedByTooltip = true;
+          _this2._scheduleShow(reference, options.delay, options, evt);
+        };
+        _this2._events.push({ event: event, func: func });
+        reference.addEventListener(event, func);
+      });
+
+      // schedule hide tooltip
+      oppositeEvents.forEach(function (event) {
+        var func = function func(evt) {
+          if (evt.usedByTooltip === true) {
+            return;
+          }
+          _this2._scheduleHide(reference, options.delay, options, evt);
+        };
+        _this2._events.push({ event: event, func: func });
+        reference.addEventListener(event, func);
+        if (event === 'click' && options.closeOnClickOutside) {
+          document.addEventListener('mousedown', function (e) {
+            if (!_this2._isOpening) {
+              return;
+            }
+            var popper = _this2.popperInstance.popper;
+            if (reference.contains(e.target) || popper.contains(e.target)) {
+              return;
+            }
+            func(e);
+          }, true);
+        }
+      });
+    }
+  }, {
+    key: '_scheduleShow',
+    value: function _scheduleShow(reference, delay, options /*, evt */) {
+      var _this3 = this;
+
+      this._isOpening = true;
+      // defaults to 0
+      var computedDelay = delay && delay.show || delay || 0;
+      this._showTimeout = window.setTimeout(function () {
+        return _this3._show(reference, options);
+      }, computedDelay);
+    }
+  }, {
+    key: '_scheduleHide',
+    value: function _scheduleHide(reference, delay, options, evt) {
+      var _this4 = this;
+
+      this._isOpening = false;
+      // defaults to 0
+      var computedDelay = delay && delay.hide || delay || 0;
+      window.clearTimeout(this._showTimeout);
+      window.setTimeout(function () {
+        if (_this4._isOpen === false) {
+          return;
+        }
+        if (!document.body.contains(_this4._tooltipNode)) {
+          return;
+        }
+
+        // if we are hiding because of a mouseleave, we must check that the new
+        // reference isn't the tooltip, because in this case we don't want to hide it
+        if (evt.type === 'mouseleave') {
+          var isSet = _this4._setTooltipNodeEvent(evt, reference, delay, options);
+
+          // if we set the new event, don't hide the tooltip yet
+          // the new event will take care to hide it if necessary
+          if (isSet) {
+            return;
+          }
+        }
+
+        _this4._hide(reference, options);
+      }, computedDelay);
+    }
+  }, {
+    key: '_updateTitleContent',
+    value: function _updateTitleContent(title) {
+      if (typeof this._tooltipNode === 'undefined') {
+        if (typeof this.options.title !== 'undefined') {
+          this.options.title = title;
+        }
+        return;
+      }
+      var titleNode = this._tooltipNode.querySelector(this.options.innerSelector);
+      this._clearTitleContent(titleNode, this.options.html, this.reference.getAttribute('title') || this.options.title);
+      this._addTitleContent(this.reference, title, this.options.html, titleNode);
+      this.options.title = title;
+      this.popperInstance.update();
+    }
+  }, {
+    key: '_clearTitleContent',
+    value: function _clearTitleContent(titleNode, allowHtml, lastTitle) {
+      if (lastTitle.nodeType === 1 || lastTitle.nodeType === 11) {
+        allowHtml && titleNode.removeChild(lastTitle);
+      } else {
+        allowHtml ? titleNode.innerHTML = '' : titleNode.textContent = '';
+      }
+    }
+  }]);
+  return Tooltip;
+}();
+
+/**
+ * Title function, its context is the Tooltip instance.
+ * @memberof Tooltip
+ * @callback TitleFunction
+ * @return {String} placement - The desired title.
+ */
+
+
+var _initialiseProps = function _initialiseProps() {
+  var _this5 = this;
+
+  this.show = function () {
+    return _this5._show(_this5.reference, _this5.options);
+  };
+
+  this.hide = function () {
+    return _this5._hide();
+  };
+
+  this.dispose = function () {
+    return _this5._dispose();
+  };
+
+  this.toggle = function () {
+    if (_this5._isOpen) {
+      return _this5.hide();
+    } else {
+      return _this5.show();
+    }
+  };
+
+  this.updateTitleContent = function (title) {
+    return _this5._updateTitleContent(title);
+  };
+
+  this._events = [];
+
+  this._setTooltipNodeEvent = function (evt, reference, delay, options) {
+    var relatedreference = evt.relatedreference || evt.toElement || evt.relatedTarget;
+
+    var callback = function callback(evt2) {
+      var relatedreference2 = evt2.relatedreference || evt2.toElement || evt2.relatedTarget;
+
+      // Remove event listener after call
+      _this5._tooltipNode.removeEventListener(evt.type, callback);
+
+      // If the new reference is not the reference element
+      if (!reference.contains(relatedreference2)) {
+        // Schedule to hide tooltip
+        _this5._scheduleHide(reference, options.delay, options, evt2);
+      }
+    };
+
+    if (_this5._tooltipNode.contains(relatedreference)) {
+      // listen to mouseleave on the tooltip element to be able to hide the tooltip
+      _this5._tooltipNode.addEventListener(evt.type, callback);
+      return true;
+    }
+
+    return false;
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Tooltip);
+//# sourceMappingURL=tooltip.js.map
+
+
+/***/ }),
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16855,7 +17076,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -17133,7 +17354,7 @@ var _Main = __webpack_require__(30);
 
 var _Main2 = _interopRequireDefault(_Main);
 
-var _browserTabs = __webpack_require__(64);
+var _browserTabs = __webpack_require__(62);
 
 var _browserTabs2 = _interopRequireDefault(_browserTabs);
 
@@ -17188,7 +17409,7 @@ var _LoginView = __webpack_require__(6);
 
 var _LoginView2 = _interopRequireDefault(_LoginView);
 
-var _DashboardView = __webpack_require__(12);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -17208,11 +17429,11 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _ProxySearchView = __webpack_require__(21);
+var _ProxySearchView = __webpack_require__(20);
 
 var _ProxySearchView2 = _interopRequireDefault(_ProxySearchView);
 
-var _Extension = __webpack_require__(63);
+var _Extension = __webpack_require__(61);
 
 var _Extension2 = _interopRequireDefault(_Extension);
 
@@ -17220,7 +17441,7 @@ var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
 
-var _UpdateRequiredView = __webpack_require__(20);
+var _UpdateRequiredView = __webpack_require__(19);
 
 var _UpdateRequiredView2 = _interopRequireDefault(_UpdateRequiredView);
 
@@ -18014,7 +18235,7 @@ var _LanguageView = __webpack_require__(14);
 
 var _LanguageView2 = _interopRequireDefault(_LanguageView);
 
-var _DashboardView = __webpack_require__(12);
+var _DashboardView = __webpack_require__(13);
 
 var _DashboardView2 = _interopRequireDefault(_DashboardView);
 
@@ -18095,7 +18316,7 @@ var UserProfileView = function () {
 			var _this = this;
 			if (_this.Storage.userData.authcode) {
 				_this.userProfileAuthcode.text(_this.Storage.userData.authcode);
-				(0, _jquery2.default)('#authcode-container').css('display', 'block');
+				//$('#authcode-container').css('display', 'block');
 			}
 		}
 	}, {
@@ -18435,31 +18656,33 @@ var CloseAccountView = function () {
     value: function onCloseAccountClicked() {
       var _this = this;
       _this.setLoading();
-      _BackgroundRequester2.default.request('api', 'closeAccount', {
-        authcode: _this.userData && _this.userData.authcode ? _this.userData.authcode.toLowerCase() : ""
-      }).then(function (response) {
 
-        _this.unsetLoading();
+      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
+        var userData = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
+        _BackgroundRequester2.default.request('api', 'closeAccount', userData).then(function (response) {
 
-        if (_Utils2.default.isResponse200(response)) return _this.accountClosed();
+          _this.unsetLoading();
 
-        if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+          if (_Utils2.default.isResponse200(response)) return _this.accountClosed();
 
-        if (_Utils2.default.isResponseMinusOne(response)) {
-          return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
-        }
+          if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
 
-        if (_Utils2.default.isResponseAuthError(response)) {
-          chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
-            chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
-              _LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+          if (_Utils2.default.isResponseMinusOne(response)) {
+            return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+          }
+
+          if (_Utils2.default.isResponseAuthError(response)) {
+            chrome.storage.local.remove([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function () {
+              chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.LOCALE], function (storage) {
+                _LoginView2.default.initView(_Utils2.default.getFallbackLocale("AuthFailed", storage[_ServiceMeta2.default.STORAGEKEYS.LOCALE], _localeFallback2.default));
+              });
             });
-          });
-        }
+          }
 
-        if (_Utils2.default.isMaintenanceMode(response)) {
-          _this.showMaintenanceMessage(response.message);
-        }
+          if (_Utils2.default.isMaintenanceMode(response)) {
+            _this.showMaintenanceMessage(response.message);
+          }
+        });
       });
     }
   }, {
@@ -20411,7 +20634,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
 /* 41 */
@@ -20753,7 +20976,7 @@ module.exports = Sha1
  */
 
 var inherits = __webpack_require__(10)
-var Sha256 = __webpack_require__(23)
+var Sha256 = __webpack_require__(22)
 var Hash = __webpack_require__(11)
 var Buffer = __webpack_require__(9).Buffer
 
@@ -20804,7 +21027,7 @@ module.exports = Sha224
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(10)
-var SHA512 = __webpack_require__(24)
+var SHA512 = __webpack_require__(23)
 var Hash = __webpack_require__(11)
 var Buffer = __webpack_require__(9).Buffer
 
@@ -20895,7 +21118,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -21167,7 +21390,7 @@ var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _Sticked = __webpack_require__(25);
+var _Sticked = __webpack_require__(24);
 
 var _Sticked2 = _interopRequireDefault(_Sticked);
 
@@ -21191,13 +21414,13 @@ var _PermissionView = __webpack_require__(18);
 
 var _PermissionView2 = _interopRequireDefault(_PermissionView);
 
-var _OtherToolsView = __webpack_require__(26);
+var _OtherToolsView = __webpack_require__(25);
 
 var _OtherToolsView2 = _interopRequireDefault(_OtherToolsView);
 
-var _Tooltip = __webpack_require__(19);
+var _tooltip = __webpack_require__(26);
 
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
+var _tooltip2 = _interopRequireDefault(_tooltip);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -21278,6 +21501,7 @@ var ConnectedView = function () {
 
 			_this.connectedCountry = (0, _jquery2.default)('#connected-country');
 			_this.connectedIpLookupButton = (0, _jquery2.default)('#connected-ip-lookup-button');
+			_this.connectedDNSLeakTestButton = (0, _jquery2.default)('#dns-test-button');
 			_this.connectedDisconnectButton = (0, _jquery2.default)('#connected-disconnect-button');
 			_this.connectedProxyExtensionNames = (0, _jquery2.default)('#proxyExtensionNames');
 			_this.connectedProxyExtensionServiceName = (0, _jquery2.default)('#proxyextenion-servicename');
@@ -21322,6 +21546,7 @@ var ConnectedView = function () {
 			var _this = this;
 
 			_this.connectedIpLookupButton.click(_this.onIpLookupButtonClicked.bind(this));
+			_this.connectedDNSLeakTestButton.click(_this.onDNSLeakTestButtonClicked.bind(this));
 			_this.connectedDisconnectButton.click(_this.onDisconnectButtonClicked.bind(this));
 			_this.pinCountryButton.click(_this.onPinCountryButtonClicked.bind(this));
 
@@ -21336,6 +21561,12 @@ var ConnectedView = function () {
 			_this.downloadWindowsButton.click(_this.onDesktopInfoButtonClicked.bind(this));
 
 			_this.otherToolsButton.click(_this.onOtherToolsButtonClicked.bind(this));
+		}
+	}, {
+		key: 'onDNSLeakTestButtonClicked',
+		value: function onDNSLeakTestButtonClicked() {
+			var _this = this;
+			_Utils2.default.openNewTab("https://dnsleaktest.org/dns-leak-test");
 		}
 	}, {
 		key: 'onOtherToolsButtonClicked',
@@ -21446,7 +21677,7 @@ var ConnectedView = function () {
 				title: "Top"
 			};
 
-			new _Tooltip2.default(_this.pinCountryButton, {
+			new _tooltip2.default(_this.pinCountryButton, {
 				placement: 'top', // or bottom, left, right, and variations
 				title: "Only accessible for premium user"
 			});
@@ -22017,7 +22248,7 @@ exports.default = {
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {/**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
- * @version 1.15.0
+ * @version 1.16.1
  * @license
  * Copyright (c) 2016 Federico Zivolo and contributors
  *
@@ -22039,16 +22270,17 @@ exports.default = {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined' && typeof navigator !== 'undefined';
 
-var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
-var timeoutDuration = 0;
-for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
-  if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
-    timeoutDuration = 1;
-    break;
+var timeoutDuration = function () {
+  var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
+  for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
+    if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
+      return 1;
+    }
   }
-}
+  return 0;
+}();
 
 function microtaskDebounce(fn) {
   var called = false;
@@ -22166,6 +22398,17 @@ function getScrollParent(element) {
   }
 
   return getScrollParent(getParentNode(element));
+}
+
+/**
+ * Returns the reference node of the reference object, or the reference object itself.
+ * @method
+ * @memberof Popper.Utils
+ * @param {Element|Object} reference - the reference element (the popper will be relative to this)
+ * @returns {Element} parent
+ */
+function getReferenceNode(reference) {
+  return reference && reference.referenceNode ? reference.referenceNode : reference;
 }
 
 var isIE11 = isBrowser && !!(window.MSInputMethodContext && document.documentMode);
@@ -22351,7 +22594,7 @@ function getBordersSize(styles, axis) {
   var sideA = axis === 'x' ? 'Left' : 'Top';
   var sideB = sideA === 'Left' ? 'Right' : 'Bottom';
 
-  return parseFloat(styles['border' + sideA + 'Width'], 10) + parseFloat(styles['border' + sideB + 'Width'], 10);
+  return parseFloat(styles['border' + sideA + 'Width']) + parseFloat(styles['border' + sideB + 'Width']);
 }
 
 function getSize(axis, body, html, computedStyle) {
@@ -22476,8 +22719,8 @@ function getBoundingClientRect(element) {
 
   // subtract scrollbar size from sizes
   var sizes = element.nodeName === 'HTML' ? getWindowSizes(element.ownerDocument) : {};
-  var width = sizes.width || element.clientWidth || result.right - result.left;
-  var height = sizes.height || element.clientHeight || result.bottom - result.top;
+  var width = sizes.width || element.clientWidth || result.width;
+  var height = sizes.height || element.clientHeight || result.height;
 
   var horizScrollbar = element.offsetWidth - width;
   var vertScrollbar = element.offsetHeight - height;
@@ -22506,8 +22749,8 @@ function getOffsetRectRelativeToArbitraryNode(children, parent) {
   var scrollParent = getScrollParent(children);
 
   var styles = getStyleComputedProperty(parent);
-  var borderTopWidth = parseFloat(styles.borderTopWidth, 10);
-  var borderLeftWidth = parseFloat(styles.borderLeftWidth, 10);
+  var borderTopWidth = parseFloat(styles.borderTopWidth);
+  var borderLeftWidth = parseFloat(styles.borderLeftWidth);
 
   // In cases where the parent is fixed, we must ignore negative scroll in offset calc
   if (fixedPosition && isHTML) {
@@ -22528,8 +22771,8 @@ function getOffsetRectRelativeToArbitraryNode(children, parent) {
   // differently when margins are applied to it. The margins are included in
   // the box of the documentElement, in the other cases not.
   if (!isIE10 && isHTML) {
-    var marginTop = parseFloat(styles.marginTop, 10);
-    var marginLeft = parseFloat(styles.marginLeft, 10);
+    var marginTop = parseFloat(styles.marginTop);
+    var marginLeft = parseFloat(styles.marginLeft);
 
     offsets.top -= borderTopWidth - marginTop;
     offsets.bottom -= borderTopWidth - marginTop;
@@ -22629,7 +22872,7 @@ function getBoundaries(popper, reference, padding, boundariesElement) {
   // NOTE: 1 DOM access here
 
   var boundaries = { top: 0, left: 0 };
-  var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+  var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
 
   // Handle viewport case
   if (boundariesElement === 'viewport') {
@@ -22757,7 +23000,7 @@ function computeAutoPlacement(placement, refRect, popper, reference, boundariesE
 function getReferenceOffsets(state, popper, reference) {
   var fixedPosition = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-  var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, reference);
+  var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
   return getOffsetRectRelativeToArbitraryNode(reference, commonOffsetParent, fixedPosition);
 }
 
@@ -23019,7 +23262,7 @@ function destroy() {
 
   this.disableEventListeners();
 
-  // remove the popper if user explicity asked for the deletion on destroy
+  // remove the popper if user explicitly asked for the deletion on destroy
   // do not use `remove` because IE11 doesn't support it
   if (this.options.removeOnDestroy) {
     this.popper.parentNode.removeChild(this.popper);
@@ -23468,8 +23711,8 @@ function arrow(data, options) {
   // Compute the sideValue using the updated popper offsets
   // take popper margin in account because we don't have this info available
   var css = getStyleComputedProperty(data.instance.popper);
-  var popperMarginSide = parseFloat(css['margin' + sideCapitalized], 10);
-  var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width'], 10);
+  var popperMarginSide = parseFloat(css['margin' + sideCapitalized]);
+  var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width']);
   var sideValue = center - data.offsets.popper[side] - popperMarginSide - popperBorderSide;
 
   // prevent arrowElement from being placed not contiguously to its popper
@@ -24620,7 +24863,7 @@ Popper.Defaults = Defaults;
 /* harmony default export */ __webpack_exports__["a"] = (Popper);
 //# sourceMappingURL=popper.js.map
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(22)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(21)))
 
 /***/ }),
 /* 55 */
@@ -24647,7 +24890,7 @@ var _ServiceMeta = __webpack_require__(0);
 
 var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -24785,7 +25028,7 @@ var _BackgroundRequester = __webpack_require__(4);
 
 var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
 
-var _UpgradeView = __webpack_require__(13);
+var _UpgradeView = __webpack_require__(12);
 
 var _UpgradeView2 = _interopRequireDefault(_UpgradeView);
 
@@ -24933,563 +25176,6 @@ var _Sanitize = __webpack_require__(7);
 
 var _Sanitize2 = _interopRequireDefault(_Sanitize);
 
-var _Register3SuccessView = __webpack_require__(58);
-
-var _Register3SuccessView2 = _interopRequireDefault(_Register3SuccessView);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var shajs = __webpack_require__(15);
-
-var Register3View = function () {
-	function Register3View() {
-		_classCallCheck(this, Register3View);
-
-		this.template = _folders2.default.VIEWS + '/register3.html';
-		this.header = _folders2.default.VIEWS + '/header.html';
-	}
-
-	_createClass(Register3View, [{
-		key: 'initView',
-		value: function initView() {
-			var _this = this;
-
-			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
-		}
-	}, {
-		key: 'loadTemplate',
-		value: function loadTemplate(locale) {
-			var _this = this;
-
-			this.App = (0, _jquery2.default)('#app');
-			this.App.html("");
-
-			_jquery2.default.get(_this.header, function (header) {
-				_this.App.append(header);
-				_jquery2.default.get(_this.template, function (template) {
-					var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
-
-					_this.App.append(loadedTemplate);
-					_this.selectElements(locale);
-					_this.setErrorMessages(locale);
-					_this.setAgreement(locale);
-					_this.setPolicyEvents(locale);
-					_this.setHeaderBackButton();
-				}, "html");
-			}, "html");
-		}
-	}, {
-		key: 'selectElements',
-		value: function selectElements(locale) {
-			var _this = this;
-
-			_this.headerLogo = (0, _jquery2.default)('#header-logo');
-			_this.headerVersion = (0, _jquery2.default)('#header-version');
-
-			_this.registerSuccessView = (0, _jquery2.default)('#register-success');
-			_this.registerFormView = (0, _jquery2.default)('#register-form');
-
-			_this.registerSuccessMessage = (0, _jquery2.default)('#register-success-message');
-			_this.registerBackButton = (0, _jquery2.default)('#register-back-button');
-
-			_this.emailField = (0, _jquery2.default)('#register3-email');
-			_this.passwordField = (0, _jquery2.default)('#register3-password');
-			_this.passwordConfirmField = (0, _jquery2.default)('#register3-password-confirm');
-
-			_this.showPassword = (0, _jquery2.default)('#show-password');
-			_this.showPasswordImg = (0, _jquery2.default)('#show-password-img');
-
-			_this.agreementTxt = (0, _jquery2.default)('#register3-agreemnet-txt');
-
-			_this.registerButton = (0, _jquery2.default)('#register-button');
-
-			_this.errorMessage = (0, _jquery2.default)('#error_message');
-
-			_this.setServiceElements(locale);
-			_this.setEvents();
-		}
-	}, {
-		key: 'setAgreement',
-		value: function setAgreement(locale) {
-			var _this = this;
-
-			var fallbackTxt = _this.getLegalText(locale);
-
-			_this.agreementTxt.html(fallbackTxt);
-		}
-	}, {
-		key: 'getLegalText',
-		value: function getLegalText(locale) {
-			var _this = this;
-
-			if (locale.RegisterLegalAgreement && locale.TermsAndConditions && locale.PrivacyPolicy && locale.LicenseAgreement && locale.RegisterButton) {
-				var legalText = locale.RegisterLegalAgreement;
-				legalText = legalText.replace('{0}', '"' + locale.RegisterButton + '"');
-				legalText = legalText.replace('{1}', '<a id="tos-link" href="#" data="/html/tos.php">' + locale.TermsAndConditions + '</a>');
-				legalText = legalText.replace('{2}', '<a id="pp-link" href="#" data="/html/pp.php">' + locale.PrivacyPolicy + '</a>');
-				legalText = legalText.replace('{3}', '<a id="eula-link" href="#" data="/html/eula.php">' + locale.LicenseAgreement + '</a>');
-
-				return legalText;
-			} else {
-				return 'By clicking "Register", you confirm that you accept our Terms of Conditions and you have read our Privacy Policy and EULA.';
-			}
-		}
-	}, {
-		key: 'setPolicyEvents',
-		value: function setPolicyEvents() {
-
-			(0, _jquery2.default)('#tos-link').click(this.openPolicyPage);
-			(0, _jquery2.default)('#pp-link').click(this.openPolicyPage);
-			(0, _jquery2.default)('#eula-link').click(this.openPolicyPage);
-		}
-	}, {
-		key: 'openPolicyPage',
-		value: function openPolicyPage() {
-			var _this = this;
-
-			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
-				if (storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] && (0, _jquery2.default)(_this).attr('data')) {
-					var policyLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + (0, _jquery2.default)(_this).attr('data');
-					chrome.tabs.create({ url: policyLink });
-				}
-			});
-		}
-	}, {
-		key: 'setServiceElements',
-		value: function setServiceElements(locale) {
-			var _this = this;
-			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
-
-				_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
-			});
-			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
-
-			//Linux/Ubuntu password field focus bug fix
-			chrome.runtime.getPlatformInfo(function (platformInfo) {
-				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
-					_this.passwordField.attr('type', 'text');
-					_this.passwordField.focus(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (passwordShowState == 'off') {
-							_this.passwordField.css('font-family', 'dotfont');
-							_this.passwordField.css('font-size', '8px');
-						}
-						if (_this.passwordField.val() === '') {
-							_this.passwordField.attr('placeholder', '');
-						}
-					});
-					_this.passwordField.focusout(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (_this.passwordField.val() === '') {
-							if (passwordShowState == 'off') {
-								_this.passwordField.css('font-family', '');
-								_this.passwordField.css('font-size', '');
-							}
-							_this.passwordField.attr('placeholder', locale.RegisterPassword);
-						}
-					});
-
-					_this.passwordConfirmField.attr('type', 'text');
-					_this.passwordConfirmField.focus(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (passwordShowState == 'off') {
-							_this.passwordConfirmField.css('font-family', 'dotfont');
-							_this.passwordConfirmField.css('font-size', '8px');
-						}
-						if (_this.passwordConfirmField.val() === '') {
-							_this.passwordConfirmField.attr('placeholder', '');
-						}
-					});
-					_this.passwordConfirmField.focusout(function () {
-						var passwordShowState = _this.showPassword.attr('data');
-						if (_this.passwordConfirmField.val() === '') {
-							if (passwordShowState == 'off') {
-								_this.passwordConfirmField.css('font-family', '');
-								_this.passwordConfirmField.css('font-size', '');
-							}
-							_this.passwordConfirmField.attr('placeholder', locale.RegisterPasswordConfirm);
-						}
-					});
-				}
-			});
-		}
-	}, {
-		key: 'setHeaderBackButton',
-		value: function setHeaderBackButton() {
-			var _this = this;
-			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
-			_this.headerBackButton.css('display', 'block');
-			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
-		}
-	}, {
-		key: 'setErrorMessages',
-		value: function setErrorMessages(locale) {
-			var _this = this;
-
-			_this.RegisterErrorEmail = locale.RegisterErrorEmail;
-			_this.enterValidEmailConfirmError = locale.enterValidEmailConfirmError;
-			_this.RegisterErrorPasswordNotMatch = locale.RegisterErrorPasswordNotMatch;
-			_this.RegisterPasswordToShort = locale.RegisterPasswordToShort ? locale.RegisterPasswordToShort : "Please type at least 6 characters as password for your own security. Typed password is too short";
-			_this.RegisterPasswordWhiteSpaceError = locale.RegisterPasswordWhiteSpaceError ? locale.RegisterPasswordWhiteSpaceError : "Please do not use whitespace/space/empty at the beginning or end of your password";
-		}
-	}, {
-		key: 'setEvents',
-		value: function setEvents() {
-			var _this = this;
-			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
-			_this.registerBackButton.click(_this.onBackToLoginClicked.bind(this));
-
-			_this.emailField.focus(_this.onInputFocus.bind(this));
-			_this.emailField.focusout(_this.onInputFocusOut.bind(this));
-
-			_this.passwordField.focus(_this.onInputFocus.bind(this));
-			_this.passwordField.focusout(_this.onInputFocusOut.bind(this));
-
-			_this.passwordConfirmField.focus(_this.onInputFocus.bind(this));
-			_this.passwordConfirmField.focusout(_this.onInputFocusOut.bind(this));
-
-			_this.showPassword.click(_this.onShowPasswordClicked.bind(this));
-		}
-	}, {
-		key: 'onShowPasswordClicked',
-		value: function onShowPasswordClicked(e) {
-			var _this = this;
-			var current = _this.showPassword.attr('data');
-
-			chrome.runtime.getPlatformInfo(function (platformInfo) {
-				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
-					_this.passwordField.attr('type', 'text');
-					_this.passwordConfirmField.attr('type', 'text');
-
-					if (current == 'off') {
-						_this.showPasswordImg.attr('src', './images/red-eye.png');
-						_this.showPassword.attr('data', 'on');
-						_this.passwordField.css('font-family', '');
-						_this.passwordField.css('font-size', '');
-						_this.passwordConfirmField.css('font-family', '');
-						_this.passwordConfirmField.css('font-size', '');
-					} else {
-						_this.showPassword.attr('data', 'off');
-						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
-						if (_this.passwordField.val() != "") {
-							_this.passwordField.css('font-family', 'dotfont');
-							_this.passwordField.css('font-size', '8px');
-						}
-						if (_this.passwordConfirmField.val() != "") {
-							_this.passwordConfirmField.css('font-family', 'dotfont');
-							_this.passwordConfirmField.css('font-size', '8px');
-						}
-					}
-				} else {
-					if (current == 'off') {
-						_this.showPasswordImg.attr('src', './images/red-eye.png');
-						_this.showPassword.attr('data', 'on');
-						_this.passwordField.attr('type', 'text');
-						_this.passwordConfirmField.attr('type', 'text');
-					} else {
-						_this.showPassword.attr('data', 'off');
-						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
-						_this.passwordField.attr('type', 'password');
-						_this.passwordConfirmField.attr('type', 'password');
-					}
-				}
-			});
-		}
-	}, {
-		key: 'onInputFocus',
-		value: function onInputFocus(e) {
-			var _this = this;
-			(0, _jquery2.default)(e.target).css('border-color', '#0074b3');
-		}
-	}, {
-		key: 'onInputFocusOut',
-		value: function onInputFocusOut(e) {
-			var _this = this;
-			(0, _jquery2.default)(e.target).css('border-color', 'rgba(0,0,0,0.12)');
-		}
-	}, {
-		key: 'openPolicyPage',
-		value: function openPolicyPage() {
-			var _this = this;
-
-			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
-				if (storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] && (0, _jquery2.default)(_this).attr('data')) {
-					var policyLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + (0, _jquery2.default)(_this).attr('data');
-					chrome.tabs.create({ url: policyLink });
-				}
-			});
-		}
-	}, {
-		key: 'loadLocaleFromServer',
-		value: function loadLocaleFromServer() {
-
-			//todo what happen if it take to long? loading screen is showed?
-			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
-				if (resp != undefined && resp != "" && resp.Retcode === 200) {
-
-					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
-						window.location.reload(true);
-					});
-				} else {
-					//todo can't get locale
-				}
-			});
-		}
-
-		/* Modifier */
-
-	}, {
-		key: 'setLoading',
-		value: function setLoading() {
-			var _this = this;
-
-			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
-			_this.registerButton.unbind('click');
-			_this.registerButton.addClass('btn--inactive');
-		}
-	}, {
-		key: 'unsetLoading',
-		value: function unsetLoading() {
-			var _this = this;
-
-			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
-			_this.registerButton.removeClass('btn--inactive');
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(errors) {
-			var _this = this;
-			_this.errorMessage.html("");
-
-			for (var i = 0; i < errors.length; i++) {
-				if (i <= 2) {
-					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
-					_this.errorMessage.append(errorElm);
-				}
-			}
-		}
-
-		/* Events */
-
-	}, {
-		key: 'onRegisterButtonClicked',
-		value: function onRegisterButtonClicked() {
-			var _this = this;
-
-			var errorMessages = [];
-			_this.errorMessage.html("");
-
-			var emailField = _jquery2.default.trim(_this.emailField.val());
-			var passwordField = _this.passwordField.val();
-			var passwordFieldConfirm = _this.passwordConfirmField.val();
-
-			if (emailField == "" || emailField.indexOf('@') == -1 || emailField.indexOf('.') == -1) errorMessages.push(_this.RegisterErrorEmail);
-
-			if (passwordField == "" || passwordField !== passwordFieldConfirm) errorMessages.push(_this.RegisterErrorPasswordNotMatch);
-
-			if (passwordField.length < 6) errorMessages.push(_this.RegisterPasswordToShort);
-
-			if (_jquery2.default.trim(passwordField).length !== passwordField.length) errorMessages.push(_this.RegisterPasswordWhiteSpaceError);
-
-			if (errorMessages.length != 0) return _this.displayErrors(errorMessages);
-
-			var registerData = {
-				email: emailField,
-				password: shajs('sha512').update(passwordField).digest('hex')
-			};
-
-			_this.setLoading();
-
-			_BackgroundRequester2.default.request('api', 'register', registerData).then(function (response) {
-
-				_this.unsetLoading();
-
-				if (response && !_Utils2.default.isEmpty(response)) {
-
-					if (response.Retcode == 200) return _this.onRegisterSuccess(response.Message);
-
-					if (response.Message) return _this.onRegisterFailed(response.Message);
-				}
-			});
-		}
-	}, {
-		key: 'onRegisterSuccess',
-		value: function onRegisterSuccess(successMessage) {
-			var _this = this;
-			location.reload();
-			//Register3SuccessView.show();
-			/*
-   		_this.registerSuccessMessage.text(successMessage);
-   		_this.registerSuccessView.addClass('register-view--success--on');
-   		_this.registerFormView.addClass('register-view--success');
-   */
-		}
-	}, {
-		key: 'onRegisterFailed',
-		value: function onRegisterFailed(errorMessages) {
-			var _this = this;
-
-			_this.displayErrors(errorMessages);
-		}
-	}, {
-		key: 'onBackToLoginClicked',
-		value: function onBackToLoginClicked() {
-
-			_LoginView2.default.initView();
-		}
-	}, {
-		key: 'onHeaderBackButtonClicked',
-		value: function onHeaderBackButtonClicked() {
-			_LoginView2.default.initView();
-		}
-	}]);
-
-	return Register3View;
-}();
-
-exports.default = new Register3View();
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(3);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _LoginView = __webpack_require__(6);
-
-var _LoginView2 = _interopRequireDefault(_LoginView);
-
-var _Utils = __webpack_require__(2);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _localeFallback = __webpack_require__(5);
-
-var _localeFallback2 = _interopRequireDefault(_localeFallback);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Register3SuccessView = function () {
-  function Register3SuccessView() {
-    _classCallCheck(this, Register3SuccessView);
-
-    this.template = _folders2.default.VIEWS + '/register3-success.html';
-  }
-
-  _createClass(Register3SuccessView, [{
-    key: 'show',
-    value: function show() {
-      var _this2 = this;
-
-      var _this = this;
-
-      _Utils2.default.getLocaleInStorage().then(function (locale) {
-        _this2.App = (0, _jquery2.default)('#app');
-        _this2.App.html("");
-
-        _jquery2.default.get(_this.template, function (template) {
-          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
-
-          _this.App.append(loadedTemplate);
-          _this.selectElements();
-        }, "html");
-      });
-    }
-  }, {
-    key: 'selectElements',
-    value: function selectElements() {
-      var _this = this;
-
-      _this.closeButton = (0, _jquery2.default)('#success-close');
-      _this.backToLoginButton = (0, _jquery2.default)('#back-to-login-button');
-      _this.setEvents();
-    }
-  }, {
-    key: 'setEvents',
-    value: function setEvents() {
-      var _this = this;
-
-      _this.closeButton.click(_this.onBackToLoginClicked);
-      _this.backToLoginButton.click(_this.onBackToLoginClicked);
-    }
-  }, {
-    key: 'onBackToLoginClicked',
-    value: function onBackToLoginClicked() {
-      _LoginView2.default.initView();
-    }
-  }]);
-
-  return Register3SuccessView;
-}();
-
-exports.default = new Register3SuccessView();
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(3);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _Utils = __webpack_require__(2);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _LoginView = __webpack_require__(6);
-
-var _LoginView2 = _interopRequireDefault(_LoginView);
-
-var _DOMPurify = __webpack_require__(8);
-
-var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
-
-var _Sanitize = __webpack_require__(7);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -25502,6 +25188,9 @@ var ForgotpassView = function () {
 
 		this.template = _folders2.default.VIEWS + '/forgotpass.html';
 		this.header = _folders2.default.VIEWS + '/header.html';
+
+		this.emailInputChanged = this.emailInputChanged.bind(this);
+		this.emailFieldChanged = this.emailFieldChanged.bind(this);
 	}
 
 	_createClass(ForgotpassView, [{
@@ -25552,6 +25241,8 @@ var ForgotpassView = function () {
 		value: function selectElements() {
 			var _this = this;
 
+			_this.isEmailFieldValid = true;
+
 			_this.headerLogo = (0, _jquery2.default)('#header-logo');
 			_this.headerVersion = (0, _jquery2.default)('#header-version');
 
@@ -25563,12 +25254,59 @@ var ForgotpassView = function () {
 
 			_this.forgotpassEmailField = (0, _jquery2.default)('#forgotpass-email');
 
+			_this.forgotpassEmailField.change(function (event) {
+				_this.emailInputChanged(event.target.value);
+			});
+			_this.forgotpassEmailField.on("input", function (event) {
+				_this.emailFieldChanged(event.target.value);
+			});
+
 			_this.forgotpassButton = (0, _jquery2.default)('#forgotpass-button');
 
 			_this.errorMessage = (0, _jquery2.default)('#error_message');
 
 			_this.setServiceElements();
 			_this.setEvents();
+		}
+	}, {
+		key: 'emailInputChanged',
+		value: function emailInputChanged(val) {
+			var _this = this;
+
+			var isValid = _this.validateEmail(val);
+
+			_this.isEmailFieldValid = isValid;
+			//}, 1000)
+			if (_this.isEmailFieldValid) {
+				_this.clearEmailError();
+			} else {
+				_this.showEmailError();
+			}
+		}
+	}, {
+		key: 'emailFieldChanged',
+		value: function emailFieldChanged(val) {
+			var _this = this;
+
+			var isValid = _this.validateEmail(val);
+			if (!_this.isEmailFieldValid) _this.isEmailFieldValid = isValid;
+
+			if (_this.isEmailFieldValid) {
+				_this.clearEmailError();
+			} else {
+				_this.showEmailError();
+			}
+		}
+	}, {
+		key: 'clearEmailError',
+		value: function clearEmailError() {
+
+			(0, _jquery2.default)('#email-error').css('display', 'none');
+		}
+	}, {
+		key: 'showEmailError',
+		value: function showEmailError() {
+			(0, _jquery2.default)('#email-error').css('display', 'block');
 		}
 	}, {
 		key: 'setServiceElements',
@@ -25631,21 +25369,8 @@ var ForgotpassView = function () {
 		key: 'unsetLoading',
 		value: function unsetLoading() {
 			var _this = this;
-
-			_this.makeButtonActive(_this.forgotpassButton);
-		}
-	}, {
-		key: 'displayErrors',
-		value: function displayErrors(errors) {
-			var _this = this;
 			_this.errorMessage.html("");
-
-			for (var i = 0; i < errors.length; i++) {
-				if (i <= 2) {
-					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
-					_this.errorMessage.append(errorElm);
-				}
-			}
+			_this.makeButtonActive(_this.forgotpassButton);
 		}
 
 		/* Events */
@@ -25655,34 +25380,36 @@ var ForgotpassView = function () {
 		value: function onForgotpassButtonClicked() {
 			var _this = this;
 
-			var errorMessages = [];
-			_this.errorMessage.html("");
+			var forgotpassEmailField = _this.forgotpassEmailField.val();
 
-			if (_this.forgotpassEmailField.val() == "" || _this.forgotpassEmailField.val().indexOf('@') == -1 || _this.forgotpassEmailField.val().indexOf('.') == -1) errorMessages.push(_this.EMAILFAILED);
+			if (_this.validateEmail(forgotpassEmailField)) {
+				_this.clearResponseError();
+				_this.setLoading();
+				setTimeout(function () {
+					_BackgroundRequester2.default.request('api', 'forgotPass', { email: forgotpassEmailField }).then(function (response) {
 
-			if (errorMessages.length > 0) return _this.displayErrors(errorMessages);
+						_this.unsetLoading();
 
-			_this.setLoading();
+						if (_Utils2.default.isResponse200(response)) return _this.showSuccess(response.message);
 
-			var forgotPassData = {
-				email: _this.forgotpassEmailField.val()
-			};
+						if (_Utils2.default.isResponseMinus20(response)) return _this.showResponseError(response.message);
 
-			_BackgroundRequester2.default.request('api', 'forgotPass', forgotPassData).then(function (response) {
+						if (_Utils2.default.isResponseMinusOne(response)) {
+							return _Utils2.default.showMinusOneError(_this.showResponseError.bind(_this));
+						}
 
-				_this.unsetLoading();
-
-				if (response && !_Utils2.default.isEmpty(response)) {
-
-					if (response.Retcode == 200) return _this.onForgotpassSuccess(response.Message);
-
-					if (response.Message) return _this.onForgotpassFailed(response.Message);
-				}
-			});
+						if (_Utils2.default.isMaintenanceMode(response)) {
+							_this.showMaintenanceMessage(response.message);
+						}
+					});
+				}, 500);
+			} else {
+				_this.emailInputChanged({ target: { value: forgotpassEmailField } });
+			}
 		}
 	}, {
-		key: 'onForgotpassSuccess',
-		value: function onForgotpassSuccess(successMessage) {
+		key: 'showSuccess',
+		value: function showSuccess(successMessage) {
 			var _this = this;
 
 			_this.forgotpassSuccessMessage.html(_DOMPurify2.default.sanitize(successMessage, { SAFE_FOR_JQUERY: true }));
@@ -25690,11 +25417,29 @@ var ForgotpassView = function () {
 			_this.forgotpassFormView.addClass('forgotpass-view--success');
 		}
 	}, {
-		key: 'onForgotpassFailed',
-		value: function onForgotpassFailed(errorMessages) {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
 			var _this = this;
-
-			_this.displayErrors(errorMessages);
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#forgotpass-mode').css('display', 'none');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
+		key: 'showResponseError',
+		value: function showResponseError(msg) {
+			(0, _jquery2.default)('#error_message').html("");
+			(0, _jquery2.default)('#error_message').text(msg);
+			//$('#error_message').css("display", "block")
+		}
+	}, {
+		key: 'clearResponseError',
+		value: function clearResponseError() {
+			(0, _jquery2.default)('#error_message').html("");
+			//$('#error_message').css("display", "none")
 		}
 	}, {
 		key: 'onBackToLoginClicked',
@@ -25708,6 +25453,11 @@ var ForgotpassView = function () {
 			var _this = this;
 			_this.onBackToLoginClicked();
 		}
+	}, {
+		key: 'validateEmail',
+		value: function validateEmail(email) {
+			return email && typeof email === 'string' && email != '' && /\S+@\S+\.\S+/.test(email);
+		}
 	}]);
 
 	return ForgotpassView;
@@ -25716,205 +25466,7 @@ var ForgotpassView = function () {
 exports.default = new ForgotpassView();
 
 /***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _jquery = __webpack_require__(3);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _folders = __webpack_require__(1);
-
-var _folders2 = _interopRequireDefault(_folders);
-
-var _LoginView = __webpack_require__(6);
-
-var _LoginView2 = _interopRequireDefault(_LoginView);
-
-var _Utils = __webpack_require__(2);
-
-var _Utils2 = _interopRequireDefault(_Utils);
-
-var _localeFallback = __webpack_require__(5);
-
-var _localeFallback2 = _interopRequireDefault(_localeFallback);
-
-var _BackgroundRequester = __webpack_require__(4);
-
-var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
-
-var _Sanitize = __webpack_require__(7);
-
-var _Sanitize2 = _interopRequireDefault(_Sanitize);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var ActivationView = function () {
-  function ActivationView() {
-    _classCallCheck(this, ActivationView);
-
-    this.template = _folders2.default.VIEWS + '/activation.html';
-  }
-
-  _createClass(ActivationView, [{
-    key: 'show',
-    value: function show(userData) {
-      var _this2 = this;
-
-      var _this = this;
-      _this.userData = userData;
-
-      _Utils2.default.getLocaleInStorage().then(function (locale) {
-        _this2.App = (0, _jquery2.default)('#app');
-        _this2.App.html("");
-
-        _jquery2.default.get(_this.template, function (template) {
-          var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
-
-          _this.App.append(loadedTemplate);
-          _this.selectElements();
-        }, "html");
-      });
-    }
-  }, {
-    key: 'selectElements',
-    value: function selectElements() {
-      var _this = this;
-
-      _this.closeButton = (0, _jquery2.default)('#activation-close');
-      _this.backToLoginButton = (0, _jquery2.default)('#back-to-login-button');
-      _this.backToLoginButton2 = (0, _jquery2.default)('#back-to-login-button-2');
-      _this.backToLoginButton2Container = (0, _jquery2.default)('#back-to-login-button-2-container');
-      _this.resendActivationButton = (0, _jquery2.default)('#resend-activation-button');
-
-      _this.resendActivationLoading = (0, _jquery2.default)('#resend-loading');
-
-      _this.activationInfoContainer = (0, _jquery2.default)('#activation-info');
-      _this.resendActivationTimeout = (0, _jquery2.default)('#resend-activation-timeout');
-      _this.resendActivationSuccess = (0, _jquery2.default)('#resend-activation-success');
-      _this.resendActivationError = (0, _jquery2.default)('#resend-activation-error');
-      _this.setEvents();
-    }
-  }, {
-    key: 'setEvents',
-    value: function setEvents() {
-      var _this = this;
-
-      _this.closeButton.click(_this.onBackToLoginClicked.bind(this));
-      _this.backToLoginButton.click(_this.onBackToLoginClicked.bind(this));
-      _this.backToLoginButton2.click(_this.onBackToLoginClicked.bind(this));
-      _this.resendActivationButton.click(_this.onResendActivationClicked.bind(this));
-    }
-  }, {
-    key: 'onResendActivationClicked',
-    value: function onResendActivationClicked() {
-      var _this = this;
-
-      _this.setLoading();
-
-      _BackgroundRequester2.default.request('api', 'resendActivationLink', {
-        email: _this.userData.email,
-        password: _this.userData.password
-      }).then(function (response) {
-        _this.unsetLoading();
-
-        if (response && response.isTimeout) return _this.showTimeout(); // Local timeout cache
-
-        if (response && response.Retcode === 200) return _this.resendSuccess();
-
-        if (response && response.Retcode < 0) return _this.showError(response.Message);
-      });
-
-      //_this.resendSuccess();
-    }
-  }, {
-    key: 'onBackToLoginClicked',
-    value: function onBackToLoginClicked() {
-      _LoginView2.default.initView();
-    }
-  }, {
-    key: 'setLoading',
-    value: function setLoading() {
-      var _this = this;
-
-      _this.resendActivationLoading.html(_ServiceMeta2.default.LOADINGIMG);
-      _this.resendActivationButton.unbind('click');
-      _this.resendActivationButton.css('display', 'none');
-    }
-  }, {
-    key: 'unsetLoading',
-    value: function unsetLoading() {
-      var _this = this;
-
-      _this.resendActivationLoading.html("");
-      _this.resendActivationButton.click(_this.onResendActivationClicked.bind(this));
-      _this.resendActivationButton.css('display', 'block');
-    }
-  }, {
-    key: 'showTimeout',
-    value: function showTimeout() {
-      var _this = this;
-      _this.activationInfoContainer.css('display', 'none');
-      _this.resendActivationSuccess.css('display', 'none');
-      _this.resendActivationError.css('display', 'none');
-
-      _this.resendActivationTimeout.css('display', 'block');
-      _this.backToLoginButton2Container.css('display', 'block');
-    }
-  }, {
-    key: 'resendSuccess',
-    value: function resendSuccess() {
-      var _this = this;
-      _this.activationInfoContainer.css('display', 'none');
-      _this.resendActivationSuccess.css('display', 'block');
-      _this.resendActivationError.css('display', 'none');
-
-      _this.resendActivationTimeout.css('display', 'none');
-      _this.backToLoginButton2Container.css('display', 'block');
-    }
-  }, {
-    key: 'showError',
-    value: function showError(errorMessages) {
-      var _this = this;
-      _this.activationInfoContainer.css('display', 'none');
-      _this.resendActivationSuccess.css('display', 'none');
-      _this.resendActivationError.css('display', 'block');
-
-      _this.resendActivationTimeout.css('display', 'none');
-      _this.backToLoginButton2Container.css('display', 'block');
-
-      if (errorMessages && Array.isArray(errorMessages)) {
-        errorMessages.forEach(function (error) {
-          _this.resendActivationError.append("<p>" + _Sanitize2.default.escpateData(error) + "</p>");
-        });
-      } else {
-        _this.resendActivationError.text("Something went wrong. Please try later again.");
-      }
-    }
-  }]);
-
-  return ActivationView;
-}();
-
-exports.default = new ActivationView();
-
-/***/ }),
-/* 61 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26242,7 +25794,659 @@ var CreateAuthcodeView = function () {
 exports.default = new CreateAuthcodeView();
 
 /***/ }),
-/* 62 */
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _jquery = __webpack_require__(3);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+var _folders = __webpack_require__(1);
+
+var _folders2 = _interopRequireDefault(_folders);
+
+var _Utils = __webpack_require__(2);
+
+var _Utils2 = _interopRequireDefault(_Utils);
+
+var _ServiceMeta = __webpack_require__(0);
+
+var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+
+var _BackgroundRequester = __webpack_require__(4);
+
+var _BackgroundRequester2 = _interopRequireDefault(_BackgroundRequester);
+
+var _LoginView = __webpack_require__(6);
+
+var _LoginView2 = _interopRequireDefault(_LoginView);
+
+var _DOMPurify = __webpack_require__(8);
+
+var _DOMPurify2 = _interopRequireDefault(_DOMPurify);
+
+var _Sanitize = __webpack_require__(7);
+
+var _Sanitize2 = _interopRequireDefault(_Sanitize);
+
+var _Register3SuccessView = __webpack_require__(60);
+
+var _Register3SuccessView2 = _interopRequireDefault(_Register3SuccessView);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var shajs = __webpack_require__(15);
+
+var Register3View = function () {
+	function Register3View() {
+		_classCallCheck(this, Register3View);
+
+		this.template = _folders2.default.VIEWS + '/register3.html';
+		this.header = _folders2.default.VIEWS + '/header.html';
+
+		this.emailInputChanged = this.emailInputChanged.bind(this);
+		this.emailFieldChanged = this.emailFieldChanged.bind(this);
+
+		this.passwordInputChanged = this.passwordInputChanged.bind(this);
+		this.passwordFieldChanged = this.passwordFieldChanged.bind(this);
+
+		this.passwordConfirmInputChanged = this.passwordConfirmInputChanged.bind(this);
+		this.passwordConfirmFieldChanged = this.passwordConfirmFieldChanged.bind(this);
+	}
+
+	_createClass(Register3View, [{
+		key: 'initView',
+		value: function initView() {
+			var _this = this;
+
+			_Utils2.default.getLocaleInStorage().then(_this.loadTemplate.bind(this), _this.loadLocaleFromServer.bind(this));
+		}
+	}, {
+		key: 'loadTemplate',
+		value: function loadTemplate(locale) {
+			var _this = this;
+
+			this.App = (0, _jquery2.default)('#app');
+			this.App.html("");
+
+			_jquery2.default.get(_this.header, function (header) {
+				_this.App.append(header);
+				_jquery2.default.get(_this.template, function (template) {
+					var loadedTemplate = _Utils2.default.loadTemplate(template, locale);
+
+					_this.App.append(loadedTemplate);
+					_this.selectElements(locale);
+					_this.setErrorMessages(locale);
+					_this.setAgreement(locale);
+					_this.setPolicyEvents(locale);
+					_this.setHeaderBackButton();
+				}, "html");
+			}, "html");
+		}
+	}, {
+		key: 'selectElements',
+		value: function selectElements(locale) {
+			var _this = this;
+
+			_this.isEmailFieldValid = true;
+			_this.isPassFieldValid = true;
+			_this.isConfirmPassFieldValid = true;
+
+			_this.headerLogo = (0, _jquery2.default)('#header-logo');
+			_this.headerVersion = (0, _jquery2.default)('#header-version');
+
+			_this.registerSuccessView = (0, _jquery2.default)('#register-success');
+			_this.registerFormView = (0, _jquery2.default)('#register-form');
+
+			_this.registerSuccessMessage = (0, _jquery2.default)('#register-success-message');
+			_this.registerBackButton = (0, _jquery2.default)('#register-back-button');
+
+			_this.emailField = (0, _jquery2.default)('#register3-email');
+			_this.passwordField = (0, _jquery2.default)('#register3-password');
+			_this.passwordConfirmField = (0, _jquery2.default)('#register3-password-confirm');
+
+			_this.showPassword = (0, _jquery2.default)('#show-password');
+			_this.showPasswordImg = (0, _jquery2.default)('#show-password-img');
+
+			_this.agreementTxt = (0, _jquery2.default)('#register3-agreemnet-txt');
+
+			_this.registerButton = (0, _jquery2.default)('#register-button');
+
+			_this.errorMessage = (0, _jquery2.default)('#error_message');
+
+			_this.setServiceElements(locale);
+			_this.setEvents();
+		}
+	}, {
+		key: 'setAgreement',
+		value: function setAgreement(locale) {
+			var _this = this;
+
+			var fallbackTxt = _this.getLegalText(locale);
+
+			_this.agreementTxt.html(fallbackTxt);
+		}
+	}, {
+		key: 'getLegalText',
+		value: function getLegalText(locale) {
+			var _this = this;
+
+			if (locale.RegisterLegalAgreement && locale.TermsAndConditions && locale.PrivacyPolicy && locale.LicenseAgreement && locale.RegisterButton) {
+				var legalText = locale.RegisterLegalAgreement;
+				legalText = legalText.replace('{0}', '"' + locale.RegisterButton + '"');
+				legalText = legalText.replace('{1}', '<a id="tos-link" href="#" data="/api2/pub/documents/terms">' + locale.TermsAndConditions + '</a>');
+				legalText = legalText.replace('{2}', '<a id="pp-link" href="#" data="/api2/pub/documents/ppolicy">' + locale.PrivacyPolicy + '</a>');
+				legalText = legalText.replace('{3}', '<a id="eula-link" href="#" data="/api2/pub/documents/enduserla">' + locale.LicenseAgreement + '</a>');
+
+				return legalText;
+			} else {
+				return 'By clicking "Register", you confirm that you accept our Terms of Conditions and you have read our Privacy Policy and EULA.';
+			}
+		}
+	}, {
+		key: 'setPolicyEvents',
+		value: function setPolicyEvents() {
+
+			(0, _jquery2.default)('#tos-link').click(this.openPolicyPage);
+			(0, _jquery2.default)('#pp-link').click(this.openPolicyPage);
+			(0, _jquery2.default)('#eula-link').click(this.openPolicyPage);
+		}
+	}, {
+		key: 'openPolicyPage',
+		value: function openPolicyPage() {
+			var _this = this;
+
+			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] && (0, _jquery2.default)(_this).attr('data')) {
+					var policyLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + (0, _jquery2.default)(_this).attr('data');
+					chrome.tabs.create({ url: policyLink });
+				}
+			});
+		}
+	}, {
+		key: 'setServiceElements',
+		value: function setServiceElements(locale) {
+			var _this = this;
+			chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.BASELINK, _ServiceMeta2.default.STORAGEKEYS.INSTALLID], function (storage) {
+
+				_this.headerLogo.attr('src', _ServiceMeta2.default.IMAGES.HEADERLOGO);
+			});
+			_this.headerVersion.text('v. ' + _ServiceMeta2.default.VERSION);
+
+			//Linux/Ubuntu password field focus bug fix
+			chrome.runtime.getPlatformInfo(function (platformInfo) {
+				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
+					_this.passwordField.attr('type', 'text');
+					_this.passwordField.focus(function () {
+						var passwordShowState = _this.showPassword.attr('data');
+						if (passwordShowState == 'off') {
+							_this.passwordField.css('font-family', 'dotfont');
+							_this.passwordField.css('font-size', '8px');
+						}
+						if (_this.passwordField.val() === '') {
+							_this.passwordField.attr('placeholder', '');
+						}
+					});
+					_this.passwordField.focusout(function () {
+						var passwordShowState = _this.showPassword.attr('data');
+						if (_this.passwordField.val() === '') {
+							if (passwordShowState == 'off') {
+								_this.passwordField.css('font-family', '');
+								_this.passwordField.css('font-size', '');
+							}
+							_this.passwordField.attr('placeholder', locale.RegisterPassword);
+						}
+					});
+
+					_this.passwordConfirmField.attr('type', 'text');
+					_this.passwordConfirmField.focus(function () {
+						var passwordShowState = _this.showPassword.attr('data');
+						if (passwordShowState == 'off') {
+							_this.passwordConfirmField.css('font-family', 'dotfont');
+							_this.passwordConfirmField.css('font-size', '8px');
+						}
+						if (_this.passwordConfirmField.val() === '') {
+							_this.passwordConfirmField.attr('placeholder', '');
+						}
+					});
+					_this.passwordConfirmField.focusout(function () {
+						var passwordShowState = _this.showPassword.attr('data');
+						if (_this.passwordConfirmField.val() === '') {
+							if (passwordShowState == 'off') {
+								_this.passwordConfirmField.css('font-family', '');
+								_this.passwordConfirmField.css('font-size', '');
+							}
+							_this.passwordConfirmField.attr('placeholder', locale.RegisterPasswordConfirm);
+						}
+					});
+				}
+			});
+		}
+	}, {
+		key: 'setHeaderBackButton',
+		value: function setHeaderBackButton() {
+			var _this = this;
+			_this.headerBackButton = (0, _jquery2.default)('#header-back-button');
+			_this.headerBackButton.css('display', 'block');
+			_this.headerBackButton.click(_this.onHeaderBackButtonClicked.bind(this));
+		}
+	}, {
+		key: 'setErrorMessages',
+		value: function setErrorMessages(locale) {
+			var _this = this;
+
+			_this.RegisterErrorEmail = locale.RegisterErrorEmail;
+			_this.enterValidEmailConfirmError = locale.enterValidEmailConfirmError;
+			_this.RegisterErrorPasswordNotMatch = locale.RegisterErrorPasswordNotMatch;
+			_this.RegisterPasswordToShort = locale.RegisterPasswordToShort ? locale.RegisterPasswordToShort : "Please type at least 6 characters as password for your own security. Typed password is too short";
+			_this.RegisterPasswordWhiteSpaceError = locale.RegisterPasswordWhiteSpaceError ? locale.RegisterPasswordWhiteSpaceError : "Please do not use whitespace/space/empty at the beginning or end of your password";
+		}
+	}, {
+		key: 'setEvents',
+		value: function setEvents() {
+			var _this = this;
+			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
+			_this.registerBackButton.click(_this.onBackToLoginClicked.bind(this));
+
+			_this.emailField.focus(_this.onInputFocus.bind(this));
+			_this.emailField.focusout(_this.onInputFocusOut.bind(this));
+
+			_this.emailField.change(function (event) {
+				_this.emailInputChanged(event.target.value);
+			});
+			_this.emailField.on("input", function (event) {
+				_this.emailFieldChanged(event.target.value);
+			});
+
+			_this.passwordField.focus(_this.onInputFocus.bind(this));
+			_this.passwordField.focusout(_this.onInputFocusOut.bind(this));
+
+			_this.passwordField.change(function (event) {
+				_this.passwordInputChanged(event.target.value);
+			});
+			_this.passwordField.on("input", function (event) {
+				_this.passwordFieldChanged(event.target.value);
+			});
+
+			_this.passwordConfirmField.focus(_this.onInputFocus.bind(this));
+			_this.passwordConfirmField.focusout(_this.onInputFocusOut.bind(this));
+
+			_this.passwordConfirmField.change(function (event) {
+				_this.passwordConfirmInputChanged(event.target.value);
+			});
+			_this.passwordConfirmField.on("input", function (event) {
+				_this.passwordConfirmFieldChanged(event.target.value);
+			});
+
+			_this.showPassword.click(_this.onShowPasswordClicked.bind(this));
+
+			(0, _jquery2.default)('input').keyup(function (e) {
+				if (e.keyCode == 13) _this.registerButton.click();
+			});
+		}
+	}, {
+		key: 'onShowPasswordClicked',
+		value: function onShowPasswordClicked(e) {
+			var _this = this;
+			var current = _this.showPassword.attr('data');
+
+			chrome.runtime.getPlatformInfo(function (platformInfo) {
+				if (platformInfo && platformInfo.os && platformInfo.os === 'linux' && _ServiceMeta2.default.PLATFORM.toLowerCase() === 'firefox') {
+					_this.passwordField.attr('type', 'text');
+					_this.passwordConfirmField.attr('type', 'text');
+
+					if (current == 'off') {
+						_this.showPasswordImg.attr('src', './images/red-eye.png');
+						_this.showPassword.attr('data', 'on');
+						_this.passwordField.css('font-family', '');
+						_this.passwordField.css('font-size', '');
+						_this.passwordConfirmField.css('font-family', '');
+						_this.passwordConfirmField.css('font-size', '');
+					} else {
+						_this.showPassword.attr('data', 'off');
+						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
+						if (_this.passwordField.val() != "") {
+							_this.passwordField.css('font-family', 'dotfont');
+							_this.passwordField.css('font-size', '8px');
+						}
+						if (_this.passwordConfirmField.val() != "") {
+							_this.passwordConfirmField.css('font-family', 'dotfont');
+							_this.passwordConfirmField.css('font-size', '8px');
+						}
+					}
+				} else {
+					if (current == 'off') {
+						_this.showPasswordImg.attr('src', './images/red-eye.png');
+						_this.showPassword.attr('data', 'on');
+						_this.passwordField.attr('type', 'text');
+						_this.passwordConfirmField.attr('type', 'text');
+					} else {
+						_this.showPassword.attr('data', 'off');
+						_this.showPasswordImg.attr('src', './images/red-eye-off.png');
+						_this.passwordField.attr('type', 'password');
+						_this.passwordConfirmField.attr('type', 'password');
+					}
+				}
+			});
+		}
+	}, {
+		key: 'onInputFocus',
+		value: function onInputFocus(e) {
+			var _this = this;
+			(0, _jquery2.default)(e.target).css('border-color', '#0074b3');
+		}
+	}, {
+		key: 'onInputFocusOut',
+		value: function onInputFocusOut(e) {
+			var _this = this;
+			(0, _jquery2.default)(e.target).css('border-color', 'rgba(0,0,0,0.12)');
+		}
+	}, {
+		key: 'passwordConfirmInputChanged',
+		value: function passwordConfirmInputChanged(val) {
+			var _this = this;
+
+			_this.isConfirmPassFieldValid = _this.isValidConfirmPassword(val, (0, _jquery2.default)('#register3-password').val());
+
+			if (_this.isConfirmPassFieldValid) {
+				_this.clearConfirmPasswordError();
+			} else {
+				_this.showConfirmPasswordError();
+			}
+		}
+	}, {
+		key: 'passwordConfirmFieldChanged',
+		value: function passwordConfirmFieldChanged(val) {
+			var _this = this;
+
+			var isValid = _this.isValidConfirmPassword(val, (0, _jquery2.default)('#register3-password').val());
+			if (!_this.isConfirmPassFieldValid) _this.isConfirmPassFieldValid = isValid;
+
+			if (_this.isConfirmPassFieldValid) {
+				_this.clearConfirmPasswordError();
+			} else {
+				_this.showConfirmPasswordError();
+			}
+		}
+	}, {
+		key: 'clearConfirmPasswordError',
+		value: function clearConfirmPasswordError() {
+			(0, _jquery2.default)('#confirm-password-error').css('display', 'none');
+		}
+	}, {
+		key: 'showConfirmPasswordError',
+		value: function showConfirmPasswordError() {
+			(0, _jquery2.default)('#confirm-password-error').css('display', 'block');
+		}
+	}, {
+		key: 'passwordInputChanged',
+		value: function passwordInputChanged(val) {
+			var _this = this;
+			_this.isPassFieldValid = _this.isValidPassword(val);
+
+			if (_this.isPassFieldValid) {
+				_this.clearPasswordError();
+			} else {
+				_this.showPasswordError();
+			}
+
+			if (!_this.isConfirmPassFieldValid) _this.passwordConfirmInputChanged((0, _jquery2.default)('#register3-password-confirm').val());
+		}
+	}, {
+		key: 'passwordFieldChanged',
+		value: function passwordFieldChanged(val) {
+			var _this = this;
+
+			var isValid = _this.isValidPassword(val);
+			if (!_this.isPassFieldValid) _this.isPassFieldValid = isValid;
+
+			if (_this.isPassFieldValid) {
+				_this.clearPasswordError();
+			} else {
+				_this.showPasswordError();
+			}
+
+			if (!_this.isConfirmPassFieldValid) _this.passwordConfirmFieldChanged((0, _jquery2.default)('#register3-password-confirm').val());
+		}
+	}, {
+		key: 'clearPasswordError',
+		value: function clearPasswordError() {
+			(0, _jquery2.default)('#password-error').css('display', 'none');
+		}
+	}, {
+		key: 'showPasswordError',
+		value: function showPasswordError() {
+			(0, _jquery2.default)('#password-error').css('display', 'block');
+		}
+	}, {
+		key: 'emailInputChanged',
+		value: function emailInputChanged(val) {
+			var _this = this;
+
+			var isValid = _this.isValidEmail(val);
+
+			_this.isEmailFieldValid = isValid;
+			//}, 1000)
+			if (_this.isEmailFieldValid) {
+				_this.clearEmailError();
+			} else {
+				_this.showEmailError();
+			}
+		}
+	}, {
+		key: 'emailFieldChanged',
+		value: function emailFieldChanged(val) {
+			var _this = this;
+
+			var isValid = _this.isValidEmail(val);
+			if (!_this.isEmailFieldValid) _this.isEmailFieldValid = isValid;
+
+			if (_this.isEmailFieldValid) {
+				_this.clearEmailError();
+			} else {
+				_this.showEmailError();
+			}
+		}
+	}, {
+		key: 'clearEmailError',
+		value: function clearEmailError() {
+
+			(0, _jquery2.default)('#email-error').css('display', 'none');
+		}
+	}, {
+		key: 'showEmailError',
+		value: function showEmailError() {
+			(0, _jquery2.default)('#email-error').css('display', 'block');
+		}
+	}, {
+		key: 'isValidEmail',
+		value: function isValidEmail(email) {
+			return email && typeof email === 'string' && email != '' && /\S+@\S+\.\S+/.test(email);
+		}
+	}, {
+		key: 'isValidPassword',
+		value: function isValidPassword(pass) {
+			return pass && typeof pass === 'string' && pass != '' && pass.length >= 7;
+		}
+	}, {
+		key: 'isValidConfirmPassword',
+		value: function isValidConfirmPassword(confirmPass, passField) {
+			var _this = this;
+			return confirmPass && typeof confirmPass === 'string' && confirmPass != '' && confirmPass == passField;
+		}
+	}, {
+		key: 'openPolicyPage',
+		value: function openPolicyPage() {
+			var _this = this;
+
+			chrome.storage.local.get(_ServiceMeta2.default.STORAGEKEYS.BASELINK, function (storage) {
+				if (storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] && (0, _jquery2.default)(_this).attr('data')) {
+					var policyLink = storage[_ServiceMeta2.default.STORAGEKEYS.BASELINK] + (0, _jquery2.default)(_this).attr('data');
+					chrome.tabs.create({ url: policyLink });
+				}
+			});
+		}
+	}, {
+		key: 'loadLocaleFromServer',
+		value: function loadLocaleFromServer() {
+
+			//todo what happen if it take to long? loading screen is showed?
+			_BackgroundRequester2.default.request("api", "getLocale", {}).then(function (resp) {
+				if (resp != undefined && resp != "" && resp.Retcode === 200) {
+
+					chrome.storage.local.set(_defineProperty({}, _ServiceMeta2.default.STORAGEKEYS.LOCALE, resp.locale), function () {
+						window.location.reload(true);
+					});
+				} else {
+					//todo can't get locale
+				}
+			});
+		}
+
+		/* Modifier */
+
+	}, {
+		key: 'setLoading',
+		value: function setLoading() {
+			var _this = this;
+
+			_this.errorMessage.html(_ServiceMeta2.default.LOADINGIMG);
+			_this.registerButton.unbind('click');
+			_this.registerButton.addClass('btn--inactive');
+		}
+	}, {
+		key: 'unsetLoading',
+		value: function unsetLoading() {
+			var _this = this;
+
+			_this.registerButton.click(_this.onRegisterButtonClicked.bind(this));
+			_this.registerButton.removeClass('btn--inactive');
+		}
+	}, {
+		key: 'displayErrors',
+		value: function displayErrors(errors) {
+			var _this = this;
+			_this.errorMessage.html("");
+
+			for (var i = 0; i < errors.length; i++) {
+				if (i <= 2) {
+					var errorElm = '<p>' + _Sanitize2.default.escpateData(errors[i]) + '</p>';
+					_this.errorMessage.append(errorElm);
+				}
+			}
+		}
+
+		/* Events */
+
+	}, {
+		key: 'onRegisterButtonClicked',
+		value: function onRegisterButtonClicked() {
+			var _this = this;
+			var email = _this.emailField.val();
+			var password = _this.passwordField.val();
+			var confirmPass = _this.passwordConfirmField.val();
+
+			if (!_this.isValidEmail(email) || !_this.isValidPassword(password) || !_this.isValidConfirmPassword(confirmPass, password)) {
+				_this.emailInputChanged(email);
+				_this.passwordInputChanged(password);
+				_this.passwordConfirmInputChanged(confirmPass);
+				return;
+			}
+
+			_this.setLoading();
+
+			_BackgroundRequester2.default.request("api", "registerAccount", { email: email, password: password }).then(function (response) {
+				_this.unsetLoading();
+
+				if (_Utils2.default.isResponse200(response)) return _this.showSuccess(response.message);
+
+				if (_Utils2.default.isResponseMinus20(response)) return _this.showError(response.message);
+
+				if (_Utils2.default.isResponseMinusOne(response)) {
+					return _Utils2.default.showMinusOneError(_this.showError.bind(_this));
+				}
+
+				if (_Utils2.default.isMaintenanceMode(response)) {
+					_this.showMaintenanceMessage(response.message);
+				}
+			});
+		}
+	}, {
+		key: 'showSuccess',
+		value: function showSuccess(successMessage) {
+			var _this = this;
+			//location.reload();
+			_Register3SuccessView2.default.show();
+
+			_this.registerSuccessMessage.text(successMessage);
+			_this.registerSuccessView.addClass('register-view--success--on');
+			_this.registerFormView.addClass('register-view--success');
+		}
+	}, {
+		key: 'showMaintenanceMessage',
+		value: function showMaintenanceMessage(message) {
+			var _this = this;
+			(0, _jquery2.default)('#maintenance-msg').text(message);
+			(0, _jquery2.default)('#maintenance-mode-close-icon').click(function () {
+				location.reload();
+			});
+			(0, _jquery2.default)('#maintenance-mode').css('display', 'block');
+			(0, _jquery2.default)('#register-mode').css('display', 'none');
+			(0, _jquery2.default)('#header-container').css('display', 'none');
+		}
+	}, {
+		key: 'showError',
+		value: function showError(msg) {
+			(0, _jquery2.default)('#error_message').html("");
+			(0, _jquery2.default)('#error_message').text(msg);
+			(0, _jquery2.default)('#error_message').css("display", "block");
+		}
+	}, {
+		key: 'clearError',
+		value: function clearError() {
+			(0, _jquery2.default)('#error_message').html("");
+			(0, _jquery2.default)('#error_message').css("display", "none");
+		}
+	}, {
+		key: 'onRegisterFailed',
+		value: function onRegisterFailed(errorMessages) {
+			var _this = this;
+
+			_this.displayErrors(errorMessages);
+		}
+	}, {
+		key: 'onBackToLoginClicked',
+		value: function onBackToLoginClicked() {
+
+			_LoginView2.default.initView();
+		}
+	}, {
+		key: 'onHeaderBackButtonClicked',
+		value: function onHeaderBackButtonClicked() {
+			_LoginView2.default.initView();
+		}
+	}]);
+
+	return Register3View;
+}();
+
+exports.default = new Register3View();
+
+/***/ }),
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26262,34 +26466,30 @@ var _folders = __webpack_require__(1);
 
 var _folders2 = _interopRequireDefault(_folders);
 
-var _localeFallback = __webpack_require__(5);
+var _LoginView = __webpack_require__(6);
 
-var _localeFallback2 = _interopRequireDefault(_localeFallback);
+var _LoginView2 = _interopRequireDefault(_LoginView);
 
 var _Utils = __webpack_require__(2);
 
 var _Utils2 = _interopRequireDefault(_Utils);
 
-var _DashboardView = __webpack_require__(12);
+var _localeFallback = __webpack_require__(5);
 
-var _DashboardView2 = _interopRequireDefault(_DashboardView);
-
-var _ServiceMeta = __webpack_require__(0);
-
-var _ServiceMeta2 = _interopRequireDefault(_ServiceMeta);
+var _localeFallback2 = _interopRequireDefault(_localeFallback);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var EmailWarningView = function () {
-  function EmailWarningView() {
-    _classCallCheck(this, EmailWarningView);
+var Register3SuccessView = function () {
+  function Register3SuccessView() {
+    _classCallCheck(this, Register3SuccessView);
 
-    this.template = _folders2.default.VIEWS + '/emailwarning.html';
+    this.template = _folders2.default.VIEWS + '/register3-success.html';
   }
 
-  _createClass(EmailWarningView, [{
+  _createClass(Register3SuccessView, [{
     key: 'show',
     value: function show() {
       var _this2 = this;
@@ -26304,9 +26504,7 @@ var EmailWarningView = function () {
           var loadedTemplate = _Utils2.default.loadTemplateWithFallback(template, locale, _localeFallback2.default);
 
           _this.App.append(loadedTemplate);
-
           _this.selectElements();
-          _this.setAuthCode();
         }, "html");
       });
     }
@@ -26314,92 +26512,33 @@ var EmailWarningView = function () {
     key: 'selectElements',
     value: function selectElements() {
       var _this = this;
-      _this.authcodeCopied = (0, _jquery2.default)('#authcode-copied-clipboard');
-      _this.authcode = (0, _jquery2.default)('#authcode');
-      _this.authcode.click(_this.onAuthcodeClicked.bind(_this));
 
-      _this.continueButton = (0, _jquery2.default)('#continue-with-authcode');
-      _this.continueButton.click(_this.onContinueClicked.bind(this));
+      _this.closeButton = (0, _jquery2.default)('#success-close');
+      _this.backToLoginButton = (0, _jquery2.default)('#back-to-login-button');
+      _this.setEvents();
     }
   }, {
-    key: 'setAuthCode',
-    value: function setAuthCode() {
+    key: 'setEvents',
+    value: function setEvents() {
       var _this = this;
 
-      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
-        var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
-
-        if (userdata && userdata.authcode) {
-          (0, _jquery2.default)('#authcode').text(userdata.authcode);
-        }
-      });
+      _this.closeButton.click(_this.onBackToLoginClicked);
+      _this.backToLoginButton.click(_this.onBackToLoginClicked);
     }
   }, {
-    key: 'onContinueClicked',
-    value: function onContinueClicked() {
-      var _this = this;
-      _DashboardView2.default.initView();
-    }
-  }, {
-    key: 'onAuthcodeClicked',
-    value: function onAuthcodeClicked() {
-      var _this = this;
-      chrome.storage.local.get([_ServiceMeta2.default.STORAGEKEYS.USERDATA], function (storage) {
-        var userdata = storage[_ServiceMeta2.default.STORAGEKEYS.USERDATA];
-        if (userdata && userdata.authcode) {
-          _this.copyTextToClipboard(userdata.authcode);
-          _this.authcode.css('display', 'none');
-          _this.authcodeCopied.css('display', 'block');
-
-          setTimeout(function () {
-            _this.authcodeCopied.css('display', 'none');
-            _this.authcode.css('display', 'block');
-          }, 5000);
-        }
-      });
-    }
-  }, {
-    key: 'copyTextToClipboard',
-    value: function copyTextToClipboard(text) {
-      var _this = this;
-
-      if (!navigator.clipboard) {
-        _this.fallbackCopyTextToClipboard(text);
-        return;
-      }
-      navigator.clipboard.writeText(text).then(function () {}, function (err) {
-        console.error('Async: Could not copy text: ', err);
-      });
-    }
-  }, {
-    key: 'fallbackCopyTextToClipboard',
-    value: function fallbackCopyTextToClipboard(text) {
-      var _this = this;
-      var textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed"; //avoid scrolling to bottom
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'successful' : 'unsuccessful';
-      } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-      }
-
-      document.body.removeChild(textArea);
+    key: 'onBackToLoginClicked',
+    value: function onBackToLoginClicked() {
+      _LoginView2.default.initView();
     }
   }]);
 
-  return EmailWarningView;
+  return Register3SuccessView;
 }();
 
-exports.default = new EmailWarningView();
+exports.default = new Register3SuccessView();
 
 /***/ }),
-/* 63 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26524,43 +26663,6 @@ var Extension = function () {
 		key: 'setInstallId',
 		value: function setInstallId() {
 			var _this = this;
-			_Utils2.default.setInstallId().then(function (installid) {
-				_this.getWelcomePage({ iid: installid }).then(function (welcomePage) {
-					_Utils2.default.openNewTab(welcomePage);
-				}).catch(function (e) {});;
-			}).catch(function (e) {});;
-		}
-	}, {
-		key: 'getWelcomePage',
-		value: function getWelcomePage(data) {
-
-			return new Promise(function (resolve, reject) {
-				var welcomePagePingEndpoint = "https://welcomepage.org/ping/" + _ServiceMeta2.default.SHORTNAME;
-
-				var parameter = "?lang=" + _ServiceMeta2.default.BROWSERLANG + "&cv=" + _ServiceMeta2.default.VERSION + "&platform=" + _ServiceMeta2.default.PLATFORM.toLowerCase();
-
-				welcomePagePingEndpoint = welcomePagePingEndpoint + parameter;
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', welcomePagePingEndpoint, true);
-				xhr.timeout = 10000;
-
-				xhr.onreadystatechange = function () {
-					if (xhr.readyState == 4) {
-						if (xhr.status == 200) {
-							var result = "";
-							try {
-								result = JSON.parse(xhr.responseText);
-							} catch (e) {}
-
-							if (result && result != "" && result.retcode === 200 && result.msg === "pong" && result.open) return resolve(result.open);
-							return reject();
-						} else {
-							return reject();
-						}
-					}
-				};
-				xhr.send();
-			});
 		}
 
 		/* Events */
@@ -26589,7 +26691,7 @@ var Extension = function () {
 exports.default = new Extension();
 
 /***/ }),
-/* 64 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
