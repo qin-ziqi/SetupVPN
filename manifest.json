@@ -1,22 +1,35 @@
 {
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "manifest_version": 2,
+  "name": "SetupVPN - Lifetime Free VPN",
+  "short_name": "SetupVPN",
+  "description": "Unblock any blocked website in your country, school or company. It's free and easy to use.",
+  "version": "3.11.9",
+  "browser_action": {
+    "browser_style": false,
+    "default_popup": "popup.html",
+    "default_icon" : "images/setupvpn-48-grey.png",
+    "default_title": "SetupVPN"
+  },
+  "icons": {
+    "128": "images/setupvpn-128.png"
+  },
+  "permissions": [
+    "storage",
+    "proxy",
+    "notifications",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>",
+    "tabs",
+    "management"
+  ],
    "background": {
-      "scripts": [ "js/background.js" ]
-   },
-   "browser_action": {
-      "browser_style": false,
-      "default_icon": "images/setupvpn-48-grey.png",
-      "default_popup": "popup.html",
-      "default_title": "SetupVPN"
-   },
-   "description": "Unblock any blocked website in your country, school or company. It's free and easy to use.",
-   "icons": {
-      "128": "images/setupvpn-128.png"
-   },
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAssmsMz4veLwQBukhiItmkSb9c495r24Rlm+iEh4hSwazS/3D+XNIAP/AaxxqVzmdNm3kjKkZEelhnWqvL1IaLTg+CSImqveSvK18Hr0zGakOjapBVvmmTOgzXGHEgZ0NHwsC0KDnI9ncecQhZ96VEcdgGpWObPG0V0bp+tEsf/UQTZ10QsuBOTT2AnCvd7sNpnsAdvHvZlUGfn0aE+KlYyYEINGNVGKqubDpxUoIZWists4PzwQqExVb44lUU/FgqsRQyfheJ2uehiOsXPkZbDWifhmNL0IUx9JiArGwzDFYFaRMEfiRgtVY5/u9axTEUEUjJIerO/P10HHvkJT9ywIDAQAB",
-   "manifest_version": 2,
-   "name": "SetupVPN - Lifetime Free VPN",
-   "permissions": [ "storage", "proxy", "notifications", "webRequest", "webRequestBlocking", "\u003Call_urls>", "tabs", "management" ],
-   "short_name": "SetupVPN",
-   "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "3.11.8"
+    "scripts": [
+      "js/background.js"
+    ]
+  }
+
+
 }
